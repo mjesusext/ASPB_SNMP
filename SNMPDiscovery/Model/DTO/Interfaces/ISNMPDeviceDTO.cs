@@ -13,8 +13,8 @@ namespace SNMPDiscovery.Model.DTO
         IDictionary<string, ISNMPRawEntryDTO> SNMPRawDataEntries { get; set; }
         IDictionary<string, ISNMPProcessedValueDTO> SNMPProcessedData { get; set; }
 
-        ISNMPRawEntryDTO BuildSNMPRawEntry(string OID, string OIDBase);
-        ISNMPRawEntryDTO BuildSNMPRawEntry(string OID, string OIDBase, string RawValue, EnumSNMPOIDType DataType);
+        ISNMPRawEntryDTO BuildSNMPRawEntry(string OID);
+        ISNMPRawEntryDTO BuildSNMPRawEntry(string OID, string RawValue, EnumSNMPOIDType DataType);
         void AttachSNMPProcessedValue(Type DataType, object Data);
     }
 }

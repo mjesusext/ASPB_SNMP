@@ -14,7 +14,8 @@ namespace SNMPDiscovery.Model.DTO
         public IPAddress InitialIP { get; set; }
         public IPAddress FinalIP { get; set; }
         public string CommunityString { get; set; }
-        public IDictionary<string, ISNMPProcessingProfileDTO> ProcessingProfiles { get; set; }
+        public IDictionary<string, ISNMPProcessStrategy> Processes { get; set; }
+        public IDictionary<string, IOIDSettingDTO> OIDSettings { get; set; }
 
         public SNMPSettingDTO()
         {
@@ -28,19 +29,41 @@ namespace SNMPDiscovery.Model.DTO
             CommunityString = SNMPUser;
         }
 
-        public ISNMPProcessingProfileDTO BuildProcessingProfile(string id, EnumProcessingType Process)
+        public ISNMPProcessStrategy BuildProcess(string id, EnumProcessingType ProcessType)
         {
+            ISNMPProcessStrategy ProcessProfile = null;
+
             //Lazy initialization
-            if (ProcessingProfiles == null)
+            if (Processes == null)
             {
-                ProcessingProfiles = new Dictionary<string, ISNMPProcessingProfileDTO>();
+                Processes = new Dictionary<string, ISNMPProcessStrategy>();
             }
 
-            ISNMPProcessingProfileDTO ProcessProfile = new SNMPProcessingProfile(id, Process);
-            ProcessingProfiles.Add(id, ProcessProfile);
+            //If profile exists, retrive the existing one
+            if (Processes.ContainsKey(id))
+            {
+                return Processes[id];
+            }
+            else
+            {
+                switch (ProcessType)
+                {
+                    case EnumProcessingType.None:
+                        break;
+                    case EnumProcessingType.TopologyDiscovery:
+                        ProcessProfile = new TopologyBuilderStrategy();
+                        break;
+                    case EnumProcessingType.PrinterConsumption:
+                        break;
+                    default:
+                        break;
+                }
 
-            return ProcessProfile;
+                OIDSettings = ProcessProfile.BuildOIDSetting(OIDSettings);
+                Processes.Add(id, ProcessProfile);
+
+                return ProcessProfile;
+            }
         }
-
     }
 }

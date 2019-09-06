@@ -9,7 +9,6 @@ namespace SNMPDiscovery.Model.DTO
     public interface ISNMPRawEntryDTO
     {
         string OID { get; set; }
-        string RootOID { get; set; }
         string ValueData { get; set; }
         EnumSNMPOIDType DataType { get; set; }
     }

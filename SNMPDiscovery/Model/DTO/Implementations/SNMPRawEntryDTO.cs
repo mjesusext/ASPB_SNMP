@@ -17,16 +17,14 @@ namespace SNMPDiscovery.Model.DTO
         {
         }
 
-        public SNMPRawEntryDTO(string oid, string oidbase)
+        public SNMPRawEntryDTO(string oid)
         {
             OID = oid;
-            RootOID = oidbase;
         }
 
-        public SNMPRawEntryDTO(string oid, string oidbase, string data, EnumSNMPOIDType datatype)
+        public SNMPRawEntryDTO(string oid, string data, EnumSNMPOIDType datatype)
         {
             OID = oid;
-            RootOID = oidbase;
             ValueData = data;
             DataType = datatype;
         }

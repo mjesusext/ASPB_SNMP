@@ -27,7 +27,7 @@ namespace SNMPDiscovery.Model.DTO
             TargetIP = new IPAddress(targetIP);
         }
 
-        public ISNMPRawEntryDTO BuildSNMPRawEntry(string OID, string OIDBase)
+        public ISNMPRawEntryDTO BuildSNMPRawEntry(string OID)
         {
             //Lazy initialization
             if (SNMPRawDataEntries == null)
@@ -35,13 +35,13 @@ namespace SNMPDiscovery.Model.DTO
                 SNMPRawDataEntries = new Dictionary<string, ISNMPRawEntryDTO>();
             }
 
-            ISNMPRawEntryDTO RawEntry = new SNMPRawEntryDTO(OID, OIDBase);
+            ISNMPRawEntryDTO RawEntry = new SNMPRawEntryDTO(OID);
             SNMPRawDataEntries.Add(OID, RawEntry);
 
             return RawEntry;
         }
 
-        public ISNMPRawEntryDTO BuildSNMPRawEntry(string OID, string OIDBase, string RawValue, EnumSNMPOIDType DataType)
+        public ISNMPRawEntryDTO BuildSNMPRawEntry(string OID, string RawValue, EnumSNMPOIDType DataType)
         {
             //Lazy initialization
             if (SNMPRawDataEntries == null)
@@ -49,7 +49,7 @@ namespace SNMPDiscovery.Model.DTO
                 SNMPRawDataEntries = new Dictionary<string, ISNMPRawEntryDTO>();
             }
 
-            ISNMPRawEntryDTO RawEntry = new SNMPRawEntryDTO(OID, OIDBase, RawValue, DataType);
+            ISNMPRawEntryDTO RawEntry = new SNMPRawEntryDTO(OID, RawValue, DataType);
             SNMPRawDataEntries.Add(OID, RawEntry);
 
             return RawEntry;

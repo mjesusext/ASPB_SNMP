@@ -11,6 +11,101 @@ namespace SNMPDiscovery.Model.Services
     {
         public string ID { get; set; } = "TopologyBuilder";
 
+        public IDictionary<string, IOIDSettingDTO> BuildOIDSetting(IDictionary<string, IOIDSettingDTO> OIDSettings)
+        {
+            //Lazy initialization
+            if (OIDSettings == null)
+            {
+                OIDSettings = new Dictionary<string, IOIDSettingDTO>();
+            }
+
+            //ToDo
+            //1 - Check if exists. TRUE = ADD, FALSE = SKIP
+            //IOIDSettingDTO setting = new OIDSettingDTO(id, initialOID, finalOID, initialOID == finalOID);
+            //OIDSettings.Add(id, setting);
+
+            if (!OIDSettings.ContainsKey("Step1A - Basic Info"))
+            {
+                OIDSettings.Add("Step1A - Basic Info", new OIDSettingDTO("Step1A - Basic Info", "1.3.6.1.2.1.1.1", "1.3.6.1.2.1.1.8", false));
+            }
+
+            if (!OIDSettings.ContainsKey("Step2E - Port descriptive names"))
+            {
+                IOIDSettingDTO MockOIDSettingB = new OIDSettingDTO("Step2E - Port descriptive names", "1.3.6.1.2.1.2.2.1.2", "1.3.6.1.2.1.2.2.1.2", true);
+                IList<EnumSNMPOIDIndexType> indexesB = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number };
+                MockOIDSettingB.BuildIndexedOIDSetting("1.3.6.1.2.1.2.2.1.2", indexesB);
+
+                OIDSettings.Add("Step2E - Port descriptive names", MockOIDSettingB);
+            }
+
+            if (!OIDSettings.ContainsKey("Step1B - Port MAC Address"))
+            {
+                OIDSettings.Add("Step1B - Port MAC Address", new OIDSettingDTO("Step1B - Port MAC Address", "1.3.6.1.2.1.2.2.1.6", "1.3.6.1.2.1.2.2.1.6", true));
+            }
+
+            if (!OIDSettings.ContainsKey("Step2J - Learned MAC Address By Port ID"))
+            {
+                OIDSettings.Add("Step2J - Learned MAC Address By Port ID", new OIDSettingDTO("Step2J - Learned MAC Address By Port ID", "1.3.6.1.2.1.17.7.1.2.2.1.2", "1.3.6.1.2.1.17.7.1.2.2.1.2", true));
+            }
+
+            if (!OIDSettings.ContainsKey("Step1C - Learned MACs By Port MAC"))
+            {
+                IOIDSettingDTO MockOIDSettingC = new OIDSettingDTO("Step1C - Learned MACs By Port MAC", "1.3.6.1.2.1.17.4.3.1", "1.3.6.1.2.1.17.4.3.4", false);
+                IList<EnumSNMPOIDIndexType> indexesC = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.MacAddress };
+                MockOIDSettingC.BuildIndexedOIDSetting("1.3.6.1.2.1.17.4.3.1.1", indexesC);
+                MockOIDSettingC.BuildIndexedOIDSetting("1.3.6.1.2.1.17.4.3.1.2", indexesC);
+                MockOIDSettingC.BuildIndexedOIDSetting("1.3.6.1.2.1.17.4.3.1.3", indexesC);
+
+                OIDSettings.Add("Step1C - Learned MACs By Port MAC", MockOIDSettingC);
+            }
+
+            if (!OIDSettings.ContainsKey("StepX - TEST"))
+            {
+                OIDSettings.Add("StepX - TEST", new OIDSettingDTO("StepX - TEST", "1.2.840.10006.300.43", "1.2.840.10006.300.43", true));
+            }
+
+            #region Version antigua
+
+            //Test combination. When processing gets impelmented, it will be included on the algorithm
+            //BuildOIDSetting("Step1A - Basic Info", "1.3.6.1.2.1.1.1", "1.3.6.1.2.1.1.8");
+            //IOIDSettingDTO MockOIDSettingB = BuildOIDSetting("Step2E - Port descriptive names", "1.3.6.1.2.1.2.2.1.2", "1.3.6.1.2.1.2.2.1.2");
+            //IList<EnumSNMPOIDIndexType> indexesB = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number };
+            //MockOIDSettingB.BuildIndexedOIDSetting("1.3.6.1.2.1.2.2.1.2", indexesB);
+
+            //BuildOIDSetting("Step1B - Port MAC Address", "1.3.6.1.2.1.2.2.1.6", "1.3.6.1.2.1.2.2.1.6");
+            //BuildOIDSetting("Step2J - Learned MAC Address By Port ID", "1.3.6.1.2.1.17.7.1.2.2.1.2", "1.3.6.1.2.1.17.7.1.2.2.1.2");
+            //BuildOIDSetting("Step2I - VLAN detection by port (except Trunks)", "1.3.6.1.2.1.17.7.1.4.3.1", "1.3.6.1.2.1.17.7.1.4.3.1");
+
+            //Extra pero no imprescindible
+            //IOIDSettingDTO MockOIDSettingC = BuildOIDSetting("Step1C - Learned MACs By Port MAC", "1.3.6.1.2.1.17.4.3.1", "1.3.6.1.2.1.17.4.3.4");
+            //IList<EnumSNMPOIDIndexType> indexesC = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.MacAddress };
+            //MockOIDSettingC.BuildIndexedOIDSetting("1.3.6.1.2.1.17.4.3.1.1", indexesC);
+            //MockOIDSettingC.BuildIndexedOIDSetting("1.3.6.1.2.1.17.4.3.1.2", indexesC);
+            //MockOIDSettingC.BuildIndexedOIDSetting("1.3.6.1.2.1.17.4.3.1.3", indexesC);
+
+            //------ Otros OID test ------
+
+            //BuildOIDSetting("StepX - TEST", "1.2.840.10006.300.43", "1.2.840.10006.300.43");
+
+            //BuildOIDSetting("Step2A", "1.0.8802.1.1.2.1.4.2.1.4", "1.0.8802.1.1.2.1.4.2.1.4");
+            //BuildOIDSetting("Step2B", "1.0.8802.1.1.2.1.4.1.1.7", "1.0.8802.1.1.2.1.4.1.1.7");
+            //BuildOIDSetting("Step2C", "1.2.840.10006.300.43.1.1.1.1.7", "1.2.840.10006.300.43.1.1.1.1.7");
+            //BuildOIDSetting("Step2D", "1.2.840.10006.300.43.1.2.1.1.5", "1.2.840.10006.300.43.1.2.1.1.5");
+            //BuildOIDSetting("Step2F", "1.3.6.1.4.1.9.9.46.1.3.1.1.4", "1.3.6.1.4.1.9.9.46.1.3.1.1.4");
+            //BuildOIDSetting("Step2G", "1.3.6.1.2.1.17.1.4.1.2", "1.3.6.1.2.1.17.1.4.1.2");
+            //BuildOIDSetting("Step2H", "1.3.6.1.2.1.17.2.15.1.3", "1.3.6.1.2.1.17.2.15.1.3");
+            //BuildOIDSetting("Step2K", "1.3.6.1.2.1.31.1.1.1.1", "1.3.6.1.2.1.31.1.1.1.1");
+            //BuildOIDSetting("Step2L", "1.3.6.1.2.1.31.1.1.1.6", "1.3.6.1.2.1.31.1.1.1.6");
+            //BuildOIDSetting("Step2M", "1.3.6.1.2.1.31.1.1.1.10", "1.3.6.1.2.1.31.1.1.1.10");
+            //BuildOIDSetting("Step2N", "1.3.6.1.2.1.31.1.1.1.15", "1.3.6.1.2.1.31.1.1.1.15");
+            //BuildOIDSetting("Step2Ñ", "1.3.6.1.2.1.31.1.1.1.18", "1.3.6.1.2.1.31.1.1.1.18");
+
+            //1.3.6.1.4.1.11.2 --> nm Evitamos porque es propietario HP...
+            #endregion
+
+            return OIDSettings;
+        }
+
         public void Run(IDictionary<string, ISNMPDeviceDTO> DevicesData)
         {
             TransformRawData(DevicesData);
@@ -90,10 +185,8 @@ namespace SNMPDiscovery.Model.Services
             foreach (var DescriptionEntry in PortDescriptions)
             {
 
-                TopologyInfo.PortsByInterface.Add(DescriptionEntry.Value.OID.Replace(DescriptionEntry.Value.RootOID + "." , ""), new Tuple<string, bool>(DescriptionEntry.Value.ValueData, false));
+                //TopologyInfo.PortsByInterface.Add(DescriptionEntry.Value.OID.Replace(DescriptionEntry.Value.RootOID + "." , ""), new Tuple<string, bool>(DescriptionEntry.Value.ValueData, false));
             }
-
-            int i = 3;
         }
 
         #endregion

@@ -82,7 +82,7 @@ namespace SNMPDiscovery.Model.Services
 
         public void RunProcesses()
         {
-            IEnumerable<ISNMPProcessStrategy> processes = _model.SNMPSettings.SelectMany(x => x.Value.ProcessingProfiles).Select(x => x.Value.Process);
+            IEnumerable<ISNMPProcessStrategy> processes = _model.SNMPSettings.SelectMany(x => x.Value.Processes.Values);
 
             foreach (ISNMPProcessStrategy alg in processes)
             {
@@ -143,7 +143,7 @@ namespace SNMPDiscovery.Model.Services
         private void SNMPWalkByOIDSetting(UdpTarget UDPtarget, Pdu pdu, AgentParameters param, ISNMPSettingDTO SNMPSettingEntry, ISNMPDeviceDTO SNMPDeviceData)
         {
             //Get all OID requested for all processing algorithms
-            IEnumerable<IOIDSettingDTO> OIDSettingCollection = SNMPSettingEntry.ProcessingProfiles.Values.SelectMany(x => x.OIDSettingsCollection.Values);
+            IEnumerable<IOIDSettingDTO> OIDSettingCollection = SNMPSettingEntry.OIDSettings.Values;
             Oid indexOid = new Oid(); 
             Oid finalOid = new Oid();
 
@@ -159,7 +159,6 @@ namespace SNMPDiscovery.Model.Services
             SnmpV2Packet Result;
             Oid indexOid = new Oid(OIDSetting.InitialOID); //Walk control
             Oid finalOid = new Oid(OIDSetting.FinalOID);
-            IEnumerable<Oid> IndexedOIDvalues = OIDSetting.IndexedOIDSettings.Keys.Select(x => new Oid(x)); //Collection of OIDs which have index format information
 
             //Test
             Console.WriteLine("----- {0} -----", OIDSetting.ID);
@@ -171,7 +170,7 @@ namespace SNMPDiscovery.Model.Services
                 try
                 {
                     Result = (SnmpV2Packet)UDPtarget.Request(pdu, param);
-                    nextEntry = SNMPDecodeData(Result, indexOid, finalOid, OIDSetting.InclusiveInterval, IndexedOIDvalues, SNMPDeviceData);
+                    nextEntry = SNMPDecodeData(Result, indexOid, finalOid, OIDSetting.InclusiveInterval,SNMPDeviceData);
                 }
                 catch (Exception e)
                 {
@@ -185,7 +184,7 @@ namespace SNMPDiscovery.Model.Services
             }
         }
 
-        private bool SNMPDecodeData(SnmpV2Packet Result, Oid indexOid, Oid finalOid, bool InclusiveInterval, IEnumerable<Oid> IndexedOIDvalues, ISNMPDeviceDTO SNMPDeviceData)
+        private bool SNMPDecodeData(SnmpV2Packet Result, Oid indexOid, Oid finalOid, bool InclusiveInterval, ISNMPDeviceDTO SNMPDeviceData)
         {
             bool nextEntry = true;
 
@@ -197,8 +196,7 @@ namespace SNMPDiscovery.Model.Services
                     // Check that retrieved Oid is higher than the limit or is the last block of leafs
                     if (ResBinding.Oid < finalOid || finalOid.IsRootOf(ResBinding.Oid) && InclusiveInterval)
                     {
-                        string rootOID = IndexedOIDvalues.FirstOrDefault(x => x.IsRootOf(ResBinding.Oid)) == null ? string.Empty : IndexedOIDvalues.FirstOrDefault(x => x.IsRootOf(ResBinding.Oid)).ToString();
-                        ISNMPRawEntryDTO SNMPRawData = SNMPDeviceData.BuildSNMPRawEntry(ResBinding.Oid.ToString(), rootOID, ResBinding.Value.ToString(), (EnumSNMPOIDType)Enum.Parse(typeof(EnumSNMPOIDType), SnmpConstants.GetTypeName(ResBinding.Value.Type)));
+                        ISNMPRawEntryDTO SNMPRawData = SNMPDeviceData.BuildSNMPRawEntry(ResBinding.Oid.ToString(), ResBinding.Value.ToString(), (EnumSNMPOIDType)Enum.Parse(typeof(EnumSNMPOIDType), SnmpConstants.GetTypeName(ResBinding.Value.Type)));
 
                         //Test
                         Console.WriteLine("Request {0} || {1} -- {2} ({3}): {4}", SNMPDeviceData.TargetIP.ToString(), Result.Pdu.RequestId, SNMPRawData.OID, SNMPRawData.DataType.ToString(), SNMPRawData.ValueData);
@@ -232,49 +230,7 @@ namespace SNMPDiscovery.Model.Services
         public void MockGetSettings()
         {
             ISNMPSettingDTO MockSNMPSetting = _model.BuildSNMPSetting("ColecciónSwitches", "192.168.1.42", "192.168.1.42", "public");
-            ISNMPProcessingProfileDTO MockProcessProfileSetting = MockSNMPSetting.BuildProcessingProfile("TopologiaSwitches", EnumProcessingType.TopologyDiscovery);
-
-            #region Step1
-            
-            //Test combination. When processing gets impelmented, it will be included on the algorithm
-            MockProcessProfileSetting.BuildOIDSetting("Step1A - Basic Info", "1.3.6.1.2.1.1.1", "1.3.6.1.2.1.1.8");
-            IOIDSettingDTO MockOIDSettingB = MockProcessProfileSetting.BuildOIDSetting("Step2E - Port descriptive names", "1.3.6.1.2.1.2.2.1.2", "1.3.6.1.2.1.2.2.1.2");
-            IList<EnumSNMPOIDIndexType> indexesB = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number };
-            MockOIDSettingB.BuildIndexedOIDSetting("1.3.6.1.2.1.2.2.1.2", indexesB);
-
-            MockProcessProfileSetting.BuildOIDSetting("Step1B - Port MAC Address", "1.3.6.1.2.1.2.2.1.6", "1.3.6.1.2.1.2.2.1.6");
-            MockProcessProfileSetting.BuildOIDSetting("Step2J - Learned MAC Address By Port ID", "1.3.6.1.2.1.17.7.1.2.2.1.2", "1.3.6.1.2.1.17.7.1.2.2.1.2");
-            MockProcessProfileSetting.BuildOIDSetting("Step2I - VLAN detection by port (except Trunks)", "1.3.6.1.2.1.17.7.1.4.3.1", "1.3.6.1.2.1.17.7.1.4.3.1");
-
-            //Extra pero no imprescindible
-            IOIDSettingDTO MockOIDSettingC = MockProcessProfileSetting.BuildOIDSetting("Step1C - Learned MACs By Port MAC", "1.3.6.1.2.1.17.4.3.1", "1.3.6.1.2.1.17.4.3.4");
-            IList<EnumSNMPOIDIndexType> indexesC = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.MacAddress };
-            MockOIDSettingC.BuildIndexedOIDSetting("1.3.6.1.2.1.17.4.3.1.1", indexesC);
-            MockOIDSettingC.BuildIndexedOIDSetting("1.3.6.1.2.1.17.4.3.1.2", indexesC);
-            MockOIDSettingC.BuildIndexedOIDSetting("1.3.6.1.2.1.17.4.3.1.3", indexesC);
-
-            MockProcessProfileSetting.BuildOIDSetting("StepX - TEST", "1.2.840.10006.300.43", "1.2.840.10006.300.43");
-            
-            #endregion
-
-            #region Step2
-
-            //MockProcessProfileSetting.BuildOIDSetting("Step2A", "1.0.8802.1.1.2.1.4.2.1.4", "1.0.8802.1.1.2.1.4.2.1.4");
-            //MockProcessProfileSetting.BuildOIDSetting("Step2B", "1.0.8802.1.1.2.1.4.1.1.7", "1.0.8802.1.1.2.1.4.1.1.7");
-            //MockProcessProfileSetting.BuildOIDSetting("Step2C", "1.2.840.10006.300.43.1.1.1.1.7", "1.2.840.10006.300.43.1.1.1.1.7");
-            //MockProcessProfileSetting.BuildOIDSetting("Step2D", "1.2.840.10006.300.43.1.2.1.1.5", "1.2.840.10006.300.43.1.2.1.1.5");
-            //MockProcessProfileSetting.BuildOIDSetting("Step2F", "1.3.6.1.4.1.9.9.46.1.3.1.1.4", "1.3.6.1.4.1.9.9.46.1.3.1.1.4");
-            //MockProcessProfileSetting.BuildOIDSetting("Step2G", "1.3.6.1.2.1.17.1.4.1.2", "1.3.6.1.2.1.17.1.4.1.2");
-            //MockProcessProfileSetting.BuildOIDSetting("Step2H", "1.3.6.1.2.1.17.2.15.1.3", "1.3.6.1.2.1.17.2.15.1.3");
-            //MockProcessProfileSetting.BuildOIDSetting("Step2K", "1.3.6.1.2.1.31.1.1.1.1", "1.3.6.1.2.1.31.1.1.1.1");
-            //MockProcessProfileSetting.BuildOIDSetting("Step2L", "1.3.6.1.2.1.31.1.1.1.6", "1.3.6.1.2.1.31.1.1.1.6");
-            //MockProcessProfileSetting.BuildOIDSetting("Step2M", "1.3.6.1.2.1.31.1.1.1.10", "1.3.6.1.2.1.31.1.1.1.10");
-            //MockProcessProfileSetting.BuildOIDSetting("Step2N", "1.3.6.1.2.1.31.1.1.1.15", "1.3.6.1.2.1.31.1.1.1.15");
-            //MockProcessProfileSetting.BuildOIDSetting("Step2Ñ", "1.3.6.1.2.1.31.1.1.1.18", "1.3.6.1.2.1.31.1.1.1.18");
-
-            //1.3.6.1.4.1.11.2 --> nm Evitamos porque es propietario HP...
-            #endregion
-
+            ISNMPProcessStrategy MockProcessProfileSetting = MockSNMPSetting.BuildProcess("TopologiaSwitches", EnumProcessingType.TopologyDiscovery);
         }
 
         #endregion
