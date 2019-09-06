@@ -73,12 +73,10 @@
     <Compile Include="Model\DTO\Implementations\SNMPDeviceDTO.cs" />
     <Compile Include="Model\DTO\Implementations\SNMPModel.cs" />
     <Compile Include="Model\DTO\Implementations\SNMPProcessedValueDTO.cs" />
-    <Compile Include="Model\DTO\Implementations\SNMPProcessingProfile.cs" />
     <Compile Include="Model\DTO\Enums\EnumProcessingType.cs" />
     <Compile Include="Model\DTO\Interfaces\IDiscoveredBasicInfo.cs" />
     <Compile Include="Model\DTO\Interfaces\IIndexedOIDSettingDTO.cs" />
     <Compile Include="Model\DTO\Interfaces\ISNMPProcessedValueDTO.cs" />
-    <Compile Include="Model\DTO\Interfaces\ISNMPProcessingProfileDTO.cs" />
     <Compile Include="Model\Services\Implementations\SNMPModelService.cs" />
     <Compile Include="Model\DTO\Implementations\SNMPRawEntryDTO.cs" />
     <Compile Include="Model\DTO\Implementations\SNMPSettingDTO.cs" />

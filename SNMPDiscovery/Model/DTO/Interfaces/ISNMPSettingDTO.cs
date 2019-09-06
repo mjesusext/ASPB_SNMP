@@ -14,8 +14,9 @@ namespace SNMPDiscovery.Model.DTO
         IPAddress InitialIP { get; set; }
         IPAddress FinalIP { get; set; }
         string CommunityString { get; set; }
-        IDictionary<string, ISNMPProcessingProfileDTO> ProcessingProfiles { get; set;}
+        IDictionary<string, ISNMPProcessStrategy> Processes { get; set; }
+        IDictionary<string, IOIDSettingDTO> OIDSettings { get; set; }
 
-        ISNMPProcessingProfileDTO BuildProcessingProfile(string id, EnumProcessingType Process);
+        ISNMPProcessStrategy BuildProcess(string id, EnumProcessingType Process);
     }
 }
