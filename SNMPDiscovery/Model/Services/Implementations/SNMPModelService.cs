@@ -87,13 +87,13 @@ namespace SNMPDiscovery.Model.Services
             foreach (ISNMPProcessStrategy alg in processes)
             {
                 //Notify initialization
-                Console.WriteLine($"Starting algorithm {alg.ID}");
+                Console.WriteLine($"Starting algorithm {alg.ProcessID}");
 
                 //Validate proper inputs
-                alg.ValidateInput(_model.SNMPData);
+                alg.ValidateInput(_model);
                 //Run process
 
-                alg.Run(_model.SNMPData);
+                alg.Run(_model);
                 //Notify alg done
             }
         }
@@ -230,7 +230,7 @@ namespace SNMPDiscovery.Model.Services
         public void MockGetSettings()
         {
             ISNMPSettingDTO MockSNMPSetting = _model.BuildSNMPSetting("ColecciónSwitches", "192.168.1.42", "192.168.1.42", "public");
-            ISNMPProcessStrategy MockProcessProfileSetting = MockSNMPSetting.BuildProcess("TopologiaSwitches", EnumProcessingType.TopologyDiscovery);
+            ISNMPProcessStrategy MockProcessProfileSetting = MockSNMPSetting.BuildProcess(EnumProcessingType.TopologyDiscovery);
         }
 
         #endregion

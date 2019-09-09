@@ -16,7 +16,7 @@ namespace SNMPDiscovery.Model.DTO
         string CommunityString { get; set; }
         IDictionary<string, ISNMPProcessStrategy> Processes { get; set; }
         IDictionary<string, IOIDSettingDTO> OIDSettings { get; set; }
-
-        ISNMPProcessStrategy BuildProcess(string id, EnumProcessingType Process);
+        
+        ISNMPProcessStrategy BuildProcess(EnumProcessingType Process);
     }
 }

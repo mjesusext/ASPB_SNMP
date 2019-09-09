@@ -13,7 +13,6 @@ namespace SNMPDiscovery.Model.DTO
         IDictionary<string, ISNMPDeviceDTO> SNMPData { get; set; }
 
         ISNMPSettingDTO BuildSNMPSetting(string ID, string initialIP, string finalIP, string SNMPUser);
-
         ISNMPDeviceDTO BuildSNMPDevice(string targetIP);
         ISNMPDeviceDTO BuildSNMPDevice(int targetIP);
     }

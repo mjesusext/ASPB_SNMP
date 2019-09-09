@@ -9,10 +9,11 @@ namespace SNMPDiscovery.Model.Services
 {
     public interface ISNMPProcessStrategy
     {
-        string ID { get; set; }
+        string ProcessID { get; }
+        string RegardingSetting { get; set; }
 
-        IDictionary<string, IOIDSettingDTO> BuildOIDSetting(IDictionary<string, IOIDSettingDTO> OIDSettings);
-        void ValidateInput(IDictionary<string, ISNMPDeviceDTO> DevicesData);
-        void Run(IDictionary<string, ISNMPDeviceDTO> DevicesData);
+        IDictionary<string, IOIDSettingDTO> BuildOIDSetting(string regardingSetting, IDictionary<string, IOIDSettingDTO> OIDSettings);
+        void ValidateInput(ISNMPModelDTO Model);
+        void Run(ISNMPModelDTO Model);
     }
 }

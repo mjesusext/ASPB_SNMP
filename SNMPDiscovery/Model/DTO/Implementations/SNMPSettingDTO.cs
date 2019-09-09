@@ -29,7 +29,7 @@ namespace SNMPDiscovery.Model.DTO
             CommunityString = SNMPUser;
         }
 
-        public ISNMPProcessStrategy BuildProcess(string id, EnumProcessingType ProcessType)
+        public ISNMPProcessStrategy BuildProcess(EnumProcessingType ProcessType)
         {
             ISNMPProcessStrategy ProcessProfile = null;
 
@@ -39,28 +39,28 @@ namespace SNMPDiscovery.Model.DTO
                 Processes = new Dictionary<string, ISNMPProcessStrategy>();
             }
 
-            //If profile exists, retrive the existing one
-            if (Processes.ContainsKey(id))
+            switch (ProcessType)
             {
-                return Processes[id];
+                case EnumProcessingType.None:
+                    break;
+                case EnumProcessingType.TopologyDiscovery:
+                    ProcessProfile = new TopologyBuilderStrategy();
+                    break;
+                case EnumProcessingType.PrinterConsumption:
+                    break;
+                default:
+                    break;
+            }
+
+            //If profile exists, retrive the existing one
+            if (Processes.ContainsKey(ProcessProfile.ProcessID))
+            {
+                return Processes[ProcessProfile.ProcessID];
             }
             else
             {
-                switch (ProcessType)
-                {
-                    case EnumProcessingType.None:
-                        break;
-                    case EnumProcessingType.TopologyDiscovery:
-                        ProcessProfile = new TopologyBuilderStrategy();
-                        break;
-                    case EnumProcessingType.PrinterConsumption:
-                        break;
-                    default:
-                        break;
-                }
-
-                OIDSettings = ProcessProfile.BuildOIDSetting(OIDSettings);
-                Processes.Add(id, ProcessProfile);
+                OIDSettings = ProcessProfile.BuildOIDSetting(ID, OIDSettings);
+                Processes.Add(ProcessProfile.ProcessID, ProcessProfile);
 
                 return ProcessProfile;
             }
