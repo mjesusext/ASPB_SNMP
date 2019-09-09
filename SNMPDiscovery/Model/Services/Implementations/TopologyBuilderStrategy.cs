@@ -166,8 +166,6 @@ namespace SNMPDiscovery.Model.Services
                 //Fill with VLAN inventory
                 //Fill with LearnedAddress inventory
                 //Fill with DirectNeighbours
-
-                int a = 0;
             }
         }
 
@@ -226,7 +224,8 @@ namespace SNMPDiscovery.Model.Services
             foreach (ISNMPRawEntryDTO rawentry in SelectedData)
             {
                 //Get matched root OID
-                string rootOID = SelectedSetting.IndexedOIDSettings.Keys.Where(x => x.StartsWith(rawentry.OID)).FirstOrDefault();
+                //string rootOID = SelectedSetting.IndexedOIDSettings.Keys.Where(x => x.StartsWith(rawentry.OID)).FirstOrDefault();
+                string rootOID = SelectedSetting.IndexedOIDSettings.Keys.Where(x => rawentry.OID.StartsWith(x)).FirstOrDefault();
 
                 if (rootOID == null)
                 {
