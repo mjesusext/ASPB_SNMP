@@ -15,11 +15,11 @@ namespace SNMPDiscovery.Model.DTO
         public EnumOSILayers OSIImplementedLayers { get; set; }
         public EnumDeviceType DeviceType { get; set; }
 
-        public IDictionary<string, Tuple<string, bool>> PortsByInterface { get; set; }
-        public IDictionary<string, Tuple<string, string>> VLANByInterface { get; set; }
-        public IDictionary<string, string> MACPortByInterface { get; set; }
-        public IDictionary<string, IDictionary<string, string>> LearnedAddressByInterface { get; set; }
-        public IDictionary<string, Tuple<string,string>> DirectNeighbours { get; set; }
-      
+        public IDictionary<string, string> PortsDescriptionByInterfaceID { get; set; }
+        public IDictionary<string, Tuple<EnumPhysPortType, string>> PortsTypologyByInterfaceID { get; set; }
+        public IDictionary<string, Tuple<string, string>> VLANByInterfaceID { get; set; }
+        public IDictionary<string, string> MACPortByInterfaceID { get; set; }
+        public IDictionary<string, IDictionary<string, string>> LearnedAddressByInterfaceID { get; set; }
+        public IDictionary<string, Tuple<string,string>> DirectNeighboursByInterfaceID { get; set; }
     }
 }
