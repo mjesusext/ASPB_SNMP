@@ -51,7 +51,11 @@ namespace SNMPDiscovery.Model.Services
 
             if (!OIDSettings.ContainsKey("PhysPortMACAddress"))
             {
-                OIDSettings.Add("PhysPortMACAddress", new OIDSettingDTO("PhysPortMACAddress", "1.3.6.1.2.1.2.2.1.6", "1.3.6.1.2.1.2.2.1.6", true));
+                IOIDSettingDTO MockOIDSettingC = new OIDSettingDTO("PhysPortMACAddress", "1.3.6.1.2.1.2.2.1.6", "1.3.6.1.2.1.2.2.1.6", true);
+                IList<EnumSNMPOIDIndexType> indexesC = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number };
+                MockOIDSettingC.BuildIndexedOIDSetting("1.3.6.1.2.1.2.2.1.6", indexesC);
+
+                OIDSettings.Add("PhysPortMACAddress", MockOIDSettingC);
             }
 
             if (!OIDSettings.ContainsKey("VLANInfo"))
@@ -61,11 +65,11 @@ namespace SNMPDiscovery.Model.Services
 
             if (!OIDSettings.ContainsKey("LearnedMACByPhysPortID"))
             {
-                IOIDSettingDTO MockOIDSettingB = new OIDSettingDTO("LearnedMACByPhysPortID", "1.3.6.1.2.1.17.7.1.2.2.1.2", "1.3.6.1.2.1.17.7.1.2.2.1.2", true);
-                IList<EnumSNMPOIDIndexType> indexesB = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number, EnumSNMPOIDIndexType.MacAddress };
-                MockOIDSettingB.BuildIndexedOIDSetting("1.3.6.1.2.1.17.7.1.2.2.1.2", indexesB);
+                IOIDSettingDTO MockOIDSettingD = new OIDSettingDTO("LearnedMACByPhysPortID", "1.3.6.1.2.1.17.7.1.2.2.1.2", "1.3.6.1.2.1.17.7.1.2.2.1.2", true);
+                IList<EnumSNMPOIDIndexType> indexesD = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number, EnumSNMPOIDIndexType.MacAddress };
+                MockOIDSettingD.BuildIndexedOIDSetting("1.3.6.1.2.1.17.7.1.2.2.1.2", indexesD);
 
-                OIDSettings.Add("LearnedMACByPhysPortID", MockOIDSettingB);
+                OIDSettings.Add("LearnedMACByPhysPortID", MockOIDSettingD);
             }
 
             if (!OIDSettings.ContainsKey("LearnedMACByPhysPortMAC"))
@@ -84,8 +88,6 @@ namespace SNMPDiscovery.Model.Services
                 OIDSettings.Add("LACPSetting", new OIDSettingDTO("LACPSetting", "1.2.840.10006.300.43", "1.2.840.10006.300.43", true));
             }
 
-
-
             OIDSettings.Add("Step2A", new OIDSettingDTO("Step2A", "1.0.8802.1.1.2.1.4.2.1.4", "1.0.8802.1.1.2.1.4.2.1.4", true));
             //OIDSettings.Add("Step2B", new OIDSettingDTO("Step2B", "1.0.8802.1.1.2.1.4.1.1.7", "1.0.8802.1.1.2.1.4.1.1.7", false));
             //OIDSettings.Add("Step2C", new OIDSettingDTO("Step2C", "1.2.840.10006.300.43.1.1.1.1.7", "1.2.840.10006.300.43.1.1.1.1.7", true));
@@ -99,43 +101,6 @@ namespace SNMPDiscovery.Model.Services
             //OIDSettings.Add("Step2N", new OIDSettingDTO("Step2N", "1.3.6.1.2.1.31.1.1.1.15", "1.3.6.1.2.1.31.1.1.1.15", true));
             OIDSettings.Add("Step2Ñ", new OIDSettingDTO("Step2Ñ", "1.3.6.1.2.1.31.1.1.1.18", "1.3.6.1.2.1.31.1.1.1.18", true));
 
-            #endregion
-
-            #region Old version
-
-            //Test combination. When processing gets impelmented, it will be included on the algorithm
-            //BuildOIDSetting("Step1A - Basic Info", "1.3.6.1.2.1.1.1", "1.3.6.1.2.1.1.8");
-            //IOIDSettingDTO MockOIDSettingB = BuildOIDSetting("Step2E - Port descriptive names", "1.3.6.1.2.1.2.2.1.2", "1.3.6.1.2.1.2.2.1.2");
-            //IList<EnumSNMPOIDIndexType> indexesB = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number };
-            //MockOIDSettingB.BuildIndexedOIDSetting("1.3.6.1.2.1.2.2.1.2", indexesB);
-            //BuildOIDSetting("Step1B - Port MAC Address", "1.3.6.1.2.1.2.2.1.6", "1.3.6.1.2.1.2.2.1.6");
-            //BuildOIDSetting("Step2J - Learned MAC Address By Port ID", "1.3.6.1.2.1.17.7.1.2.2.1.2", "1.3.6.1.2.1.17.7.1.2.2.1.2");
-            //BuildOIDSetting("Step2I - VLAN detection by port (except Trunks)", "1.3.6.1.2.1.17.7.1.4.3.1", "1.3.6.1.2.1.17.7.1.4.3.1");
-
-            //Extra pero no imprescindible
-            //IOIDSettingDTO MockOIDSettingC = BuildOIDSetting("Step1C - Learned MACs By Port MAC", "1.3.6.1.2.1.17.4.3.1", "1.3.6.1.2.1.17.4.3.4");
-            //IList<EnumSNMPOIDIndexType> indexesC = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.MacAddress };
-            //MockOIDSettingC.BuildIndexedOIDSetting("1.3.6.1.2.1.17.4.3.1.1", indexesC);
-            //MockOIDSettingC.BuildIndexedOIDSetting("1.3.6.1.2.1.17.4.3.1.2", indexesC);
-            //MockOIDSettingC.BuildIndexedOIDSetting("1.3.6.1.2.1.17.4.3.1.3", indexesC);
-            //BuildOIDSetting("StepX - TEST", "1.2.840.10006.300.43", "1.2.840.10006.300.43");
-
-            //------ Otros OID test ------
-
-            //BuildOIDSetting("Step2A", "1.0.8802.1.1.2.1.4.2.1.4", "1.0.8802.1.1.2.1.4.2.1.4");
-            //BuildOIDSetting("Step2B", "1.0.8802.1.1.2.1.4.1.1.7", "1.0.8802.1.1.2.1.4.1.1.7");
-            //BuildOIDSetting("Step2C", "1.2.840.10006.300.43.1.1.1.1.7", "1.2.840.10006.300.43.1.1.1.1.7");
-            //BuildOIDSetting("Step2D", "1.2.840.10006.300.43.1.2.1.1.5", "1.2.840.10006.300.43.1.2.1.1.5");
-            //BuildOIDSetting("Step2F", "1.3.6.1.4.1.9.9.46.1.3.1.1.4", "1.3.6.1.4.1.9.9.46.1.3.1.1.4");
-            //BuildOIDSetting("Step2G", "1.3.6.1.2.1.17.1.4.1.2", "1.3.6.1.2.1.17.1.4.1.2");
-            //BuildOIDSetting("Step2H", "1.3.6.1.2.1.17.2.15.1.3", "1.3.6.1.2.1.17.2.15.1.3");
-            //BuildOIDSetting("Step2K", "1.3.6.1.2.1.31.1.1.1.1", "1.3.6.1.2.1.31.1.1.1.1");
-            //BuildOIDSetting("Step2L", "1.3.6.1.2.1.31.1.1.1.6", "1.3.6.1.2.1.31.1.1.1.6");
-            //BuildOIDSetting("Step2M", "1.3.6.1.2.1.31.1.1.1.10", "1.3.6.1.2.1.31.1.1.1.10");
-            //BuildOIDSetting("Step2N", "1.3.6.1.2.1.31.1.1.1.15", "1.3.6.1.2.1.31.1.1.1.15");
-            //BuildOIDSetting("Step2Ñ", "1.3.6.1.2.1.31.1.1.1.18", "1.3.6.1.2.1.31.1.1.1.18");
-
-            //1.3.6.1.4.1.11.2 --> nm Evitamos porque es propietario HP...
             #endregion
 
             return OIDSettings;
@@ -186,7 +151,6 @@ namespace SNMPDiscovery.Model.Services
                 FillLearnedMACAddresses(Device, OIDSettings, TopologyInfo); //Fill with LearnedAddress inventory
                 FillPortMACAddress(Device, OIDSettings, TopologyInfo); //Fill with MAC address of each port
                 //FillPortIDInfo(Device, OIDSettings, TopologyInfo); //Fill with port IDs inventory
-                
                 //Fill with VLAN inventory
                 //Fill with DirectNeighbours
             }
@@ -214,7 +178,6 @@ namespace SNMPDiscovery.Model.Services
             MappingHandler[5] = (x, y, z) => { ((ITopologyInfoDTO)z).Location = y; };
             MappingHandler[6] = (x, y, z) => { ((ITopologyInfoDTO)z).Description = y; };
 
-
             //Loop of each subset 
             for (int i = 0; i < numRootEntries; i++)
             {
@@ -228,152 +191,80 @@ namespace SNMPDiscovery.Model.Services
 
         private void FillLearnedMACAddresses(ISNMPDeviceDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, ITopologyInfoDTO TopologyInfo)
         {
-            //IDictionary<string, IDictionary<string, string>> LearnedAddresses = new Dictionary<string, IDictionary<string, string>>();
+            //Get setting of interest and number of roots/key OIDs for handling data
+            IOIDSettingDTO SelectedSetting = OIDSettings["LearnedMACByPhysPortID"];
+            int numRootEntries = SelectedSetting.IndexedOIDSettings.Count;
+            List<string> RootEntries = SelectedSetting.IndexedOIDSettings.Keys.ToList();
 
-            ////Get setting of interest
-            //IOIDSettingDTO SelectedSetting = OIDSettings["LearnedMACByPhysPortID"];
+            //Define handle collection in order
+            Action<IList<string>, string, object>[] MappingHandler = new Action<IList<string>, string, object>[numRootEntries];
+            MappingHandler[0] = LearnedAddressMapper;
 
-            ////Select proper OID entries for processing
-            //IList<ISNMPRawEntryDTO> SelectedData = Device.SNMPRawDataEntries
-            //                                    .Where(x => CompareOID(x.Key, SelectedSetting.InitialOID) >= 0 &&
-            //                                        (
-            //                                            CompareOID(x.Key, SelectedSetting.FinalOID) <= 0 && SelectedSetting.InclusiveInterval ||
-            //                                            CompareOID(x.Key, SelectedSetting.FinalOID) < 0 && !SelectedSetting.InclusiveInterval)
-            //                                        )
-            //                                    .OrderBy(x => x.Key, Comparer<string>.Create(CompareOID))
-            //                                    .Select(x => x.Value)
-            //                                    .ToList();
+            //Define container if necesary
+            TopologyInfo.LearnedAddressByInterfaceID = new Dictionary<string, IDictionary<string, string>>();
 
-            ////Iterate on selected data for parsing possible indexes --> Not apliying here
-            //foreach (ISNMPRawEntryDTO rawentry in SelectedData)
-            //{
-            //    //Get matched root OID
-            //    //string rootOID = SelectedSetting.IndexedOIDSettings.Keys.Where(x => x.StartsWith(rawentry.OID)).FirstOrDefault();
-            //    string rootOID = SelectedSetting.IndexedOIDSettings.Keys.Where(x => rawentry.OID.StartsWith(x)).FirstOrDefault();
+            //Loop of each subset 
+            for (int i = 0; i < numRootEntries; i++)
+            {
+                //1) select OID data subset
+                IList<ISNMPRawEntryDTO> SelectedDeviceOID = ModelHelper.OIDDataSelector(Device, RootEntries[i], i + 1 == numRootEntries ? RootEntries[i] : RootEntries[i + 1]);
 
-            //    if (rootOID == null)
-            //    {
-            //        continue;
-            //    }
-            //    else
-            //    {
-            //        List<int> indexValues = rawentry.OID.Replace(rootOID + ".", "").Split('.').Select(x => int.Parse(x)).ToList();
-            //        List<string> indexData = new List<string>();
+                //2) apply specific handle on entryparser
+                ModelHelper.OIDEntryParser(SelectedDeviceOID, SelectedSetting.IndexedOIDSettings[RootEntries[i]], TopologyInfo, MappingHandler[i]);
+            }
+        }
 
-            //        foreach (EnumSNMPOIDIndexType IndexType in SelectedSetting.IndexedOIDSettings[rootOID].IndexDataDefinitions)
-            //        {
-            //            switch (IndexType)
-            //            {
-            //                case EnumSNMPOIDIndexType.Number:
-            //                    indexData.Add(indexValues[0].ToString());
-            //                    indexValues.RemoveAt(0);
+        private void LearnedAddressMapper(IList<string> IndexValues, string Value, object StrategyDTOobject)
+        {
+            ITopologyInfoDTO TopologyInfo = StrategyDTOobject as ITopologyInfoDTO;
 
-            //                    break;
-            //                case EnumSNMPOIDIndexType.MacAddress:
-            //                    indexData.Add(string.Join(" ", indexValues.Take(6).Select(x => x.ToString("X"))));
-            //                    indexValues.RemoveRange(0, 6);
+            IDictionary<string, IDictionary<string, string>> LearnedAddres = TopologyInfo.LearnedAddressByInterfaceID;
 
-            //                    break;
-            //                case EnumSNMPOIDIndexType.IP:
-            //                    break;
-            //                case EnumSNMPOIDIndexType.Date:
-            //                    break;
-            //                case EnumSNMPOIDIndexType.ByteString:
-            //                    break;
-            //                case EnumSNMPOIDIndexType.Oid:
-            //                    break;
-            //                default:
-            //                    break;
-            //            }
-            //        }
-
-            //        //Assign values
-            //        if (LearnedAddresses.ContainsKey(rawentry.ValueData))
-            //        {
-            //            if (!LearnedAddresses[rawentry.ValueData].ContainsKey(indexData[1]))
-            //            {
-            //                LearnedAddresses[rawentry.ValueData].Add(indexData[1], null);
-            //            }
-            //        }
-            //        else
-            //        {
-            //            LearnedAddresses.Add(rawentry.ValueData, new Dictionary<string, string>() { { indexData[1], null } });
-            //        }
-            //    }
-            //}
-
-            ////Save dictionary on the model
-            //TopologyInfo.LearnedAddressByInterfaceID = LearnedAddresses;
+            if (LearnedAddres.ContainsKey(Value))
+            {
+                if (!LearnedAddres[Value].ContainsKey(IndexValues[1]))
+                {
+                    LearnedAddres[Value].Add(IndexValues[1], null);
+                }
+            }
+            else
+            {
+                LearnedAddres.Add(Value, new Dictionary<string, string>() { { IndexValues[1], null } });
+            }
         }
 
         private void FillPortMACAddress(ISNMPDeviceDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, ITopologyInfoDTO TopologyInfo)
         {
-            //IDictionary<string, string> MACByInterface = new Dictionary<string, string>();
+            //Get setting of interest and number of roots/key OIDs for handling data
+            IOIDSettingDTO SelectedSetting = OIDSettings["PhysPortMACAddress"];
+            int numRootEntries = SelectedSetting.IndexedOIDSettings.Count;
+            List<string> RootEntries = SelectedSetting.IndexedOIDSettings.Keys.ToList();
 
-            ////Get setting of interest
-            //IOIDSettingDTO SelectedSetting = OIDSettings["LearnedMACByPhysPortID"];
+            //Define handle collection in order
+            Action<IList<string>, string, object>[] MappingHandler = new Action<IList<string>, string, object>[numRootEntries];
+            MappingHandler[0] = PortMACAddressMapper;
 
-            ////Select proper OID entries for processing
-            //IList<ISNMPRawEntryDTO> SelectedData = Device.SNMPRawDataEntries
-            //                                    .Where(x => CompareOID(x.Key, SelectedSetting.InitialOID) >= 0 &&
-            //                                        (
-            //                                            CompareOID(x.Key, SelectedSetting.FinalOID) <= 0 && SelectedSetting.InclusiveInterval ||
-            //                                            CompareOID(x.Key, SelectedSetting.FinalOID) < 0 && !SelectedSetting.InclusiveInterval)
-            //                                        )
-            //                                    .OrderBy(x => x.Key, Comparer<string>.Create(CompareOID))
-            //                                    .Select(x => x.Value)
-            //                                    .ToList();
+            //Define container if necesary
+            TopologyInfo.MACPortByInterfaceID = new Dictionary<string, string>();
 
-            ////Iterate on selected data for parsing possible indexes --> Not apliying here
-            //foreach (ISNMPRawEntryDTO rawentry in SelectedData)
-            //{
-            //    //Get matched root OID
-            //    //string rootOID = SelectedSetting.IndexedOIDSettings.Keys.Where(x => x.StartsWith(rawentry.OID)).FirstOrDefault();
-            //    string rootOID = SelectedSetting.IndexedOIDSettings.Keys.Where(x => rawentry.OID.StartsWith(x)).FirstOrDefault();
+            //Loop of each subset 
+            for (int i = 0; i < numRootEntries; i++)
+            {
+                //1) select OID data subset
+                IList<ISNMPRawEntryDTO> SelectedDeviceOID = ModelHelper.OIDDataSelector(Device, RootEntries[i], i + 1 == numRootEntries ? RootEntries[i] : RootEntries[i + 1]);
 
-            //    if (rootOID == null)
-            //    {
-            //        continue;
-            //    }
-            //    else
-            //    {
-            //        List<int> indexValues = rawentry.OID.Replace(rootOID + ".", "").Split('.').Select(x => int.Parse(x)).ToList();
-            //        List<string> indexData = new List<string>();
+                //2) apply specific handle on entryparser
+                ModelHelper.OIDEntryParser(SelectedDeviceOID, SelectedSetting.IndexedOIDSettings[RootEntries[i]], TopologyInfo, MappingHandler[i]);
+            }
+        }
 
-            //        foreach (EnumSNMPOIDIndexType IndexType in SelectedSetting.IndexedOIDSettings[rootOID].IndexDataDefinitions)
-            //        {
-            //            switch (IndexType)
-            //            {
-            //                case EnumSNMPOIDIndexType.Number:
-            //                    indexData.Add(indexValues[0].ToString());
-            //                    indexValues.RemoveAt(0);
+        private void PortMACAddressMapper(IList<string> IndexValues, string Value, object StrategyDTOobject)
+        {
+            ITopologyInfoDTO TopologyInfo = StrategyDTOobject as ITopologyInfoDTO;
 
-            //                    break;
-            //                case EnumSNMPOIDIndexType.MacAddress:
-            //                    indexData.Add(string.Join(" ", indexValues.Take(6).Select(x => x.ToString("X"))));
-            //                    indexValues.RemoveRange(0, 6);
+            IDictionary<string, string> MACofPorts = TopologyInfo.MACPortByInterfaceID;
 
-            //                    break;
-            //                case EnumSNMPOIDIndexType.IP:
-            //                    break;
-            //                case EnumSNMPOIDIndexType.Date:
-            //                    break;
-            //                case EnumSNMPOIDIndexType.ByteString:
-            //                    break;
-            //                case EnumSNMPOIDIndexType.Oid:
-            //                    break;
-            //                default:
-            //                    break;
-            //            }
-            //        }
-
-            //        //Assign values
-            //        MACByInterface.Add(indexData[0], rawentry.ValueData);
-            //    }
-            //}
-
-            ////Save dictionary on the model
-            //TopologyInfo.MACPortByInterfaceID = MACByInterface;
+            MACofPorts.Add(IndexValues[0], Value);
         }
 
         private void FillPortIDInfo(ISNMPDeviceDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, ITopologyInfoDTO TopologyInfo)

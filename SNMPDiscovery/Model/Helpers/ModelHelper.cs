@@ -34,11 +34,13 @@ namespace SNMPDiscovery.Model.Helpers
 
         public static IList<ISNMPRawEntryDTO> OIDDataSelector(ISNMPDeviceDTO Device, string currentRoot, string nextRoot)
         {
-            return Device.SNMPRawDataEntries.Where(x => CompareOID(x.Key, currentRoot) >= 0 && CompareOID(x.Key, nextRoot) < 0)
+            return Device.SNMPRawDataEntries.Where(x => CompareOID(x.Key, currentRoot) >= 0 && CompareOID(x.Key, nextRoot) <= 0)
                                             .OrderBy(x => x.Key, Comparer<string>.Create(CompareOID))
                                             .Select(x => x.Value)
                                             .ToList();
         }
+
+        public static void OIDEntryProcessor() { }
 
         public static void OIDEntryParser(IList<ISNMPRawEntryDTO> SelectedDeviceOID, IIndexedOIDSettingDTO IndexOIDSetting, object StrategyDTOobject, Action<IList<string>, string, object> MappingHandler)
         {
