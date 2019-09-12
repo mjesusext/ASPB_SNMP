@@ -32,54 +32,38 @@ namespace SNMPDiscovery.Model.Helpers
             return 0;
         }
 
-        public static IList<ISNMPRawEntryDTO> OIDDataSelector(ISNMPDeviceDTO Device, IOIDSettingDTO SelectedSetting)
+        public static IList<ISNMPRawEntryDTO> OIDDataSelector(ISNMPDeviceDTO Device, string currentRoot, string nextRoot)
         {
-            return Device.SNMPRawDataEntries.Where(x => CompareOID(x.Key, SelectedSetting.InitialOID) >= 0 &&
-                                                (
-                                                    CompareOID(x.Key, SelectedSetting.FinalOID) <= 0 && SelectedSetting.InclusiveInterval ||
-                                                    CompareOID(x.Key, SelectedSetting.FinalOID) < 0 && !SelectedSetting.InclusiveInterval)
-                                                )
+            return Device.SNMPRawDataEntries.Where(x => CompareOID(x.Key, currentRoot) >= 0 && CompareOID(x.Key, nextRoot) < 0)
                                             .OrderBy(x => x.Key, Comparer<string>.Create(CompareOID))
                                             .Select(x => x.Value)
                                             .ToList();
         }
 
-        public static bool HasOIDIndexInfo(IOIDSettingDTO SelectedSetting, ISNMPRawEntryDTO RawEntry, out string RootOID)
+        public static void OIDEntryParser(IList<ISNMPRawEntryDTO> SelectedDeviceOID, IIndexedOIDSettingDTO IndexOIDSetting, object StrategyDTOobject, Action<IList<string>, string, object> MappingHandler)
         {
-            RootOID = SelectedSetting.IndexedOIDSettings.Keys.Where(x => RawEntry.OID.StartsWith(x)).FirstOrDefault();
-
-            return RootOID != null;
-        }
-
-        public static void OIDEntryParser(ISNMPDeviceDTO Device, IOIDSettingDTO SelectedSetting, object StrategyDTOobject, Action<IList<string>, string, object> MappingHandler)
-        {
-            string rootOID;
-            IList<ISNMPRawEntryDTO> SelectedData = OIDDataSelector(Device, SelectedSetting);
             IList<string> IndexData = new List<string>();
 
             //Iterate on selected data for parsing possible indexes --> Not apliying here
-            foreach (ISNMPRawEntryDTO RawEntry in SelectedData)
+            foreach (ISNMPRawEntryDTO RawEntry in SelectedDeviceOID)
             {
-                if(HasOIDIndexInfo(SelectedSetting, RawEntry, out rootOID))
+                OIDIndexEntryParser(IndexOIDSetting, RawEntry, IndexData);
+
+                //Save results and clean decoded index list
+                if(MappingHandler != null)
                 {
-                    OIDIndexEntryParser(SelectedSetting, RawEntry, rootOID, IndexData);
-                }
-                else
-                {
-                    continue;
+                    MappingHandler(IndexData, RawEntry.ValueData, StrategyDTOobject);
                 }
                 
-                //Save results and clean decoded index list
-                MappingHandler(IndexData, RawEntry.ValueData, StrategyDTOobject);
                 IndexData.Clear();
             }
         }
 
-        public static void OIDIndexEntryParser(IOIDSettingDTO SelectedSetting, ISNMPRawEntryDTO RawEntry, string RootOID, IList<string> IndexData)
+        public static void OIDIndexEntryParser(IIndexedOIDSettingDTO IndexOIDSetting, ISNMPRawEntryDTO RawEntry, IList<string> IndexData)
         {
-            List<int> indexValues = RawEntry.OID.Replace(RootOID + ".", "").Split('.').Select(x => int.Parse(x)).ToList();
+            List<int> indexValues = RawEntry.OID.Replace(IndexOIDSetting.RootOID + ".", "").Split('.').Select(x => int.Parse(x)).ToList();
 
-            foreach (EnumSNMPOIDIndexType IndexType in SelectedSetting.IndexedOIDSettings[RootOID].IndexDataDefinitions)
+            foreach (EnumSNMPOIDIndexType IndexType in IndexOIDSetting.IndexDataDefinitions)
             {
                 switch (IndexType)
                 {

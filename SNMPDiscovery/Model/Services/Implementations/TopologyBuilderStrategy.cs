@@ -27,7 +27,17 @@ namespace SNMPDiscovery.Model.Services
 
             if (!OIDSettings.ContainsKey("DeviceBasicInfo"))
             {
-                OIDSettings.Add("DeviceBasicInfo", new OIDSettingDTO("Step1A - Basic Info", "1.3.6.1.2.1.1.1", "1.3.6.1.2.1.1.8", false));
+                IOIDSettingDTO MockOIDSettingA = new OIDSettingDTO("DeviceBasicInfo", "1.3.6.1.2.1.1.1", "1.3.6.1.2.1.1.8", false);
+                IList<EnumSNMPOIDIndexType> indexesA = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.None };
+                MockOIDSettingA.BuildIndexedOIDSetting("1.3.6.1.2.1.1.1", indexesA);
+                MockOIDSettingA.BuildIndexedOIDSetting("1.3.6.1.2.1.1.2", indexesA);
+                MockOIDSettingA.BuildIndexedOIDSetting("1.3.6.1.2.1.1.3", indexesA);
+                MockOIDSettingA.BuildIndexedOIDSetting("1.3.6.1.2.1.1.4", indexesA);
+                MockOIDSettingA.BuildIndexedOIDSetting("1.3.6.1.2.1.1.5", indexesA);
+                MockOIDSettingA.BuildIndexedOIDSetting("1.3.6.1.2.1.1.6", indexesA);
+                MockOIDSettingA.BuildIndexedOIDSetting("1.3.6.1.2.1.1.7", indexesA);
+
+                OIDSettings.Add("DeviceBasicInfo", MockOIDSettingA);
             }
 
             if (!OIDSettings.ContainsKey("PhysPortDescription"))
@@ -189,52 +199,31 @@ namespace SNMPDiscovery.Model.Services
 
         private void FillBasicInfo(ISNMPDeviceDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, ITopologyInfoDTO TopologyInfo)
         {
-            //Get setting of interest
+            //Get setting of interest and number of roots/key OIDs for handling data
             IOIDSettingDTO SelectedSetting = OIDSettings["DeviceBasicInfo"];
+            int numRootEntries = SelectedSetting.IndexedOIDSettings.Count;
+            List<string> RootEntries = SelectedSetting.IndexedOIDSettings.Keys.ToList();
 
-            //Select proper OID entries for processing
-            ModelHelper.OIDEntryParser(Device, SelectedSetting, TopologyInfo, BasicInfoHandler);
+            //Define handle collection in order
+            Action<IList<string>, string, object>[] MappingHandler = new Action<IList<string>, string, object>[numRootEntries];
+            MappingHandler[0] = (x, y, z) => { ((ITopologyInfoDTO)z).Description = y; };
+            MappingHandler[1] = (x, y, z) => { ((ITopologyInfoDTO)z).OIDobjectID = y; };
+            MappingHandler[2] = null;
+            MappingHandler[3] = null;
+            MappingHandler[4] = (x, y, z) => { ((ITopologyInfoDTO)z).DeviceName = y; };
+            MappingHandler[5] = (x, y, z) => { ((ITopologyInfoDTO)z).Location = y; };
+            MappingHandler[6] = (x, y, z) => { ((ITopologyInfoDTO)z).Description = y; };
 
-           
 
-            ////Get setting of interest
-            //IOIDSettingDTO SelectedSetting = OIDSettings["DeviceBasicInfo"];
+            //Loop of each subset 
+            for (int i = 0; i < numRootEntries; i++)
+            {
+                //1) select OID data subset
+                IList<ISNMPRawEntryDTO> SelectedDeviceOID = ModelHelper.OIDDataSelector(Device, RootEntries[i], i+1 == numRootEntries ? RootEntries[i] : RootEntries[i+1]);
 
-            ////Select proper OID entries for processing
-            //IList<ISNMPRawEntryDTO> SelectedData = Device.SNMPRawDataEntries
-            //                                    .Where(x => CompareOID(x.Key, SelectedSetting.InitialOID) >= 0 &&
-            //                                        (
-            //                                            CompareOID(x.Key, SelectedSetting.FinalOID) <= 0 && SelectedSetting.InclusiveInterval ||
-            //                                            CompareOID(x.Key, SelectedSetting.FinalOID) < 0 && !SelectedSetting.InclusiveInterval)
-            //                                        )
-            //                                    .OrderBy(x => x.Key, Comparer<string>.Create(CompareOID))
-            //                                    .Select(x => x.Value)
-            //                                    .ToList();
-
-            ////Iterate on selected data for parsing possible indexes --> Not apliying here
-
-            ////Assign values
-            //TopologyInfo.DeviceName = SelectedData[4].ValueData;
-            //TopologyInfo.Description = SelectedData[0].ValueData;
-            //TopologyInfo.Location = SelectedData[5].ValueData;
-            //TopologyInfo.OIDobjectID = SelectedData[1].ValueData;
-            ////ToDo...
-            //TopologyInfo.OSIImplementedLayers = EnumOSILayers.None;
-            //TopologyInfo.DeviceType = EnumDeviceType.None;
-        }
-
-        private void BasicInfoHandler(IList<string> IndexData, string ValueData, object TopologyInfoObject)
-        {
-            ITopologyInfoDTO TopologyInfo = TopologyInfoObject as ITopologyInfoDTO;
-            
-            //Assign values
-            TopologyInfo.DeviceName = SelectedData[4].ValueData;
-            TopologyInfo.Description = SelectedData[0].ValueData;
-            TopologyInfo.Location = SelectedData[5].ValueData;
-            TopologyInfo.OIDobjectID = SelectedData[1].ValueData;
-            //ToDo...
-            TopologyInfo.OSIImplementedLayers = EnumOSILayers.None;
-            TopologyInfo.DeviceType = EnumDeviceType.None;
+                //2) apply specific handle on entryparser
+                ModelHelper.OIDEntryParser(SelectedDeviceOID, SelectedSetting.IndexedOIDSettings[RootEntries[i]], TopologyInfo, MappingHandler[i]);
+            }
         }
 
         private void FillLearnedMACAddresses(ISNMPDeviceDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, ITopologyInfoDTO TopologyInfo)

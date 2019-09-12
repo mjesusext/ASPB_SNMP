@@ -8,11 +8,12 @@ namespace SNMPDiscovery.Model.DTO
 {
     public enum EnumSNMPOIDIndexType : uint
     {
-        Number = 0,
-        MacAddress = 1,
-        IP = 2,
-        Date = 3,
-        ByteString = 4,
-        Oid = 5
+        None = 0,
+        Number = 1,
+        MacAddress = 2,
+        IP = 3,
+        Date = 4,
+        ByteString = 5,
+        Oid = 6
     }
 }
