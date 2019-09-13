@@ -78,6 +78,7 @@
     <Compile Include="Model\DTO\Interfaces\IDiscoveredBasicInfo.cs" />
     <Compile Include="Model\DTO\Interfaces\IIndexedOIDSettingDTO.cs" />
     <Compile Include="Model\DTO\Interfaces\ISNMPProcessedValueDTO.cs" />
+    <Compile Include="Model\Helpers\CustomPair.cs" />
     <Compile Include="Model\Helpers\ModelHelper.cs" />
     <Compile Include="Model\Services\Implementations\SNMPModelService.cs" />
     <Compile Include="Model\DTO\Implementations\SNMPRawEntryDTO.cs" />

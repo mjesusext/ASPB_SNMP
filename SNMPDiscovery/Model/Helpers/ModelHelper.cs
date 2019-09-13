@@ -40,7 +40,21 @@ namespace SNMPDiscovery.Model.Helpers
                                             .ToList();
         }
 
-        public static void OIDEntryProcessor() { }
+        public static void OIDEntryProcessor(ISNMPDeviceDTO Device, object StrategyDTOobject, IOIDSettingDTO SelectedSetting, IList<Action<IList<string>, string, object>> MappingHandler)
+        {
+            int numRootEntries = SelectedSetting.IndexedOIDSettings.Count;
+            List<string> RootEntries = SelectedSetting.IndexedOIDSettings.Keys.ToList();
+
+            //Loop of each subset 
+            for (int i = 0; i < numRootEntries; i++)
+            {
+                //1) select OID data subset
+                IList<ISNMPRawEntryDTO> SelectedDeviceOID = OIDDataSelector(Device, RootEntries[i], i + 1 == numRootEntries ? RootEntries[i] : RootEntries[i + 1]);
+
+                //2) apply specific handle on entryparser
+                OIDEntryParser(SelectedDeviceOID, SelectedSetting.IndexedOIDSettings[RootEntries[i]], StrategyDTOobject, MappingHandler[i]);
+            }
+        }
 
         public static void OIDEntryParser(IList<ISNMPRawEntryDTO> SelectedDeviceOID, IIndexedOIDSettingDTO IndexOIDSetting, object StrategyDTOobject, Action<IList<string>, string, object> MappingHandler)
         {

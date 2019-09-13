@@ -11,8 +11,9 @@ namespace SNMPDiscovery.Model.DTO
         Loopback = 0,
         Access = 1,
         Trunk = 2,
-        InferedTrunk = 3,
-        LACP = 4,
-        Aggregate = 5
+        LACP = 3,
+        Aggregate = 4,
+        VirtualPort = 5,
+        InferedTrunk = 6
     }
 }

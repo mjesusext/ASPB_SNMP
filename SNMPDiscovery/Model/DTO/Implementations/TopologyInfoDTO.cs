@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SNMPDiscovery.Model.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,10 +17,10 @@ namespace SNMPDiscovery.Model.DTO
         public EnumDeviceType DeviceType { get; set; }
 
         public IDictionary<string, string> PortsDescriptionByInterfaceID { get; set; }
-        public IDictionary<string, Tuple<EnumPhysPortType, string>> PortsTypologyByInterfaceID { get; set; }
-        public IDictionary<string, Tuple<string, string>> VLANByInterfaceID { get; set; }
+        public IDictionary<string, CustomPair<EnumPhysPortType, string>> PortsTypologyByInterfaceID { get; set; }
+        public IDictionary<string, CustomPair<string, string>> VLANByInterfaceID { get; set; }
         public IDictionary<string, string> MACPortByInterfaceID { get; set; }
         public IDictionary<string, IDictionary<string, string>> LearnedAddressByInterfaceID { get; set; }
-        public IDictionary<string, Tuple<string,string>> DirectNeighboursByInterfaceID { get; set; }
+        public IDictionary<string, CustomPair<string,string>> DirectNeighboursByInterfaceID { get; set; }
     }
 }
