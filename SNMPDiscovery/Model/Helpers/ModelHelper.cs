@@ -34,10 +34,20 @@ namespace SNMPDiscovery.Model.Helpers
 
         public static IList<ISNMPRawEntryDTO> OIDDataSelector(ISNMPDeviceDTO Device, string currentRoot, string nextRoot)
         {
-            return Device.SNMPRawDataEntries.Where(x => CompareOID(x.Key, currentRoot) >= 0 && CompareOID(x.Key, nextRoot) <= 0)
+            if(currentRoot != nextRoot)
+            {
+                return Device.SNMPRawDataEntries.Where(x => CompareOID(x.Key, currentRoot) >= 0 && CompareOID(x.Key, nextRoot) < 0)
                                             .OrderBy(x => x.Key, Comparer<string>.Create(CompareOID))
                                             .Select(x => x.Value)
                                             .ToList();
+            }
+            else
+            {
+                return Device.SNMPRawDataEntries.Where(x => CompareOID(x.Key, currentRoot) >= 0 && CompareOID(x.Key, nextRoot) <= 0)
+                                            .OrderBy(x => x.Key, Comparer<string>.Create(CompareOID))
+                                            .Select(x => x.Value)
+                                            .ToList();
+            }
         }
 
         public static void OIDEntryProcessor(ISNMPDeviceDTO Device, object StrategyDTOobject, IOIDSettingDTO SelectedSetting, IList<Action<IList<string>, string, object>> MappingHandler)
@@ -105,6 +115,18 @@ namespace SNMPDiscovery.Model.Helpers
                         break;
                 }
             }
+        }
+
+        public static string GetStringBitMask(string hexmask)
+        {
+            StringBuilder y = new StringBuilder();
+
+            foreach (string item in hexmask.Split(' '))
+            {
+                y.Append(Convert.ToString(int.Parse(item, System.Globalization.NumberStyles.HexNumber), 2).PadLeft(8, '0'));
+            }
+
+            return y.ToString();
         }
     }
 }

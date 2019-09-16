@@ -31,79 +31,92 @@ namespace SNMPDiscovery.Model.Services
 
             if (!OIDSettings.ContainsKey("DeviceBasicInfo"))
             {
-                IOIDSettingDTO MockOIDSettingA = new OIDSettingDTO("DeviceBasicInfo", "1.3.6.1.2.1.1.1", "1.3.6.1.2.1.1.8", false);
-                IList<EnumSNMPOIDIndexType> indexesA = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.None };
-                MockOIDSettingA.BuildIndexedOIDSetting("1.3.6.1.2.1.1.1", indexesA);
-                MockOIDSettingA.BuildIndexedOIDSetting("1.3.6.1.2.1.1.2", indexesA);
-                MockOIDSettingA.BuildIndexedOIDSetting("1.3.6.1.2.1.1.3", indexesA);
-                MockOIDSettingA.BuildIndexedOIDSetting("1.3.6.1.2.1.1.4", indexesA);
-                MockOIDSettingA.BuildIndexedOIDSetting("1.3.6.1.2.1.1.5", indexesA);
-                MockOIDSettingA.BuildIndexedOIDSetting("1.3.6.1.2.1.1.6", indexesA);
-                MockOIDSettingA.BuildIndexedOIDSetting("1.3.6.1.2.1.1.7", indexesA);
+                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("DeviceBasicInfo", "1.3.6.1.2.1.1.1", "1.3.6.1.2.1.1.8", false);
+                IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.None };
+                MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.1.1", indexes);
+                MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.1.2", indexes);
+                MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.1.3", indexes);
+                MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.1.4", indexes);
+                MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.1.5", indexes);
+                MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.1.6", indexes);
+                MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.1.7", indexes);
 
-                OIDSettings.Add("DeviceBasicInfo", MockOIDSettingA);
+                OIDSettings.Add("DeviceBasicInfo", MockOIDSetting);
             }
 
             if (!OIDSettings.ContainsKey("PhysPortDescription"))
             {
-                IOIDSettingDTO MockOIDSettingB = new OIDSettingDTO("PhysPortDescription", "1.3.6.1.2.1.2.2.1.2", "1.3.6.1.2.1.2.2.1.2", true);
-                IList<EnumSNMPOIDIndexType> indexesB = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number };
-                MockOIDSettingB.BuildIndexedOIDSetting("1.3.6.1.2.1.2.2.1.2", indexesB);
+                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("PhysPortDescription", "1.3.6.1.2.1.2.2.1.2", "1.3.6.1.2.1.2.2.1.2", true);
+                IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number };
+                MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.2.2.1.2", indexes);
 
-                OIDSettings.Add("PhysPortDescription", MockOIDSettingB);
+                OIDSettings.Add("PhysPortDescription", MockOIDSetting);
             }
 
             if (!OIDSettings.ContainsKey("PhysPortMACAddress"))
             {
-                IOIDSettingDTO MockOIDSettingC = new OIDSettingDTO("PhysPortMACAddress", "1.3.6.1.2.1.2.2.1.6", "1.3.6.1.2.1.2.2.1.6", true);
-                IList<EnumSNMPOIDIndexType> indexesC = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number };
-                MockOIDSettingC.BuildIndexedOIDSetting("1.3.6.1.2.1.2.2.1.6", indexesC);
+                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("PhysPortMACAddress", "1.3.6.1.2.1.2.2.1.6", "1.3.6.1.2.1.2.2.1.6", true);
+                IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number };
+                MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.2.2.1.6", indexes);
 
-                OIDSettings.Add("PhysPortMACAddress", MockOIDSettingC);
+                OIDSettings.Add("PhysPortMACAddress", MockOIDSetting);
             }
 
-            if (!OIDSettings.ContainsKey("VLANInfo"))
+            if (!OIDSettings.ContainsKey("VLANDescription"))
             {
-                OIDSettings.Add("VLANInfo", new OIDSettingDTO("VLANInfo", "1.3.6.1.2.1.17.7.1.4.3.1", "1.3.6.1.2.1.17.7.1.4.3.1", true));
+                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("VLANDescription", "1.3.6.1.2.1.17.7.1.4.3.1.1", "1.3.6.1.2.1.17.7.1.4.3.1.1", true);
+                IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number };
+                MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.17.7.1.4.3.1.1", indexes);
+
+                OIDSettings.Add("VLANDescription", MockOIDSetting);
+            }
+
+            if (!OIDSettings.ContainsKey("VLANMapping"))
+            {
+                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("VLANDescription", "1.3.6.1.2.1.17.7.1.4.3.1.2", "1.3.6.1.2.1.17.7.1.4.3.1.2", true);
+                IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number };
+                MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.17.7.1.4.3.1.2", indexes);
+
+                OIDSettings.Add("VLANMapping", MockOIDSetting);
             }
 
             if (!OIDSettings.ContainsKey("LearnedMACByPhysPortID"))
             {
-                IOIDSettingDTO MockOIDSettingD = new OIDSettingDTO("LearnedMACByPhysPortID", "1.3.6.1.2.1.17.7.1.2.2.1.2", "1.3.6.1.2.1.17.7.1.2.2.1.2", true);
-                IList<EnumSNMPOIDIndexType> indexesD = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number, EnumSNMPOIDIndexType.MacAddress };
-                MockOIDSettingD.BuildIndexedOIDSetting("1.3.6.1.2.1.17.7.1.2.2.1.2", indexesD);
+                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("LearnedMACByPhysPortID", "1.3.6.1.2.1.17.7.1.2.2.1.2", "1.3.6.1.2.1.17.7.1.2.2.1.2", true);
+                IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number, EnumSNMPOIDIndexType.MacAddress };
+                MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.17.7.1.2.2.1.2", indexes);
 
-                OIDSettings.Add("LearnedMACByPhysPortID", MockOIDSettingD);
+                OIDSettings.Add("LearnedMACByPhysPortID", MockOIDSetting);
             }
 
             if (!OIDSettings.ContainsKey("LearnedMACByPhysPortMAC"))
             {
-                IOIDSettingDTO MockOIDSettingE = new OIDSettingDTO("LearnedMACByPhysPortMAC", "1.3.6.1.2.1.17.4.3.1", "1.3.6.1.2.1.17.4.3.4", false);
-                IList<EnumSNMPOIDIndexType> indexesE = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.MacAddress };
-                MockOIDSettingE.BuildIndexedOIDSetting("1.3.6.1.2.1.17.4.3.1.1", indexesE);
-                MockOIDSettingE.BuildIndexedOIDSetting("1.3.6.1.2.1.17.4.3.1.2", indexesE);
-                MockOIDSettingE.BuildIndexedOIDSetting("1.3.6.1.2.1.17.4.3.1.3", indexesE);
+                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("LearnedMACByPhysPortMAC", "1.3.6.1.2.1.17.4.3.1", "1.3.6.1.2.1.17.4.3.4", false);
+                IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.MacAddress };
+                MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.17.4.3.1.1", indexes);
+                MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.17.4.3.1.2", indexes);
+                MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.17.4.3.1.3", indexes);
 
-                OIDSettings.Add("LearnedMACByPhysPortMAC", MockOIDSettingE);
+                OIDSettings.Add("LearnedMACByPhysPortMAC", MockOIDSetting);
             }
 
             if (!OIDSettings.ContainsKey("LACPSetting"))
             {
                 //OIDSettings.Add("LACPSetting", new OIDSettingDTO("LACPSetting", "1.2.840.10006.300.43", "1.2.840.10006.300.43", true));
-                IOIDSettingDTO MockOIDSettingF = new OIDSettingDTO("LACPSetting", "1.2.840.10006.300.43.1.1.2.1.1", "1.2.840.10006.300.43.1.1.2.1.1", true);
-                IList<EnumSNMPOIDIndexType> indexesF = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number };
-                MockOIDSettingF.BuildIndexedOIDSetting("1.2.840.10006.300.43.1.1.2.1.1", indexesF);
+                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("LACPSetting", "1.2.840.10006.300.43.1.1.2.1.1", "1.2.840.10006.300.43.1.1.2.1.1", true);
+                IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number };
+                MockOIDSetting.BuildIndexedOIDSetting("1.2.840.10006.300.43.1.1.2.1.1", indexes);
 
-                OIDSettings.Add("LACPSetting", MockOIDSettingF);
+                OIDSettings.Add("LACPSetting", MockOIDSetting);
             }
 
             if (!OIDSettings.ContainsKey("PortHierarchy"))
             {
-                IOIDSettingDTO MockOIDSettingG = new OIDSettingDTO("PortHierarchy", "1.3.6.1.2.1.31.1.2.1.3", "1.3.6.1.2.1.31.1.2.1.3", true);
-                IList<EnumSNMPOIDIndexType> indexesG = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number, EnumSNMPOIDIndexType.Number };
-                MockOIDSettingG.BuildIndexedOIDSetting("1.3.6.1.2.1.31.1.2.1.3", indexesG);
+                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("PortHierarchy", "1.3.6.1.2.1.31.1.2.1.3", "1.3.6.1.2.1.31.1.2.1.3", true);
+                IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number, EnumSNMPOIDIndexType.Number };
+                MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.31.1.2.1.3", indexes);
 
-                OIDSettings.Add("PortHierarchy", MockOIDSettingG);
+                OIDSettings.Add("PortHierarchy", MockOIDSetting);
             }
 
 
@@ -173,10 +186,10 @@ namespace SNMPDiscovery.Model.Services
                 GetLearnedMACAddresses(Device, OIDSettings, TopologyInfo); //Fill with LearnedAddress inventory
                 GetPortMACAddress(Device, OIDSettings, TopologyInfo); //Fill with MAC address of each port
                 GetPortIDInfo(Device, OIDSettings, TopologyInfo); //Fill with port IDs inventory
+                GetVLANInfo(Device, OIDSettings, TopologyInfo); //Get VLANInventory and mappings
+                ComputeDirectNeighbours(TopologyInfo);
 
-                int i = 3;
-                //Fill with VLAN inventory
-                //Fill with DirectNeighbours
+                int i = 4;
             }
         }
 
@@ -201,7 +214,7 @@ namespace SNMPDiscovery.Model.Services
             MappingHandlers.Add(null);
             MappingHandlers.Add((x, y, z) => { ((ITopologyInfoDTO)z).DeviceName = y; });
             MappingHandlers.Add((x, y, z) => { ((ITopologyInfoDTO)z).Location = y; });
-            MappingHandlers.Add((x, y, z) => { ((ITopologyInfoDTO)z).Description = y; });
+            MappingHandlers.Add(null);
 
             //Collect data mapping with handlers
             ModelHelper.OIDEntryProcessor(Device, TopologyInfo, SelectedSetting, MappingHandlers);
@@ -220,7 +233,7 @@ namespace SNMPDiscovery.Model.Services
             MappingHandlers.Add(LearnedAddressMapper);
 
             //Initialize container if necesary
-            TopologyInfo.LearnedAddressByInterfaceID = new Dictionary<string, IDictionary<string, string>>();
+            TopologyInfo.PortLearnedAddresses = new Dictionary<string, IDictionary<string, string>>();
 
             //Collect data mapping with handlers
             ModelHelper.OIDEntryProcessor(Device, TopologyInfo, SelectedSetting, MappingHandlers);
@@ -236,10 +249,10 @@ namespace SNMPDiscovery.Model.Services
 
             //Define handle collection in order
             MappingHandlers = new List<Action<IList<string>, string, object>>();
-            MappingHandlers.Add((x,y,z) => { ((ITopologyInfoDTO)z).MACPortByInterfaceID.Add(x[0], y); });
+            MappingHandlers.Add((x,y,z) => { ((ITopologyInfoDTO)z).PortMACAddress.Add(x[0], y); });
 
             //Define container if necesary
-            TopologyInfo.MACPortByInterfaceID = new Dictionary<string, string>();
+            TopologyInfo.PortMACAddress = new Dictionary<string, string>();
 
             //Collect data mapping with handlers
             ModelHelper.OIDEntryProcessor(Device, TopologyInfo, SelectedSetting, MappingHandlers);
@@ -257,9 +270,9 @@ namespace SNMPDiscovery.Model.Services
             SelectedSetting = OIDSettings["PhysPortDescription"];
 
             MappingHandlers = new List<Action<IList<string>, string, object>>();
-            MappingHandlers.Add((x, y, z) => { ((ITopologyInfoDTO)z).PortsDescriptionByInterfaceID.Add(x[0], y); });
+            MappingHandlers.Add((x, y, z) => { ((ITopologyInfoDTO)z).PortInventory.Add(x[0], y); });
 
-            TopologyInfo.PortsDescriptionByInterfaceID = new Dictionary<string, string>();
+            TopologyInfo.PortInventory = new Dictionary<string, string>();
             ModelHelper.OIDEntryProcessor(Device, TopologyInfo, SelectedSetting, MappingHandlers);
 
             #endregion
@@ -267,25 +280,25 @@ namespace SNMPDiscovery.Model.Services
             #region Port typology
 
             //By default, all ports are access ports. Initialize dictionary
-            TopologyInfo.PortsTypologyByInterfaceID = new Dictionary<string, CustomPair<EnumPhysPortType, string>>();
+            TopologyInfo.PortSettings = new Dictionary<string, CustomPair<EnumPhysPortType, string>>();
             
-            foreach (string portID in TopologyInfo.MACPortByInterfaceID.Keys)
+            foreach (string portID in TopologyInfo.PortMACAddress.Keys)
             {
-                TopologyInfo.PortsTypologyByInterfaceID.Add(portID, new CustomPair<EnumPhysPortType, string>(EnumPhysPortType.Access, null));
+                TopologyInfo.PortSettings.Add(portID, new CustomPair<EnumPhysPortType, string>(EnumPhysPortType.Access, null));
             } 
 
             //Detect ports without MAC --> type loopback
-            IEnumerable<string> LoopbackPorts = TopologyInfo.MACPortByInterfaceID.Where(x => string.IsNullOrEmpty(x.Value)).Select(x => x.Key);
+            IEnumerable<string> LoopbackPorts = TopologyInfo.PortMACAddress.Where(x => string.IsNullOrEmpty(x.Value)).Select(x => x.Key);
             foreach (string loopbackitem in LoopbackPorts)
             {
-                TopologyInfo.PortsTypologyByInterfaceID[loopbackitem].First = EnumPhysPortType.Loopback;
+                TopologyInfo.PortSettings[loopbackitem].First = EnumPhysPortType.Loopback;
             }
 
             // Adrress by port > LearnedMACThreshold --> InferedTrunks
-            IEnumerable<string> InferedTrunks = TopologyInfo.LearnedAddressByInterfaceID.Where(x => x.Value.Count > LearnedMACThreshold).Select(x => x.Key);
+            IEnumerable<string> InferedTrunks = TopologyInfo.PortLearnedAddresses.Where(x => x.Value.Count > LearnedMACThreshold).Select(x => x.Key);
             foreach (string inferedtrunkitem in InferedTrunks)
             {
-                TopologyInfo.PortsTypologyByInterfaceID[inferedtrunkitem].First = EnumPhysPortType.InferedTrunk;
+                TopologyInfo.PortSettings[inferedtrunkitem].First = EnumPhysPortType.InferedTrunk;
             }
 
             // VirtualPort - Trunk
@@ -299,22 +312,20 @@ namespace SNMPDiscovery.Model.Services
             //Virtual ports
             foreach (string vlanport in PortHierarchyResults["0"])
             {
-                TopologyInfo.PortsTypologyByInterfaceID[vlanport].First = EnumPhysPortType.VirtualPort;
+                TopologyInfo.PortSettings[vlanport].First = EnumPhysPortType.VirtualPort;
             }
 
             //Trunk ports (any protocol)
-            
-            //MJE WRONG QUERY... Check it 
-            IEnumerable<KeyValuePair<string, IList<string>>> trunkports = PortHierarchyResults.Where(x => x.Value.Count > 1 && !PortHierarchyResults["0"].Contains(x.Key));
+            IEnumerable<KeyValuePair<string, IList<string>>> trunkports = PortHierarchyResults.Where(x => x.Value.Count > 1 && x.Key != "0").Where(x => !PortHierarchyResults["0"].Contains(x.Key));
 
             foreach (KeyValuePair<string, IList<string>> trunkentry in trunkports)
             {
-                TopologyInfo.PortsTypologyByInterfaceID[trunkentry.Key].First = EnumPhysPortType.Trunk;
+                TopologyInfo.PortSettings[trunkentry.Key].First = EnumPhysPortType.Trunk;
 
                 foreach (string aggregateentry in trunkentry.Value)
                 {
-                    TopologyInfo.PortsTypologyByInterfaceID[aggregateentry].First = EnumPhysPortType.Aggregate;
-                    TopologyInfo.PortsTypologyByInterfaceID[aggregateentry].Second = trunkentry.Key;
+                    TopologyInfo.PortSettings[aggregateentry].First = EnumPhysPortType.Aggregate;
+                    TopologyInfo.PortSettings[aggregateentry].Second = trunkentry.Key;
                 }
             }
 
@@ -328,12 +339,15 @@ namespace SNMPDiscovery.Model.Services
 
             foreach (KeyValuePair<string, IList<string>> lacpentry in LACPResults)
             {
-                TopologyInfo.PortsTypologyByInterfaceID[lacpentry.Key].First = EnumPhysPortType.LACP;
+                TopologyInfo.PortSettings[lacpentry.Key].First = EnumPhysPortType.LACP;
 
                 foreach (string groupedport in lacpentry.Value)
                 {
-                    TopologyInfo.PortsTypologyByInterfaceID[groupedport].First = EnumPhysPortType.Aggregate;
-                    TopologyInfo.PortsTypologyByInterfaceID[groupedport].Second = lacpentry.Key;
+                    if (TopologyInfo.PortSettings.ContainsKey(groupedport))
+                    {
+                        TopologyInfo.PortSettings[groupedport].First = EnumPhysPortType.Aggregate;
+                        TopologyInfo.PortSettings[groupedport].Second = lacpentry.Key;
+                    }
                 }
             }
 
@@ -342,8 +356,79 @@ namespace SNMPDiscovery.Model.Services
 
         private void GetVLANInfo(ISNMPDeviceDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, ITopologyInfoDTO TopologyInfo)
         {
-            //Get info with handler that gets string of flags
-            //Post processing of those flags
+            //Key: Port ID, Value: Tuple of VLAN ID and VLAN name
+            //IDictionary<string, CustomPair<string, string>> VLANByInterfaceID { get; set; }
+
+            IOIDSettingDTO SelectedSetting;
+            IList<Action<IList<string>, string, object>> MappingHandlers;
+            IDictionary<string, string> VLANMappingResult;
+
+            SelectedSetting = OIDSettings["VLANDescription"];
+            MappingHandlers = new List<Action<IList<string>, string, object>>();
+
+            #region VLAN description
+
+            MappingHandlers.Add((x, y, z) => { ((IDictionary<string,string>)z).Add(x[0], y); });
+            TopologyInfo.VLANInventory = new Dictionary<string, string>();
+
+            ModelHelper.OIDEntryProcessor(Device, TopologyInfo.VLANInventory, SelectedSetting, MappingHandlers);
+
+            #endregion
+
+            #region VLAN Mapping
+
+            //By default, all ports are access ports. Initialize dictionary
+            MappingHandlers.Clear();
+            MappingHandlers.Add((x,y,z) => { ((IDictionary<string, string>)z).Add(x[0], y); });
+
+            VLANMappingResult = new Dictionary<string, string>();
+            SelectedSetting = OIDSettings["VLANMapping"];
+
+            ModelHelper.OIDEntryProcessor(Device, VLANMappingResult, SelectedSetting, MappingHandlers);
+
+            #endregion
+
+            #region Data Parsing
+
+            TopologyInfo.PortVLANMapping = new Dictionary<string, List<string>>();
+
+            foreach (KeyValuePair<string,string> VLANMaskInfo in VLANMappingResult)
+            {
+                string bitmask = ModelHelper.GetStringBitMask(VLANMaskInfo.Value);
+
+                for (int i = 1; i <= bitmask.Length; i++)
+                {
+                    if (TopologyInfo.PortInventory.ContainsKey(i.ToString()))
+                    {
+                        if (TopologyInfo.PortVLANMapping.ContainsKey(i.ToString()))
+                        {
+                            if(bitmask[i-1] == '1')
+                            {
+                                TopologyInfo.PortVLANMapping[i.ToString()].Add(VLANMaskInfo.Key);
+                            }
+                        }
+                        else
+                        {
+                            if(bitmask[i-1] == '1')
+                            {
+                                TopologyInfo.PortVLANMapping.Add(i.ToString(), new List<string>() { VLANMaskInfo.Key });
+                            }
+                        }
+                    }
+                }
+            }
+
+            #endregion
+        }
+
+        private void ComputeDirectNeighbours(ITopologyInfoDTO TopologyInfo)
+        {
+            //Search access type
+            //IDictionary<string, CustomPair<EnumPhysPortType, string>> PortSettings;
+            //Get learned MAC and IP
+            //IDictionary<string, IDictionary<string, string>> PortLearnedAddresses;
+            //Insert into dictionary
+            //IDictionary<string, CustomPair<string, string>> DeviceDirectNeighbours;
         }
 
         #endregion
@@ -354,7 +439,7 @@ namespace SNMPDiscovery.Model.Services
         {
             ITopologyInfoDTO TopologyInfo = StrategyDTOobject as ITopologyInfoDTO;
 
-            IDictionary<string, IDictionary<string, string>> LearnedAddress = TopologyInfo.LearnedAddressByInterfaceID;
+            IDictionary<string, IDictionary<string, string>> LearnedAddress = TopologyInfo.PortLearnedAddresses;
 
             if (LearnedAddress.ContainsKey(Value))
             {
@@ -374,11 +459,11 @@ namespace SNMPDiscovery.Model.Services
             IDictionary<string, IList<string>> LACPMapping = StrategyDTOobject as IDictionary<string, IList<string>>;
             LACPMapping.Add(IndexValues[0], new List<string>());
 
-            char[] flagarray = string.Join("",Value.Split(' ').Select(x => int.Parse(x)).Select(x => Convert.ToString(x, 2))).ToCharArray();
+            string bitmask = ModelHelper.GetStringBitMask(Value);
 
-            for (int i = 0; i < flagarray.Length; i++)
+            for (int i = 0; i < bitmask.Length; i++)
             {
-                if(flagarray[i] == '1')
+                if (bitmask[i] == '1')
                 {
                     LACPMapping[IndexValues[0]].Add((i + 1).ToString());
                 }
