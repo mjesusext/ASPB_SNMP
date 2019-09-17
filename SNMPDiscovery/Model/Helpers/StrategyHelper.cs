@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SNMPDiscovery.Model.Helpers
 {
-    public static class ModelHelper
+    public static class StrategyHelper
     {
         public static int CompareOID(string current, string reference)
         {
@@ -34,7 +34,12 @@ namespace SNMPDiscovery.Model.Helpers
 
         public static IList<ISNMPRawEntryDTO> OIDDataSelector(ISNMPDeviceDTO Device, string currentRoot, string nextRoot)
         {
-            if(currentRoot != nextRoot)
+            if(Device.SNMPRawDataEntries == null)
+            {
+                return null;
+            }
+
+            if (currentRoot != nextRoot)
             {
                 return Device.SNMPRawDataEntries.Where(x => CompareOID(x.Key, currentRoot) >= 0 && CompareOID(x.Key, nextRoot) < 0)
                                             .OrderBy(x => x.Key, Comparer<string>.Create(CompareOID))
@@ -61,8 +66,11 @@ namespace SNMPDiscovery.Model.Helpers
                 //1) select OID data subset
                 IList<ISNMPRawEntryDTO> SelectedDeviceOID = OIDDataSelector(Device, RootEntries[i], i + 1 == numRootEntries ? RootEntries[i] : RootEntries[i + 1]);
 
-                //2) apply specific handle on entryparser
-                OIDEntryParser(SelectedDeviceOID, SelectedSetting.IndexedOIDSettings[RootEntries[i]], StrategyDTOobject, MappingHandler[i]);
+                if(SelectedDeviceOID != null)
+                {
+                    //2) apply specific handle on entryparser
+                    OIDEntryParser(SelectedDeviceOID, SelectedSetting.IndexedOIDSettings[RootEntries[i]], StrategyDTOobject, MappingHandler[i]);
+                }
             }
         }
 
@@ -99,7 +107,7 @@ namespace SNMPDiscovery.Model.Helpers
 
                         break;
                     case EnumSNMPOIDIndexType.MacAddress:
-                        IndexData.Add(string.Join(" ", indexValues.Take(6).Select(x => x.ToString("X"))));
+                        IndexData.Add(string.Join(" ", indexValues.Take(6).Select(x => x.ToString("X").PadLeft(2,'0'))));
                         indexValues.RemoveRange(0, 6);
 
                         break;
@@ -117,16 +125,32 @@ namespace SNMPDiscovery.Model.Helpers
             }
         }
 
-        public static string GetStringBitMask(string hexmask)
+        public static string[] GetFlagArrayPositions(string mask)
         {
-            StringBuilder y = new StringBuilder();
+            string[] result;
 
-            foreach (string item in hexmask.Split(' '))
+            if (mask.Contains(","))
             {
-                y.Append(Convert.ToString(int.Parse(item, System.Globalization.NumberStyles.HexNumber), 2).PadLeft(8, '0'));
+                result = mask.Split(new string[1] { ", " }, StringSplitOptions.RemoveEmptyEntries);
+            }
+            else
+            {
+                IEnumerable<string> BinaryMaskComponents = mask.Replace(" ", "").Select(x => Convert.ToString(int.Parse(x.ToString(), System.Globalization.NumberStyles.HexNumber), 2).PadLeft(4, '0'));
+                string BinaryMask = string.Concat(BinaryMaskComponents);
+
+                result = new string[BinaryMask.Count(x => x == '1')];
+                int indresult = 0;
+                
+                for (int i = 0; i < BinaryMask.Length; i++)
+                {
+                    if(BinaryMask[i] == '1')
+                    {
+                        result[indresult++] = (i + 1).ToString();
+                    }
+                }
             }
 
-            return y.ToString();
+            return result;
         }
     }
 }

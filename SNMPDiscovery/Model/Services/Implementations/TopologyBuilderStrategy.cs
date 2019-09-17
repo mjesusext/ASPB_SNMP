@@ -187,7 +187,7 @@ namespace SNMPDiscovery.Model.Services
                 GetPortMACAddress(Device, OIDSettings, TopologyInfo); //Fill with MAC address of each port
                 GetPortIDInfo(Device, OIDSettings, TopologyInfo); //Fill with port IDs inventory
                 GetVLANInfo(Device, OIDSettings, TopologyInfo); //Get VLANInventory and mappings
-                ComputeDirectNeighbours(TopologyInfo);
+                ComputeDirectNeighbours(TopologyInfo); //Get first address seen by Access Ports
 
                 int i = 4;
             }
@@ -217,7 +217,7 @@ namespace SNMPDiscovery.Model.Services
             MappingHandlers.Add(null);
 
             //Collect data mapping with handlers
-            ModelHelper.OIDEntryProcessor(Device, TopologyInfo, SelectedSetting, MappingHandlers);
+            StrategyHelper.OIDEntryProcessor(Device, TopologyInfo, SelectedSetting, MappingHandlers);
         }
 
         private void GetLearnedMACAddresses(ISNMPDeviceDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, ITopologyInfoDTO TopologyInfo)
@@ -236,7 +236,7 @@ namespace SNMPDiscovery.Model.Services
             TopologyInfo.PortLearnedAddresses = new Dictionary<string, IDictionary<string, string>>();
 
             //Collect data mapping with handlers
-            ModelHelper.OIDEntryProcessor(Device, TopologyInfo, SelectedSetting, MappingHandlers);
+            StrategyHelper.OIDEntryProcessor(Device, TopologyInfo, SelectedSetting, MappingHandlers);
         }
 
         private void GetPortMACAddress(ISNMPDeviceDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, ITopologyInfoDTO TopologyInfo)
@@ -255,7 +255,7 @@ namespace SNMPDiscovery.Model.Services
             TopologyInfo.PortMACAddress = new Dictionary<string, string>();
 
             //Collect data mapping with handlers
-            ModelHelper.OIDEntryProcessor(Device, TopologyInfo, SelectedSetting, MappingHandlers);
+            StrategyHelper.OIDEntryProcessor(Device, TopologyInfo, SelectedSetting, MappingHandlers);
         }
 
         private void GetPortIDInfo(ISNMPDeviceDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, ITopologyInfoDTO TopologyInfo)
@@ -273,7 +273,7 @@ namespace SNMPDiscovery.Model.Services
             MappingHandlers.Add((x, y, z) => { ((ITopologyInfoDTO)z).PortInventory.Add(x[0], y); });
 
             TopologyInfo.PortInventory = new Dictionary<string, string>();
-            ModelHelper.OIDEntryProcessor(Device, TopologyInfo, SelectedSetting, MappingHandlers);
+            StrategyHelper.OIDEntryProcessor(Device, TopologyInfo, SelectedSetting, MappingHandlers);
 
             #endregion
 
@@ -307,25 +307,28 @@ namespace SNMPDiscovery.Model.Services
             PortHierarchyResults = new Dictionary<string, IList<string>>();
             SelectedSetting = OIDSettings["PortHierarchy"];
 
-            ModelHelper.OIDEntryProcessor(Device, PortHierarchyResults, SelectedSetting, MappingHandlers);
+            StrategyHelper.OIDEntryProcessor(Device, PortHierarchyResults, SelectedSetting, MappingHandlers);
 
-            //Virtual ports
-            foreach (string vlanport in PortHierarchyResults["0"])
+            if (PortHierarchyResults.Count != 0)
             {
-                TopologyInfo.PortSettings[vlanport].First = EnumPhysPortType.VirtualPort;
-            }
-
-            //Trunk ports (any protocol)
-            IEnumerable<KeyValuePair<string, IList<string>>> trunkports = PortHierarchyResults.Where(x => x.Value.Count > 1 && x.Key != "0").Where(x => !PortHierarchyResults["0"].Contains(x.Key));
-
-            foreach (KeyValuePair<string, IList<string>> trunkentry in trunkports)
-            {
-                TopologyInfo.PortSettings[trunkentry.Key].First = EnumPhysPortType.Trunk;
-
-                foreach (string aggregateentry in trunkentry.Value)
+                //Virtual ports
+                foreach (string vlanport in PortHierarchyResults["0"])
                 {
-                    TopologyInfo.PortSettings[aggregateentry].First = EnumPhysPortType.Aggregate;
-                    TopologyInfo.PortSettings[aggregateentry].Second = trunkentry.Key;
+                    TopologyInfo.PortSettings[vlanport].First = EnumPhysPortType.VirtualPort;
+                }
+
+                //Trunk ports (any protocol)
+                IEnumerable<KeyValuePair<string, IList<string>>> trunkports = PortHierarchyResults.Where(x => x.Value.Count > 1 && x.Key != "0").Where(x => !PortHierarchyResults["0"].Contains(x.Key));
+
+                foreach (KeyValuePair<string, IList<string>> trunkentry in trunkports)
+                {
+                    TopologyInfo.PortSettings[trunkentry.Key].First = EnumPhysPortType.Trunk;
+
+                    foreach (string aggregateentry in trunkentry.Value)
+                    {
+                        TopologyInfo.PortSettings[aggregateentry].First = EnumPhysPortType.Aggregate;
+                        TopologyInfo.PortSettings[aggregateentry].Second = trunkentry.Key;
+                    }
                 }
             }
 
@@ -335,18 +338,21 @@ namespace SNMPDiscovery.Model.Services
             LACPResults = new Dictionary<string, IList<string>>();
             SelectedSetting = OIDSettings["LACPSetting"];
 
-            ModelHelper.OIDEntryProcessor(Device, LACPResults, SelectedSetting, MappingHandlers);
+            StrategyHelper.OIDEntryProcessor(Device, LACPResults, SelectedSetting, MappingHandlers);
 
-            foreach (KeyValuePair<string, IList<string>> lacpentry in LACPResults)
+            if(LACPResults.Count != 0)
             {
-                TopologyInfo.PortSettings[lacpentry.Key].First = EnumPhysPortType.LACP;
-
-                foreach (string groupedport in lacpentry.Value)
+                foreach (KeyValuePair<string, IList<string>> lacpentry in LACPResults)
                 {
-                    if (TopologyInfo.PortSettings.ContainsKey(groupedport))
+                    TopologyInfo.PortSettings[lacpentry.Key].First = EnumPhysPortType.LACP;
+
+                    foreach (string groupedport in lacpentry.Value)
                     {
-                        TopologyInfo.PortSettings[groupedport].First = EnumPhysPortType.Aggregate;
-                        TopologyInfo.PortSettings[groupedport].Second = lacpentry.Key;
+                        if (TopologyInfo.PortSettings.ContainsKey(groupedport))
+                        {
+                            TopologyInfo.PortSettings[groupedport].First = EnumPhysPortType.Aggregate;
+                            TopologyInfo.PortSettings[groupedport].Second = lacpentry.Key;
+                        }
                     }
                 }
             }
@@ -371,7 +377,7 @@ namespace SNMPDiscovery.Model.Services
             MappingHandlers.Add((x, y, z) => { ((IDictionary<string,string>)z).Add(x[0], y); });
             TopologyInfo.VLANInventory = new Dictionary<string, string>();
 
-            ModelHelper.OIDEntryProcessor(Device, TopologyInfo.VLANInventory, SelectedSetting, MappingHandlers);
+            StrategyHelper.OIDEntryProcessor(Device, TopologyInfo.VLANInventory, SelectedSetting, MappingHandlers);
 
             #endregion
 
@@ -384,34 +390,27 @@ namespace SNMPDiscovery.Model.Services
             VLANMappingResult = new Dictionary<string, string>();
             SelectedSetting = OIDSettings["VLANMapping"];
 
-            ModelHelper.OIDEntryProcessor(Device, VLANMappingResult, SelectedSetting, MappingHandlers);
-
-            #endregion
-
-            #region Data Parsing
+            StrategyHelper.OIDEntryProcessor(Device, VLANMappingResult, SelectedSetting, MappingHandlers);
 
             TopologyInfo.PortVLANMapping = new Dictionary<string, List<string>>();
 
-            foreach (KeyValuePair<string,string> VLANMaskInfo in VLANMappingResult)
+            if(VLANMappingResult.Count != 0)
             {
-                string bitmask = ModelHelper.GetStringBitMask(VLANMaskInfo.Value);
-
-                for (int i = 1; i <= bitmask.Length; i++)
+                foreach (KeyValuePair<string, string> VLANMaskInfo in VLANMappingResult)
                 {
-                    if (TopologyInfo.PortInventory.ContainsKey(i.ToString()))
+                    string[] positions = StrategyHelper.GetFlagArrayPositions(VLANMaskInfo.Value);
+
+                    for (int i = 0; i < positions.Length; i++)
                     {
-                        if (TopologyInfo.PortVLANMapping.ContainsKey(i.ToString()))
+                        if (TopologyInfo.PortInventory.ContainsKey(positions[i]))
                         {
-                            if(bitmask[i-1] == '1')
+                            if (TopologyInfo.PortVLANMapping.ContainsKey(positions[i]))
                             {
-                                TopologyInfo.PortVLANMapping[i.ToString()].Add(VLANMaskInfo.Key);
+                                TopologyInfo.PortVLANMapping[positions[i]].Add(VLANMaskInfo.Key);
                             }
-                        }
-                        else
-                        {
-                            if(bitmask[i-1] == '1')
+                            else
                             {
-                                TopologyInfo.PortVLANMapping.Add(i.ToString(), new List<string>() { VLANMaskInfo.Key });
+                                TopologyInfo.PortVLANMapping.Add(positions[i], new List<string>() { VLANMaskInfo.Key });
                             }
                         }
                     }
@@ -419,16 +418,27 @@ namespace SNMPDiscovery.Model.Services
             }
 
             #endregion
+
+
+
+
         }
 
         private void ComputeDirectNeighbours(ITopologyInfoDTO TopologyInfo)
         {
+            TopologyInfo.DeviceDirectNeighbours = new Dictionary<string, CustomPair<string, string>>();
+
             //Search access type
-            //IDictionary<string, CustomPair<EnumPhysPortType, string>> PortSettings;
-            //Get learned MAC and IP
-            //IDictionary<string, IDictionary<string, string>> PortLearnedAddresses;
-            //Insert into dictionary
-            //IDictionary<string, CustomPair<string, string>> DeviceDirectNeighbours;
+            IEnumerable<string> AccessPorts = TopologyInfo.PortSettings.Where(x => x.Value.First == EnumPhysPortType.Access).Select(x => x.Key);
+
+            foreach (string port in AccessPorts)
+            {
+                if (TopologyInfo.PortLearnedAddresses.ContainsKey(port))
+                {
+                    KeyValuePair<string, string> LearnedAddress = TopologyInfo.PortLearnedAddresses[port].First();
+                    TopologyInfo.DeviceDirectNeighbours.Add(port, new CustomPair<string, string>(LearnedAddress.Key, LearnedAddress.Value));
+                }
+            }
         }
 
         #endregion
@@ -459,15 +469,13 @@ namespace SNMPDiscovery.Model.Services
             IDictionary<string, IList<string>> LACPMapping = StrategyDTOobject as IDictionary<string, IList<string>>;
             LACPMapping.Add(IndexValues[0], new List<string>());
 
-            string bitmask = ModelHelper.GetStringBitMask(Value);
+            string[] positions = StrategyHelper.GetFlagArrayPositions(Value);
 
-            for (int i = 0; i < bitmask.Length; i++)
+            for (int i = 0; i < positions.Length; i++)
             {
-                if (bitmask[i] == '1')
-                {
-                    LACPMapping[IndexValues[0]].Add((i + 1).ToString());
-                }
+                LACPMapping[IndexValues[0]].Add(positions[i]);
             }
+
         }
 
         private void PortHierarchyMapper(IList<string> IndexValues, string Value, object StrategyDTOobject)

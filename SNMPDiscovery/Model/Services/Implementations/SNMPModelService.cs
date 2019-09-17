@@ -25,32 +25,32 @@ namespace SNMPDiscovery.Model.Services
             _modelObservers = new List<IObserver<ISNMPModelDTO>>();
             _model = new SNMPModel();
 
-            //Mock for redirecting console to file
-            FileStream ostrm;
-            StreamWriter writer;
-            TextWriter oldOut = Console.Out;
-            try
-            {
-                ostrm = new FileStream("./Redirect.txt", FileMode.Create, FileAccess.Write);
-                writer = new StreamWriter(ostrm);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Cannot open Redirect.txt for writing");
-                Console.WriteLine(e.Message);
-                return;
-            }
-            Console.SetOut(writer);
+            ////Mock for redirecting console to file
+            //FileStream ostrm;
+            //StreamWriter writer;
+            //TextWriter oldOut = Console.Out;
+            //try
+            //{
+            //    ostrm = new FileStream("./Redirect.txt", FileMode.Create, FileAccess.Write);
+            //    writer = new StreamWriter(ostrm);
+            //}
+            //catch (Exception e)
+            //{
+            //    Console.WriteLine("Cannot open Redirect.txt for writing");
+            //    Console.WriteLine(e.Message);
+            //    return;
+            //}
+            //Console.SetOut(writer);
 
             //Mock methods for development
             MockGetSettings();
             StartDiscovery();
             RunProcesses();
 
-            //Mock for undoing things
-            Console.SetOut(oldOut);
-            writer.Close();
-            ostrm.Close();
+            ////Mock for undoing things
+            //Console.SetOut(oldOut);
+            //writer.Close();
+            //ostrm.Close();
         }
 
         #region Observable implementation
@@ -229,7 +229,8 @@ namespace SNMPDiscovery.Model.Services
 
         public void MockGetSettings()
         {
-            ISNMPSettingDTO MockSNMPSetting = _model.BuildSNMPSetting("ColecciónSwitches", "192.168.1.42", "192.168.1.42", "public");
+            //ISNMPSettingDTO MockSNMPSetting = _model.BuildSNMPSetting("ColecciónSwitches", "192.168.1.42", "192.168.1.42", "public");
+            ISNMPSettingDTO MockSNMPSetting = _model.BuildSNMPSetting("ColecciónSwitches", "192.168.1.42", "192.168.1.51", "public");
             ISNMPProcessStrategy MockProcessProfileSetting = MockSNMPSetting.BuildProcess(EnumProcessingType.TopologyDiscovery);
         }
 
