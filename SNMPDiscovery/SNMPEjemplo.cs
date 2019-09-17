@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using SnmpSharpNet;
 using SNMPDiscovery.Model.Services;
 using SNMPDiscovery.Controller;
+using SNMPDiscovery.View;
+using SNMPDiscovery.Model.DTO;
 
 namespace SNMPDiscovery
 {
@@ -14,8 +16,9 @@ namespace SNMPDiscovery
     {
         public static void Main()
         {
-            ISNMPModelService model = new SNMPModelService();
-            //ISNMPDiscoveryController controller = new SNMPDiscoveryController(model);
+            ISNMPModelDTO model = new SNMPModel();
+            ISNMPDiscoveryController controller = new SNMPDiscoveryController(model);
+            ISNMPView view = new SNMPDiscoveryView(model, controller);
 
             //TestConcepto();
             Console.WriteLine("Fin de ejecución. Pulse una tecla");

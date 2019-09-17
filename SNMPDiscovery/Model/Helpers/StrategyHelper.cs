@@ -57,24 +57,23 @@ namespace SNMPDiscovery.Model.Helpers
 
         public static void OIDEntryProcessor(ISNMPDeviceDTO Device, object StrategyDTOobject, IOIDSettingDTO SelectedSetting, IList<Action<IList<string>, string, object>> MappingHandler)
         {
-            int numRootEntries = SelectedSetting.IndexedOIDSettings.Count;
-            List<string> RootEntries = SelectedSetting.IndexedOIDSettings.Keys.ToList();
+            string[] RootEntries = SelectedSetting.IndexedOIDSettings.Keys.ToArray();
 
             //Loop of each subset 
-            for (int i = 0; i < numRootEntries; i++)
+            for (int i = 0; i < RootEntries.Length; i++)
             {
                 //1) select OID data subset
-                IList<ISNMPRawEntryDTO> SelectedDeviceOID = OIDDataSelector(Device, RootEntries[i], i + 1 == numRootEntries ? RootEntries[i] : RootEntries[i + 1]);
+                IList<ISNMPRawEntryDTO> SelectedDeviceOID = OIDDataSelector(Device, RootEntries[i], i + 1 == RootEntries.Length ? RootEntries[i] : RootEntries[i + 1]);
 
                 if(SelectedDeviceOID != null)
                 {
                     //2) apply specific handle on entryparser
-                    OIDEntryParser(SelectedDeviceOID, SelectedSetting.IndexedOIDSettings[RootEntries[i]], StrategyDTOobject, MappingHandler[i]);
+                    OIDEntryParser(SelectedDeviceOID, new CustomPair<string, IList<EnumSNMPOIDIndexType>>( RootEntries[i], SelectedSetting.IndexedOIDSettings[RootEntries[i]]), StrategyDTOobject, MappingHandler[i]);
                 }
             }
         }
 
-        public static void OIDEntryParser(IList<ISNMPRawEntryDTO> SelectedDeviceOID, IIndexedOIDSettingDTO IndexOIDSetting, object StrategyDTOobject, Action<IList<string>, string, object> MappingHandler)
+        public static void OIDEntryParser(IList<ISNMPRawEntryDTO> SelectedDeviceOID, CustomPair<string, IList<EnumSNMPOIDIndexType>> IndexOIDSetting, object StrategyDTOobject, Action<IList<string>, string, object> MappingHandler)
         {
             IList<string> IndexData = new List<string>();
 
@@ -93,11 +92,11 @@ namespace SNMPDiscovery.Model.Helpers
             }
         }
 
-        public static void OIDIndexEntryParser(IIndexedOIDSettingDTO IndexOIDSetting, ISNMPRawEntryDTO RawEntry, IList<string> IndexData)
+        public static void OIDIndexEntryParser(CustomPair<string, IList<EnumSNMPOIDIndexType>> IndexOIDSetting, ISNMPRawEntryDTO RawEntry, IList<string> IndexData)
         {
-            List<int> indexValues = RawEntry.OID.Replace(IndexOIDSetting.RootOID + ".", "").Split('.').Select(x => int.Parse(x)).ToList();
+            List<int> indexValues = RawEntry.OID.Replace(IndexOIDSetting.First + ".", "").Split('.').Select(x => int.Parse(x)).ToList();
 
-            foreach (EnumSNMPOIDIndexType IndexType in IndexOIDSetting.IndexDataDefinitions)
+            foreach (EnumSNMPOIDIndexType IndexType in IndexOIDSetting.Second)
             {
                 switch (IndexType)
                 {

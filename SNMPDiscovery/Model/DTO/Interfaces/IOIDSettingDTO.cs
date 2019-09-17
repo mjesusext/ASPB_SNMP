@@ -12,8 +12,8 @@ namespace SNMPDiscovery.Model.DTO
         string InitialOID { get; set; }
         string FinalOID { get; set; }
         bool InclusiveInterval { get; set; }
-        IDictionary<string, IIndexedOIDSettingDTO> IndexedOIDSettings { get; set; }
+        IDictionary<string, IList<EnumSNMPOIDIndexType>> IndexedOIDSettings { get; set; }
 
-        IIndexedOIDSettingDTO BuildIndexedOIDSetting(string rootOID, IList<EnumSNMPOIDIndexType> indexDataDefs);
+        IDictionary<string, IList<EnumSNMPOIDIndexType>> BuildIndexedOIDSetting(string rootOID, IList<EnumSNMPOIDIndexType> indexDataDefs);
     }
 }

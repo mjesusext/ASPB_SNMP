@@ -12,14 +12,12 @@ namespace SNMPDiscovery.View
     public class SNMPDiscoveryView : ISNMPView
     {
         private ISNMPDiscoveryController _controller { get; set; }
-        private ISNMPModelService _modelService { get; set; }
         private IDisposable _subscription { get; set; }
 
-        public SNMPDiscoveryView(ISNMPModelService ModelService, ISNMPDiscoveryController Controller)
+        public SNMPDiscoveryView(ISNMPModelDTO Model, ISNMPDiscoveryController Controller)
         {
-            this._modelService = ModelService;
             this._controller = Controller;
-            _subscription = _modelService.Subscribe(this);
+            //_subscription = Model.Subscribe(this);
 
             Initialize();
         }

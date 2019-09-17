@@ -12,11 +12,11 @@ namespace SNMPDiscovery.Controller
     public class SNMPDiscoveryController : ISNMPDiscoveryController
     {
         private ISNMPView _view { get; set; }
-        private ISNMPModelService _modelService { get; set; }
+        private ISNMPModelDTO _model { get; set; }
 
-        public SNMPDiscoveryController(ISNMPModelService ModelService)
+        public SNMPDiscoveryController(ISNMPModelDTO ModelService)
         {
-            this._modelService = ModelService;
+            this._model = ModelService;
             this._view = new SNMPDiscoveryView(ModelService, this);
         }
 
