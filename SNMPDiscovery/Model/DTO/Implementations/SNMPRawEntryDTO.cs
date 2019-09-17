@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SNMPDiscovery.Model.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,10 +9,28 @@ namespace SNMPDiscovery.Model.DTO
 {
     public class SNMPRawEntryDTO : ISNMPRawEntryDTO
     {
+        private IList<IObserver<ISNMPRawEntryDTO>> _snmpRawEntryObservers;
+
         public string OID { get; set; }
         public string RootOID { get; set; }
         public string ValueData { get; set; }
         public EnumSNMPOIDType DataType { get; set; }
+
+        #region Interface Implementations
+
+        public IDisposable Subscribe(IObserver<ISNMPRawEntryDTO> observer)
+        {
+            //Check whether observer is already registered. If not, add it
+            if (!_snmpRawEntryObservers.Contains(observer))
+            {
+                _snmpRawEntryObservers.Add(observer);
+            }
+            return new SNMPObservableUnsubscriber<ISNMPRawEntryDTO>(_snmpRawEntryObservers, observer);
+        }
+
+        #endregion
+
+        #region Constructors
 
         public SNMPRawEntryDTO()
         {
@@ -28,5 +47,8 @@ namespace SNMPDiscovery.Model.DTO
             ValueData = data;
             DataType = datatype;
         }
+
+        #endregion
+
     }
 }

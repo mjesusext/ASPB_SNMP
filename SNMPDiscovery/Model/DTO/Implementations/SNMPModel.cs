@@ -51,22 +51,6 @@ namespace SNMPDiscovery.Model.DTO
             //ostrm.Close();
         }
 
-        #region Observable implementation (PENDING)
-
-        //public IDisposable Subscribe(IObserver<ISNMPModelDTO> observer)
-        //{
-        //    // Check whether observer is already registered. If not, add it
-        //    if (!_modelObservers.Contains(observer))
-        //    {
-        //        _modelObservers.Add(observer);
-        //        // Provide observer with existing data. --> Iterate + OnNext()
-        //
-        //    }
-        //    return new SNMPObservableUnsubscriber<ISNMPModelDTO>(_modelObservers, observer);
-        //}
-
-        #endregion
-
         #region Commands
 
         public void StartDiscovery()

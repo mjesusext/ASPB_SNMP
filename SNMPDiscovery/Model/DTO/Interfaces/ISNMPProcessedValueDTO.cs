@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SNMPDiscovery.Model.DTO
 {
-    public interface ISNMPProcessedValueDTO
+    public interface ISNMPProcessedValueDTO : IObservable<ISNMPProcessedValueDTO>
     {
         Type DataType { get; set; }
         object Data { get; set; }

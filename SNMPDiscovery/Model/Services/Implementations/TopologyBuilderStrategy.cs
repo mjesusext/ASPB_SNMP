@@ -10,12 +10,23 @@ namespace SNMPDiscovery.Model.Services
 {
     public class TopologyBuilderStrategy : ISNMPProcessStrategy
     {
-        public const int LearnedMACThreshold = 3;
+        private IList<IObserver<ISNMPProcessStrategy>> _strategyObservers;
+        private const int LearnedMACThreshold = 3;
 
-        public string ProcessID { get; } = "TopologyBuilder";
+        public string ProcessID { get; }
         public string RegardingSetting { get; set; }
 
         #region Interfaces implementations
+
+        public IDisposable Subscribe(IObserver<ISNMPProcessStrategy> observer)
+        {
+            //Check whether observer is already registered. If not, add it
+            if (!_strategyObservers.Contains(observer))
+            {
+                _strategyObservers.Add(observer);
+            }
+            return new SNMPObservableUnsubscriber<ISNMPProcessStrategy>(_strategyObservers, observer);
+        }
 
         public IDictionary<string, IOIDSettingDTO> BuildOIDSetting(string regardingSetting, IDictionary<string, IOIDSettingDTO> OIDSettings)
         {
@@ -496,6 +507,16 @@ namespace SNMPDiscovery.Model.Services
             
             HierarchyMapping[IndexValues[0]].Add(IndexValues[1]);
 
+        }
+
+        #endregion
+
+        #region Constructor
+
+        public TopologyBuilderStrategy()
+        {
+            ProcessID = "TopologyBuilder";
+            _strategyObservers = new List<IObserver<ISNMPProcessStrategy>>();
         }
 
         #endregion

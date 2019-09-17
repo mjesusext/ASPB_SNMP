@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SNMPDiscovery.Model.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -9,23 +10,13 @@ namespace SNMPDiscovery.Model.DTO
 {
     public class SNMPDeviceDTO : ISNMPDeviceDTO
     {
+        private IList<IObserver<ISNMPDeviceDTO>> _snmpDeviceObservers;
+
         public IPAddress TargetIP { get; set; }
         public IDictionary<string, ISNMPRawEntryDTO> SNMPRawDataEntries { get; set; }
         public IDictionary<string, ISNMPProcessedValueDTO> SNMPProcessedData { get; set; }
 
-        public SNMPDeviceDTO()
-        {
-        }
-
-        public SNMPDeviceDTO(string targetIP)
-        {
-            TargetIP = IPAddress.Parse(targetIP);
-        }
-
-        public SNMPDeviceDTO(int targetIP)
-        {
-            TargetIP = new IPAddress(targetIP);
-        }
+        #region Interface Implementations
 
         public ISNMPRawEntryDTO BuildSNMPRawEntry(string OID)
         {
@@ -55,6 +46,20 @@ namespace SNMPDiscovery.Model.DTO
             return RawEntry;
         }
 
+        public IDisposable Subscribe(IObserver<ISNMPDeviceDTO> observer)
+        {
+            //Check whether observer is already registered. If not, add it
+            if (!_snmpDeviceObservers.Contains(observer))
+            {
+                _snmpDeviceObservers.Add(observer);
+            }
+            return new SNMPObservableUnsubscriber<ISNMPDeviceDTO>(_snmpDeviceObservers, observer);
+        }
+
+        #endregion
+
+        #region Helpful methods
+
         public void AttachSNMPProcessedValue(Type DataType, object Data)
         {
             //Lazy initialization
@@ -66,5 +71,27 @@ namespace SNMPDiscovery.Model.DTO
             ISNMPProcessedValueDTO ProcessedValue = new SNMPProcessedValueDTO(DataType, Data);
             SNMPProcessedData.Add(DataType.Name, ProcessedValue);
         }
+
+        #endregion
+
+        #region Constructors
+
+        public SNMPDeviceDTO()
+        {
+        }
+
+        public SNMPDeviceDTO(string targetIP)
+        {
+            TargetIP = IPAddress.Parse(targetIP);
+        }
+
+        public SNMPDeviceDTO(int targetIP)
+        {
+            TargetIP = new IPAddress(targetIP);
+        }
+
+        #endregion
+
+
     }
 }

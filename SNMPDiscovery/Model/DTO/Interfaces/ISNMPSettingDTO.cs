@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SNMPDiscovery.Model.DTO
 {
-    public interface ISNMPSettingDTO
+    public interface ISNMPSettingDTO : IObservable<ISNMPSettingDTO>
     {
         string ID { get; set;}
         IPAddress InitialIP { get; set; }

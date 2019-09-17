@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SNMPDiscovery.Model.DTO
 {
-    public interface ISNMPRawEntryDTO
+    public interface ISNMPRawEntryDTO : IObservable<ISNMPRawEntryDTO>
     {
         string OID { get; set; }
         string ValueData { get; set; }

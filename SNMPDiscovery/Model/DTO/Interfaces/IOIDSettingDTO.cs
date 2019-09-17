@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SNMPDiscovery.Model.DTO
 {
-    public interface IOIDSettingDTO
+    public interface IOIDSettingDTO : IObservable<IOIDSettingDTO>
     {
         string ID { get; set; }
         string InitialOID { get; set; }
