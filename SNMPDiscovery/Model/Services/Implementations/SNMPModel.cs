@@ -8,9 +8,8 @@ using SNMPDiscovery.Model.DAO;
 using System.IO;
 using System.Net;
 using SnmpSharpNet;
-using SNMPDiscovery.Model.Services;
 
-namespace SNMPDiscovery.Model.DTO
+namespace SNMPDiscovery.Model.Services
 {
     public class SNMPModel : ISNMPModelDTO
     {

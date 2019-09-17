@@ -12,18 +12,27 @@ namespace SNMPDiscovery.View
     public class SNMPDiscoveryView : ISNMPView
     {
         private ISNMPDiscoveryController _controller { get; set; }
-        private IDisposable _subscription { get; set; }
+        private IList<IDisposable> _observeableSubscriptions { get; set; }
 
         public SNMPDiscoveryView(ISNMPModelDTO Model, ISNMPDiscoveryController Controller)
         {
-            this._controller = Controller;
-            //_subscription = Model.Subscribe(this);
+            _observeableSubscriptions = new List<IDisposable>();
+            _controller = Controller;
+            
+            //_observeableSubscriptions.Add()
+            //    IObserver<ISNMPDeviceDTO>, 
+            //    IObserver<ISNMPSettingDTO>,
+            //    IObserver<ISNMPProcessStrategy>,
+            //    IObserver<IOIDSettingDTO>,
+            //    IObserver<ISNMPRawEntryDTO>,
+            //    IObserver<ISNMPProcessedValueDTO>
 
             Initialize();
         }
 
-        #region Observer Implementation
-        public void OnCompleted()
+        #region Observable Implementation
+
+        public void OnNext(ISNMPDeviceDTO value)
         {
             throw new NotImplementedException();
         }
@@ -33,7 +42,32 @@ namespace SNMPDiscovery.View
             throw new NotImplementedException();
         }
 
-        public void OnNext(ISNMPModelDTO value)
+        public void OnCompleted()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnNext(ISNMPSettingDTO value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnNext(ISNMPProcessStrategy value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnNext(IOIDSettingDTO value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnNext(ISNMPRawEntryDTO value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnNext(ISNMPProcessedValueDTO value)
         {
             throw new NotImplementedException();
         }
@@ -41,6 +75,7 @@ namespace SNMPDiscovery.View
         #endregion
 
         #region View Implementation
+
         public void Initialize()
         {
             Console.WriteLine("Inicializando herramienta de documentación de red.");
@@ -61,6 +96,7 @@ namespace SNMPDiscovery.View
         {
             throw new NotImplementedException();
         }
+
         #endregion
 
     }

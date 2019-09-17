@@ -71,7 +71,7 @@
     <Compile Include="Model\DTO\Enums\EnumSNMPOIDType.cs" />
     <Compile Include="Model\DTO\Implementations\OIDSettingDTO.cs" />
     <Compile Include="Model\DTO\Implementations\SNMPDeviceDTO.cs" />
-    <Compile Include="Model\DTO\Implementations\SNMPModel.cs" />
+    <Compile Include="Model\Services\Implementations\SNMPModel.cs" />
     <Compile Include="Model\DTO\Implementations\SNMPProcessedValueDTO.cs" />
     <Compile Include="Model\DTO\Enums\EnumProcessingType.cs" />
     <Compile Include="Model\DTO\Interfaces\IDiscoveredBasicInfo.cs" />
@@ -83,7 +83,7 @@
     <Compile Include="Model\DTO\Implementations\TopologyInfoDTO.cs" />
     <Compile Include="Model\DTO\Interfaces\IOIDSettingDTO.cs" />
     <Compile Include="Model\DTO\Interfaces\ISNMPDeviceDTO.cs" />
-    <Compile Include="Model\DTO\Interfaces\ISNMPModelDTO.cs" />
+    <Compile Include="Model\Services\Interfaces\ISNMPModelDTO.cs" />
     <Compile Include="Model\DTO\Interfaces\ISNMPRawEntryDTO.cs" />
     <Compile Include="Model\DTO\Interfaces\ISNMPSettingDTO.cs" />
     <Compile Include="Model\DTO\Interfaces\ITopologyInfoDTO.cs" />
