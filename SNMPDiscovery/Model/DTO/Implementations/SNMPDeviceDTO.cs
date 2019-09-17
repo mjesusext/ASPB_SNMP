@@ -78,15 +78,18 @@ namespace SNMPDiscovery.Model.DTO
 
         public SNMPDeviceDTO()
         {
+            _snmpDeviceObservers = new List<IObserver<ISNMPDeviceDTO>>();
         }
 
         public SNMPDeviceDTO(string targetIP)
         {
+            _snmpDeviceObservers = new List<IObserver<ISNMPDeviceDTO>>();
             TargetIP = IPAddress.Parse(targetIP);
         }
 
         public SNMPDeviceDTO(int targetIP)
         {
+            _snmpDeviceObservers = new List<IObserver<ISNMPDeviceDTO>>();
             TargetIP = new IPAddress(targetIP);
         }
 

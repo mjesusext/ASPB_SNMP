@@ -34,15 +34,18 @@ namespace SNMPDiscovery.Model.DTO
 
         public SNMPRawEntryDTO()
         {
+            _snmpRawEntryObservers = new List<IObserver<ISNMPRawEntryDTO>>();
         }
 
         public SNMPRawEntryDTO(string oid)
         {
+            _snmpRawEntryObservers = new List<IObserver<ISNMPRawEntryDTO>>();
             OID = oid;
         }
 
         public SNMPRawEntryDTO(string oid, string data, EnumSNMPOIDType datatype)
         {
+            _snmpRawEntryObservers = new List<IObserver<ISNMPRawEntryDTO>>();
             OID = oid;
             ValueData = data;
             DataType = datatype;

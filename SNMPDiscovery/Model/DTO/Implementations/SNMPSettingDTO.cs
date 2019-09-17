@@ -74,10 +74,13 @@ namespace SNMPDiscovery.Model.DTO
 
         public SNMPSettingDTO()
         {
+            _snmpSettingObservers = new List<IObserver<ISNMPSettingDTO>>();
         }
 
         public SNMPSettingDTO(string id, string initialIP, string finalIP, string SNMPUser)
         {
+            _snmpSettingObservers = new List<IObserver<ISNMPSettingDTO>>();
+
             ID = id;
             InitialIP = IPAddress.Parse(initialIP);
             FinalIP = finalIP == null ? InitialIP : IPAddress.Parse(finalIP);

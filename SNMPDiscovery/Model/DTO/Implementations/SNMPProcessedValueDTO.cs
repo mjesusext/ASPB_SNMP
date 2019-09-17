@@ -32,6 +32,7 @@ namespace SNMPDiscovery.Model.DTO
 
         public SNMPProcessedValueDTO(Type dataType, object data)
         {
+            _snmpProcessedValueObservers = new List<IObserver<ISNMPProcessedValueDTO>>();
             DataType = dataType;
             Data = data;
         }

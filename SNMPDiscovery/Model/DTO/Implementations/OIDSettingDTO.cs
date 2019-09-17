@@ -48,10 +48,13 @@ namespace SNMPDiscovery.Model.DTO
 
         public OIDSettingDTO()
         {
+            _oidsettingObservers = new List<IObserver<IOIDSettingDTO>>();
         }
 
         public OIDSettingDTO(string id, string initialOID, string finalOID, bool inclusiveInterval, IDictionary<string, IList<EnumSNMPOIDIndexType>> indexedOIDSettings = null)
         {
+            _oidsettingObservers = new List<IObserver<IOIDSettingDTO>>();
+
             ID = id;
             InitialOID = initialOID;
             FinalOID = finalOID;
