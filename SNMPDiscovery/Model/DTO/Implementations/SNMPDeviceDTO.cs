@@ -82,7 +82,7 @@ namespace SNMPDiscovery.Model.DTO
             TargetIP = IPAddress.Parse(targetIP);
             OnChange += ChangeTrackerHandler;
 
-            OnChange?.Invoke(GetType(), this);
+            OnChange?.Invoke(typeof(ISNMPDeviceDTO), this);
         }
 
         public SNMPDeviceDTO(int targetIP, Action<Type, object> ChangeTrackerHandler)
@@ -90,7 +90,7 @@ namespace SNMPDiscovery.Model.DTO
             TargetIP = new IPAddress(targetIP);
             OnChange += ChangeTrackerHandler;
 
-            OnChange?.Invoke(GetType(), this);
+            OnChange?.Invoke(typeof(ISNMPDeviceDTO), this);
         }
 
         #endregion

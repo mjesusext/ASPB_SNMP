@@ -506,7 +506,7 @@ namespace SNMPDiscovery.Model.Services
             ProcessID = "TopologyBuilder";
             OnChange += ChangeTrackerHandler;
 
-            OnChange?.Invoke(GetType(), this);
+            OnChange?.Invoke(typeof(ISNMPProcessStrategy), this);
         }
 
         #endregion

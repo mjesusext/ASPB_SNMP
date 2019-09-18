@@ -81,7 +81,7 @@ namespace SNMPDiscovery.Model.Services
                 SNMPSettings = new Dictionary<string, ISNMPSettingDTO>();
             }
 
-            ISNMPSettingDTO setting = new SNMPSettingDTO(ID, initialIP, finalIP, SNMPUser);
+            ISNMPSettingDTO setting = new SNMPSettingDTO(ID, initialIP, finalIP, SNMPUser, ChangeTrackerHandler);
             SNMPSettings.Add(ID, setting);
 
             return setting;
@@ -279,6 +279,7 @@ namespace SNMPDiscovery.Model.Services
             //Console.SetOut(oldOut);
             //writer.Close();
             //ostrm.Close();
+            int i = 4;
         }
 
         #endregion

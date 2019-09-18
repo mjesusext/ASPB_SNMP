@@ -22,7 +22,7 @@ namespace SNMPDiscovery.Model.DTO
             OID = oid;
             OnChange += ChangeTrackerHandler;
 
-            OnChange?.Invoke(GetType(), this);
+            OnChange?.Invoke(typeof(ISNMPDeviceDTO), this);
         }
 
         public SNMPRawEntryDTO(string oid, string data, EnumSNMPOIDType datatype, Action<Type, object> ChangeTrackerHandler)
@@ -32,7 +32,7 @@ namespace SNMPDiscovery.Model.DTO
             DataType = datatype;
             OnChange += ChangeTrackerHandler;
 
-            OnChange?.Invoke(GetType(), this);
+            OnChange?.Invoke(typeof(ISNMPDeviceDTO), this);
         }
 
         #endregion

@@ -44,7 +44,7 @@ namespace SNMPDiscovery.Model.DTO
             IndexedOIDSettings = indexedOIDSettings ?? new Dictionary<string, IList<EnumSNMPOIDIndexType>>();
             OnChange += ChangeTrackerHandler;
 
-            OnChange?.Invoke(GetType(), this);
+            OnChange?.Invoke(typeof(IOIDSettingDTO), this);
         }
 
         #endregion

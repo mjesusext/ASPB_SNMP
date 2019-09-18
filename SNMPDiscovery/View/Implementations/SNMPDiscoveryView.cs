@@ -12,11 +12,10 @@ namespace SNMPDiscovery.View
     public class SNMPDiscoveryView : ISNMPView
     {
         private ISNMPDiscoveryController _controller { get; set; }
-        private IList<IDisposable> _observeableSubscriptions { get; set; }
+        private IDisposable _observeableSubscription { get; set; }
 
         public SNMPDiscoveryView(ISNMPModelDTO Model, ISNMPDiscoveryController Controller)
         {
-            _observeableSubscriptions = new List<IDisposable>();
             _controller = Controller;
             
             //_observeableSubscriptions.Add()

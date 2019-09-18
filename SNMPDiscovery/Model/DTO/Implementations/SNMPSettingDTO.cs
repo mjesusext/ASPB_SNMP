@@ -73,7 +73,7 @@ namespace SNMPDiscovery.Model.DTO
 
         #region Constructors
 
-        public SNMPSettingDTO(string id, string initialIP, string finalIP, string SNMPUser)
+        public SNMPSettingDTO(string id, string initialIP, string finalIP, string SNMPUser, Action<Type, object> ChangeTrackerHandler)
         {
             ID = id;
             InitialIP = IPAddress.Parse(initialIP);
@@ -83,8 +83,9 @@ namespace SNMPDiscovery.Model.DTO
             ChangedObjects = new Dictionary<Type, IList>();
             ChangedObjects.Add(typeof(ISNMPProcessStrategy), new ArrayList());
             ChangedObjects.Add(typeof(IOIDSettingDTO), new ArrayList());
+            OnChange += ChangeTrackerHandler;
 
-            OnChange?.Invoke(GetType(), ID);
+            OnChange?.Invoke(typeof(ISNMPSettingDTO), this);
         }
 
         #endregion
