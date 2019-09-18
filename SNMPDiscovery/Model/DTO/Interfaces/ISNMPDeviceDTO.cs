@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SNMPDiscovery.Model.DTO
 {
-    public interface ISNMPDeviceDTO : IObservable<ISNMPDeviceDTO>
+    public interface ISNMPDeviceDTO : ITrackeableObject, ITrackedObjectContainer
     {
         IPAddress TargetIP { get; set; }
         IDictionary<string, ISNMPRawEntryDTO> SNMPRawDataEntries { get; set; }

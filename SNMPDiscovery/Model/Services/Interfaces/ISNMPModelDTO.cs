@@ -7,7 +7,7 @@ using SNMPDiscovery.Model.DTO;
 
 namespace SNMPDiscovery.Model.Services
 {
-    public interface ISNMPModelDTO
+    public interface ISNMPModelDTO : IObservable<ISNMPModelDTO>, ITrackedObjectContainer
     {
         IDictionary<string, ISNMPSettingDTO> SNMPSettings { get; set; }
         IDictionary<string, ISNMPDeviceDTO> SNMPData { get; set; }

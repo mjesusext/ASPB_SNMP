@@ -10,11 +10,12 @@ namespace SNMPDiscovery.Model.DTO
 {
     public class SNMPDeviceDTO : ISNMPDeviceDTO
     {
-        private IList<IObserver<ISNMPDeviceDTO>> _snmpDeviceObservers;
-
         public IPAddress TargetIP { get; set; }
         public IDictionary<string, ISNMPRawEntryDTO> SNMPRawDataEntries { get; set; }
         public IDictionary<string, ISNMPProcessedValueDTO> SNMPProcessedData { get; set; }
+
+        public IDictionary<Type, List<string>> ChangedObjects { get; set; }
+        public event Action<string> OnChange;
 
         #region Interface Implementations
 
@@ -46,16 +47,6 @@ namespace SNMPDiscovery.Model.DTO
             return RawEntry;
         }
 
-        public IDisposable Subscribe(IObserver<ISNMPDeviceDTO> observer)
-        {
-            //Check whether observer is already registered. If not, add it
-            if (!_snmpDeviceObservers.Contains(observer))
-            {
-                _snmpDeviceObservers.Add(observer);
-            }
-            return new SNMPObservableUnsubscriber<ISNMPDeviceDTO>(_snmpDeviceObservers, observer);
-        }
-
         #endregion
 
         #region Helpful methods
@@ -78,23 +69,18 @@ namespace SNMPDiscovery.Model.DTO
 
         public SNMPDeviceDTO()
         {
-            _snmpDeviceObservers = new List<IObserver<ISNMPDeviceDTO>>();
         }
 
         public SNMPDeviceDTO(string targetIP)
         {
-            _snmpDeviceObservers = new List<IObserver<ISNMPDeviceDTO>>();
             TargetIP = IPAddress.Parse(targetIP);
         }
 
         public SNMPDeviceDTO(int targetIP)
         {
-            _snmpDeviceObservers = new List<IObserver<ISNMPDeviceDTO>>();
             TargetIP = new IPAddress(targetIP);
         }
 
         #endregion
-
-
     }
 }

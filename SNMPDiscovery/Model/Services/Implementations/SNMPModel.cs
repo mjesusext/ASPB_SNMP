@@ -16,39 +16,11 @@ namespace SNMPDiscovery.Model.Services
         private const int DefaultPort = 161;
         private const int DefaultTimeout = 1000;
         private const int DefaultRetries = 1;
+        private IList<IObserver<ISNMPModelDTO>> _snmpModelObservers;
 
         public IDictionary<string, ISNMPSettingDTO> SNMPSettings { get; set; }
         public IDictionary<string, ISNMPDeviceDTO> SNMPData { get; set; }
-
-        public SNMPModel()
-        {
-            ////Mock for redirecting console to file
-            //FileStream ostrm;
-            //StreamWriter writer;
-            //TextWriter oldOut = Console.Out;
-            //try
-            //{
-            //    ostrm = new FileStream("./Redirect.txt", FileMode.Create, FileAccess.Write);
-            //    writer = new StreamWriter(ostrm);
-            //}
-            //catch (Exception e)
-            //{
-            //    Console.WriteLine("Cannot open Redirect.txt for writing");
-            //    Console.WriteLine(e.Message);
-            //    return;
-            //}
-            //Console.SetOut(writer);
-
-            //Mock methods for development
-            MockGetSettings();
-            StartDiscovery();
-            RunProcesses();
-
-            ////Mock for undoing things
-            //Console.SetOut(oldOut);
-            //writer.Close();
-            //ostrm.Close();
-        }
+        public IDictionary<Type, List<string>> ChangedObjects { get; set; }
 
         #region Commands
 
@@ -84,6 +56,73 @@ namespace SNMPDiscovery.Model.Services
             //Validate exists DataDestination Settings
             //Invoke DAOData exporter realization
             //Get & serialize object to destination
+        }
+
+        #endregion
+
+        #region Interface Implementations
+
+        public IDisposable Subscribe(IObserver<ISNMPModelDTO> observer)
+        {
+            //Check whether observer is already registered. If not, add it
+            if (!_snmpModelObservers.Contains(observer))
+            {
+                _snmpModelObservers.Add(observer);
+            }
+            return new SNMPObservableUnsubscriber<ISNMPModelDTO>(_snmpModelObservers, observer);
+        }
+
+        public ISNMPSettingDTO BuildSNMPSetting(string ID, string initialIP, string finalIP, string SNMPUser)
+        {
+            //Lazy initialization
+            if (SNMPSettings == null)
+            {
+                SNMPSettings = new Dictionary<string, ISNMPSettingDTO>();
+            }
+
+            ISNMPSettingDTO setting = new SNMPSettingDTO(ID, initialIP, finalIP, SNMPUser);
+            SNMPSettings.Add(ID, setting);
+
+            return setting;
+        }
+
+        public ISNMPDeviceDTO BuildSNMPDevice(string targetIP)
+        {
+            //Lazy initialization
+            if (SNMPData == null)
+            {
+                SNMPData = new Dictionary<string, ISNMPDeviceDTO>();
+            }
+
+            ISNMPDeviceDTO device = new SNMPDeviceDTO(targetIP);
+            SNMPData.Add(targetIP, device);
+
+            return device;
+        }
+
+        public ISNMPDeviceDTO BuildSNMPDevice(int targetIP)
+        {
+            //Lazy initialization
+            if (SNMPData == null)
+            {
+                SNMPData = new Dictionary<string, ISNMPDeviceDTO>();
+            }
+
+            ISNMPDeviceDTO device = new SNMPDeviceDTO(targetIP);
+            SNMPData.Add(new IPAddress(targetIP).ToString(), device);
+
+            return device;
+        }
+
+        #endregion
+
+        #region Mocks
+
+        public void MockGetSettings()
+        {
+            //ISNMPSettingDTO MockSNMPSetting = _model.BuildSNMPSetting("ColecciónSwitches", "192.168.1.42", "192.168.1.42", "public");
+            ISNMPSettingDTO MockSNMPSetting = BuildSNMPSetting("ColecciónSwitches", "192.168.1.42", "192.168.1.51", "public");
+            ISNMPProcessStrategy MockProcessProfileSetting = MockSNMPSetting.BuildProcess(EnumProcessingType.TopologyDiscovery);
         }
 
         #endregion
@@ -206,59 +245,38 @@ namespace SNMPDiscovery.Model.Services
 
         #endregion
 
-        #region DTO Builders
+        #region Constructors
 
-        public ISNMPSettingDTO BuildSNMPSetting(string ID, string initialIP, string finalIP, string SNMPUser)
+        public SNMPModel()
         {
-            //Lazy initialization
-            if (SNMPSettings == null)
-            {
-                SNMPSettings = new Dictionary<string, ISNMPSettingDTO>();
-            }
+            _snmpModelObservers = new List<IObserver<ISNMPModelDTO>>();
 
-            ISNMPSettingDTO setting = new SNMPSettingDTO(ID, initialIP, finalIP, SNMPUser);
-            SNMPSettings.Add(ID, setting);
+            ////Mock for redirecting console to file
+            //FileStream ostrm;
+            //StreamWriter writer;
+            //TextWriter oldOut = Console.Out;
+            //try
+            //{
+            //    ostrm = new FileStream("./Redirect.txt", FileMode.Create, FileAccess.Write);
+            //    writer = new StreamWriter(ostrm);
+            //}
+            //catch (Exception e)
+            //{
+            //    Console.WriteLine("Cannot open Redirect.txt for writing");
+            //    Console.WriteLine(e.Message);
+            //    return;
+            //}
+            //Console.SetOut(writer);
 
-            return setting;
-        }
+            //Mock methods for development
+            MockGetSettings();
+            StartDiscovery();
+            RunProcesses();
 
-        public ISNMPDeviceDTO BuildSNMPDevice(string targetIP)
-        {
-            //Lazy initialization
-            if (SNMPData == null)
-            {
-                SNMPData = new Dictionary<string, ISNMPDeviceDTO>();
-            }
-
-            ISNMPDeviceDTO device = new SNMPDeviceDTO(targetIP);
-            SNMPData.Add(targetIP, device);
-
-            return device;
-        }
-
-        public ISNMPDeviceDTO BuildSNMPDevice(int targetIP)
-        {
-            //Lazy initialization
-            if (SNMPData == null)
-            {
-                SNMPData = new Dictionary<string, ISNMPDeviceDTO>();
-            }
-
-            ISNMPDeviceDTO device = new SNMPDeviceDTO(targetIP);
-            SNMPData.Add(new IPAddress(targetIP).ToString(), device);
-
-            return device;
-        }
-
-        #endregion
-
-        #region Mocks
-
-        public void MockGetSettings()
-        {
-            //ISNMPSettingDTO MockSNMPSetting = _model.BuildSNMPSetting("ColecciónSwitches", "192.168.1.42", "192.168.1.42", "public");
-            ISNMPSettingDTO MockSNMPSetting = BuildSNMPSetting("ColecciónSwitches", "192.168.1.42", "192.168.1.51", "public");
-            ISNMPProcessStrategy MockProcessProfileSetting = MockSNMPSetting.BuildProcess(EnumProcessingType.TopologyDiscovery);
+            ////Mock for undoing things
+            //Console.SetOut(oldOut);
+            //writer.Close();
+            //ostrm.Close();
         }
 
         #endregion

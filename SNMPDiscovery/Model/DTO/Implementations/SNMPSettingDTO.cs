@@ -10,14 +10,15 @@ namespace SNMPDiscovery.Model.DTO
 {
     public class SNMPSettingDTO : ISNMPSettingDTO
     {
-        private IList<IObserver<ISNMPSettingDTO>> _snmpSettingObservers;
-
         public string ID { get; set; }
         public IPAddress InitialIP { get; set; }
         public IPAddress FinalIP { get; set; }
         public string CommunityString { get; set; }
         public IDictionary<string, ISNMPProcessStrategy> Processes { get; set; }
         public IDictionary<string, IOIDSettingDTO> OIDSettings { get; set; }
+
+        public IDictionary<Type, List<string>> ChangedObjects { get; set; }
+        public event Action<string> OnChange;
 
         #region Interface implementations
 
@@ -58,29 +59,16 @@ namespace SNMPDiscovery.Model.DTO
             }
         }
 
-        public IDisposable Subscribe(IObserver<ISNMPSettingDTO> observer)
-        {
-            //Check whether observer is already registered. If not, add it
-            if (!_snmpSettingObservers.Contains(observer))
-            {
-                _snmpSettingObservers.Add(observer);
-            }
-            return new SNMPObservableUnsubscriber<ISNMPSettingDTO>(_snmpSettingObservers, observer);
-        }
-
         #endregion
 
         #region Constructors
 
         public SNMPSettingDTO()
         {
-            _snmpSettingObservers = new List<IObserver<ISNMPSettingDTO>>();
         }
 
         public SNMPSettingDTO(string id, string initialIP, string finalIP, string SNMPUser)
         {
-            _snmpSettingObservers = new List<IObserver<ISNMPSettingDTO>>();
-
             ID = id;
             InitialIP = IPAddress.Parse(initialIP);
             FinalIP = finalIP == null ? InitialIP : IPAddress.Parse(finalIP);

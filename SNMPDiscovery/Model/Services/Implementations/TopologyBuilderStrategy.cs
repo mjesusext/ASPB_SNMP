@@ -12,6 +12,7 @@ namespace SNMPDiscovery.Model.Services
     {
         private IList<IObserver<ISNMPProcessStrategy>> _strategyObservers;
         private const int LearnedMACThreshold = 3;
+        public event Action<string> OnChange;
 
         public string ProcessID { get; }
         public string RegardingSetting { get; set; }

@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace SNMPDiscovery.Model.DTO
 {
-    public interface ISNMPProcessedValueDTO: ITrackeableObject
+    public interface ITrackeableObject
     {
-        Type DataType { get; set; }
-        object Data { get; set; }
+        event Action<string> OnChange;
     }
 }

@@ -32,7 +32,7 @@ namespace SNMPDiscovery.View
 
         #region Observable Implementation
 
-        public void OnNext(ISNMPDeviceDTO value)
+        public void OnNext(ISNMPModelDTO value)
         {
             throw new NotImplementedException();
         }
@@ -43,31 +43,6 @@ namespace SNMPDiscovery.View
         }
 
         public void OnCompleted()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void OnNext(ISNMPSettingDTO value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void OnNext(ISNMPProcessStrategy value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void OnNext(IOIDSettingDTO value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void OnNext(ISNMPRawEntryDTO value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void OnNext(ISNMPProcessedValueDTO value)
         {
             throw new NotImplementedException();
         }

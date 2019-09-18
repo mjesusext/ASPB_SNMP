@@ -7,7 +7,7 @@ using SNMPDiscovery.Model.DTO;
 
 namespace SNMPDiscovery.Model.Services
 {
-    public interface ISNMPProcessStrategy : IObservable<ISNMPProcessStrategy>
+    public interface ISNMPProcessStrategy : IObservable<ISNMPProcessStrategy>, ITrackeableObject
     {
         string ProcessID { get; }
         string RegardingSetting { get; set; }

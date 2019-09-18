@@ -8,12 +8,7 @@ using SNMPDiscovery.Model.Services;
 
 namespace SNMPDiscovery.View
 {
-    public interface ISNMPView : IObserver<ISNMPDeviceDTO>, 
-                                 IObserver<ISNMPSettingDTO>,
-                                 IObserver<ISNMPProcessStrategy>,
-                                 IObserver<IOIDSettingDTO>,
-                                 IObserver<ISNMPRawEntryDTO>,
-                                 IObserver<ISNMPProcessedValueDTO>
+    public interface ISNMPView : IObserver<ISNMPModelDTO>
     {
         void Initialize();
         void ShowCommands();
