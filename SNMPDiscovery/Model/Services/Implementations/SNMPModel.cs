@@ -8,6 +8,7 @@ using SNMPDiscovery.Model.DAO;
 using System.IO;
 using System.Net;
 using SnmpSharpNet;
+using System.Collections;
 
 namespace SNMPDiscovery.Model.Services
 {
@@ -20,7 +21,7 @@ namespace SNMPDiscovery.Model.Services
 
         public IDictionary<string, ISNMPSettingDTO> SNMPSettings { get; set; }
         public IDictionary<string, ISNMPDeviceDTO> SNMPData { get; set; }
-        public IDictionary<Type, List<string>> ChangedObjects { get; set; }
+        public IDictionary<Type, IList> ChangedObjects { get; set; }
 
         #region Commands
 
@@ -94,7 +95,7 @@ namespace SNMPDiscovery.Model.Services
                 SNMPData = new Dictionary<string, ISNMPDeviceDTO>();
             }
 
-            ISNMPDeviceDTO device = new SNMPDeviceDTO(targetIP);
+            ISNMPDeviceDTO device = new SNMPDeviceDTO(targetIP, ChangeTrackerHandler);
             SNMPData.Add(targetIP, device);
 
             return device;
@@ -108,7 +109,7 @@ namespace SNMPDiscovery.Model.Services
                 SNMPData = new Dictionary<string, ISNMPDeviceDTO>();
             }
 
-            ISNMPDeviceDTO device = new SNMPDeviceDTO(targetIP);
+            ISNMPDeviceDTO device = new SNMPDeviceDTO(targetIP, ChangeTrackerHandler);
             SNMPData.Add(new IPAddress(targetIP).ToString(), device);
 
             return device;
@@ -116,13 +117,11 @@ namespace SNMPDiscovery.Model.Services
 
         #endregion
 
-        #region Mocks
+        #region Nested Object Change Handlers
 
-        public void MockGetSettings()
+        public void ChangeTrackerHandler(Type type, object obj)
         {
-            //ISNMPSettingDTO MockSNMPSetting = _model.BuildSNMPSetting("ColecciónSwitches", "192.168.1.42", "192.168.1.42", "public");
-            ISNMPSettingDTO MockSNMPSetting = BuildSNMPSetting("ColecciónSwitches", "192.168.1.42", "192.168.1.51", "public");
-            ISNMPProcessStrategy MockProcessProfileSetting = MockSNMPSetting.BuildProcess(EnumProcessingType.TopologyDiscovery);
+            ChangedObjects[type].Add(obj);
         }
 
         #endregion
@@ -250,6 +249,9 @@ namespace SNMPDiscovery.Model.Services
         public SNMPModel()
         {
             _snmpModelObservers = new List<IObserver<ISNMPModelDTO>>();
+            ChangedObjects = new Dictionary<Type, IList>();
+            ChangedObjects.Add(typeof(ISNMPSettingDTO), new ArrayList());
+            ChangedObjects.Add(typeof(ISNMPDeviceDTO), new ArrayList());
 
             ////Mock for redirecting console to file
             //FileStream ostrm;
@@ -277,6 +279,17 @@ namespace SNMPDiscovery.Model.Services
             //Console.SetOut(oldOut);
             //writer.Close();
             //ostrm.Close();
+        }
+
+        #endregion
+
+        #region Mocks
+
+        public void MockGetSettings()
+        {
+            //ISNMPSettingDTO MockSNMPSetting = _model.BuildSNMPSetting("ColecciónSwitches", "192.168.1.42", "192.168.1.42", "public");
+            ISNMPSettingDTO MockSNMPSetting = BuildSNMPSetting("ColecciónSwitches", "192.168.1.42", "192.168.1.51", "public");
+            ISNMPProcessStrategy MockProcessProfileSetting = MockSNMPSetting.BuildProcess(EnumProcessingType.TopologyDiscovery);
         }
 
         #endregion

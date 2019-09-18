@@ -10,24 +10,13 @@ namespace SNMPDiscovery.Model.Services
 {
     public class TopologyBuilderStrategy : ISNMPProcessStrategy
     {
-        private IList<IObserver<ISNMPProcessStrategy>> _strategyObservers;
         private const int LearnedMACThreshold = 3;
-        public event Action<string> OnChange;
 
         public string ProcessID { get; }
         public string RegardingSetting { get; set; }
+        public event Action<Type, object> OnChange;
 
         #region Interfaces implementations
-
-        public IDisposable Subscribe(IObserver<ISNMPProcessStrategy> observer)
-        {
-            //Check whether observer is already registered. If not, add it
-            if (!_strategyObservers.Contains(observer))
-            {
-                _strategyObservers.Add(observer);
-            }
-            return new SNMPObservableUnsubscriber<ISNMPProcessStrategy>(_strategyObservers, observer);
-        }
 
         public IDictionary<string, IOIDSettingDTO> BuildOIDSetting(string regardingSetting, IDictionary<string, IOIDSettingDTO> OIDSettings)
         {
@@ -43,7 +32,7 @@ namespace SNMPDiscovery.Model.Services
 
             if (!OIDSettings.ContainsKey("DeviceBasicInfo"))
             {
-                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("DeviceBasicInfo", "1.3.6.1.2.1.1.1", "1.3.6.1.2.1.1.8", false);
+                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("DeviceBasicInfo", "1.3.6.1.2.1.1.1", "1.3.6.1.2.1.1.8", false, null, OnChange);
                 IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.None };
                 MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.1.1", indexes);
                 MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.1.2", indexes);
@@ -58,7 +47,7 @@ namespace SNMPDiscovery.Model.Services
 
             if (!OIDSettings.ContainsKey("PhysPortDescription"))
             {
-                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("PhysPortDescription", "1.3.6.1.2.1.2.2.1.2", "1.3.6.1.2.1.2.2.1.2", true);
+                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("PhysPortDescription", "1.3.6.1.2.1.2.2.1.2", "1.3.6.1.2.1.2.2.1.2", true, null, OnChange);
                 IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number };
                 MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.2.2.1.2", indexes);
 
@@ -67,7 +56,7 @@ namespace SNMPDiscovery.Model.Services
 
             if (!OIDSettings.ContainsKey("PhysPortMACAddress"))
             {
-                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("PhysPortMACAddress", "1.3.6.1.2.1.2.2.1.6", "1.3.6.1.2.1.2.2.1.6", true);
+                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("PhysPortMACAddress", "1.3.6.1.2.1.2.2.1.6", "1.3.6.1.2.1.2.2.1.6", true, null, OnChange);
                 IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number };
                 MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.2.2.1.6", indexes);
 
@@ -76,7 +65,7 @@ namespace SNMPDiscovery.Model.Services
 
             if (!OIDSettings.ContainsKey("VLANDescription"))
             {
-                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("VLANDescription", "1.3.6.1.2.1.17.7.1.4.3.1.1", "1.3.6.1.2.1.17.7.1.4.3.1.1", true);
+                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("VLANDescription", "1.3.6.1.2.1.17.7.1.4.3.1.1", "1.3.6.1.2.1.17.7.1.4.3.1.1", true, null, OnChange);
                 IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number };
                 MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.17.7.1.4.3.1.1", indexes);
 
@@ -85,7 +74,7 @@ namespace SNMPDiscovery.Model.Services
 
             if (!OIDSettings.ContainsKey("VLANMapping"))
             {
-                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("VLANDescription", "1.3.6.1.2.1.17.7.1.4.3.1.2", "1.3.6.1.2.1.17.7.1.4.3.1.2", true);
+                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("VLANDescription", "1.3.6.1.2.1.17.7.1.4.3.1.2", "1.3.6.1.2.1.17.7.1.4.3.1.2", true, null, OnChange);
                 IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number };
                 MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.17.7.1.4.3.1.2", indexes);
 
@@ -94,7 +83,7 @@ namespace SNMPDiscovery.Model.Services
 
             if (!OIDSettings.ContainsKey("LearnedMACByPhysPortID"))
             {
-                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("LearnedMACByPhysPortID", "1.3.6.1.2.1.17.7.1.2.2.1.2", "1.3.6.1.2.1.17.7.1.2.2.1.2", true);
+                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("LearnedMACByPhysPortID", "1.3.6.1.2.1.17.7.1.2.2.1.2", "1.3.6.1.2.1.17.7.1.2.2.1.2", true, null, OnChange);
                 IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number, EnumSNMPOIDIndexType.MacAddress };
                 MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.17.7.1.2.2.1.2", indexes);
 
@@ -103,7 +92,7 @@ namespace SNMPDiscovery.Model.Services
 
             if (!OIDSettings.ContainsKey("LearnedMACByPhysPortMAC"))
             {
-                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("LearnedMACByPhysPortMAC", "1.3.6.1.2.1.17.4.3.1", "1.3.6.1.2.1.17.4.3.4", false);
+                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("LearnedMACByPhysPortMAC", "1.3.6.1.2.1.17.4.3.1", "1.3.6.1.2.1.17.4.3.4", false, null, OnChange);
                 IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.MacAddress };
                 MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.17.4.3.1.1", indexes);
                 MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.17.4.3.1.2", indexes);
@@ -115,7 +104,7 @@ namespace SNMPDiscovery.Model.Services
             if (!OIDSettings.ContainsKey("LACPSetting"))
             {
                 //OIDSettings.Add("LACPSetting", new OIDSettingDTO("LACPSetting", "1.2.840.10006.300.43", "1.2.840.10006.300.43", true));
-                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("LACPSetting", "1.2.840.10006.300.43.1.1.2.1.1", "1.2.840.10006.300.43.1.1.2.1.1", true);
+                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("LACPSetting", "1.2.840.10006.300.43.1.1.2.1.1", "1.2.840.10006.300.43.1.1.2.1.1", true, null, OnChange);
                 IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number };
                 MockOIDSetting.BuildIndexedOIDSetting("1.2.840.10006.300.43.1.1.2.1.1", indexes);
 
@@ -124,7 +113,7 @@ namespace SNMPDiscovery.Model.Services
 
             if (!OIDSettings.ContainsKey("PortHierarchy"))
             {
-                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("PortHierarchy", "1.3.6.1.2.1.31.1.2.1.3", "1.3.6.1.2.1.31.1.2.1.3", true);
+                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("PortHierarchy", "1.3.6.1.2.1.31.1.2.1.3", "1.3.6.1.2.1.31.1.2.1.3", true, null, OnChange);
                 IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number, EnumSNMPOIDIndexType.Number };
                 MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.31.1.2.1.3", indexes);
 
@@ -200,8 +189,6 @@ namespace SNMPDiscovery.Model.Services
                 GetPortIDInfo(Device, OIDSettings, TopologyInfo); //Fill with port IDs inventory
                 GetVLANInfo(Device, OIDSettings, TopologyInfo); //Get VLANInventory and mappings
                 ComputeDirectNeighbours(TopologyInfo); //Get first address seen by Access Ports
-
-                int i = 4;
             }
         }
 
@@ -514,10 +501,12 @@ namespace SNMPDiscovery.Model.Services
 
         #region Constructor
 
-        public TopologyBuilderStrategy()
+        public TopologyBuilderStrategy(Action<Type, object> ChangeTrackerHandler)
         {
             ProcessID = "TopologyBuilder";
-            _strategyObservers = new List<IObserver<ISNMPProcessStrategy>>();
+            OnChange += ChangeTrackerHandler;
+
+            OnChange?.Invoke(GetType(), this);
         }
 
         #endregion

@@ -8,6 +8,6 @@ namespace SNMPDiscovery.Model.DTO
 {
     public interface ITrackeableObject
     {
-        event Action<string> OnChange;
+        event Action<Type, object> OnChange;
     }
 }

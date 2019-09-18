@@ -1,5 +1,6 @@
 ﻿using SNMPDiscovery.Model.Services;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -14,8 +15,8 @@ namespace SNMPDiscovery.Model.DTO
         public IDictionary<string, ISNMPRawEntryDTO> SNMPRawDataEntries { get; set; }
         public IDictionary<string, ISNMPProcessedValueDTO> SNMPProcessedData { get; set; }
 
-        public IDictionary<Type, List<string>> ChangedObjects { get; set; }
-        public event Action<string> OnChange;
+        public IDictionary<Type, IList> ChangedObjects { get; set; }
+        public event Action<Type, object> OnChange;
 
         #region Interface Implementations
 
@@ -27,7 +28,7 @@ namespace SNMPDiscovery.Model.DTO
                 SNMPRawDataEntries = new Dictionary<string, ISNMPRawEntryDTO>();
             }
 
-            ISNMPRawEntryDTO RawEntry = new SNMPRawEntryDTO(OID);
+            ISNMPRawEntryDTO RawEntry = new SNMPRawEntryDTO(OID, OnChange);
             SNMPRawDataEntries.Add(OID, RawEntry);
 
             return RawEntry;
@@ -41,10 +42,19 @@ namespace SNMPDiscovery.Model.DTO
                 SNMPRawDataEntries = new Dictionary<string, ISNMPRawEntryDTO>();
             }
 
-            ISNMPRawEntryDTO RawEntry = new SNMPRawEntryDTO(OID, RawValue, DataType);
+            ISNMPRawEntryDTO RawEntry = new SNMPRawEntryDTO(OID, RawValue, DataType, OnChange);
             SNMPRawDataEntries.Add(OID, RawEntry);
 
             return RawEntry;
+        }
+
+        #endregion
+
+        #region Nested Object Change Handlers
+
+        public void ChangeTrackerHandler(Type type, object obj)
+        {
+            ChangedObjects[type].Add(obj);
         }
 
         #endregion
@@ -59,7 +69,7 @@ namespace SNMPDiscovery.Model.DTO
                 SNMPProcessedData = new Dictionary<string, ISNMPProcessedValueDTO>();
             }
 
-            ISNMPProcessedValueDTO ProcessedValue = new SNMPProcessedValueDTO(DataType, Data);
+            ISNMPProcessedValueDTO ProcessedValue = new SNMPProcessedValueDTO(DataType, Data, OnChange);
             SNMPProcessedData.Add(DataType.Name, ProcessedValue);
         }
 
@@ -67,18 +77,20 @@ namespace SNMPDiscovery.Model.DTO
 
         #region Constructors
 
-        public SNMPDeviceDTO()
-        {
-        }
-
-        public SNMPDeviceDTO(string targetIP)
+        public SNMPDeviceDTO(string targetIP, Action<Type, object> ChangeTrackerHandler)
         {
             TargetIP = IPAddress.Parse(targetIP);
+            OnChange += ChangeTrackerHandler;
+
+            OnChange?.Invoke(GetType(), this);
         }
 
-        public SNMPDeviceDTO(int targetIP)
+        public SNMPDeviceDTO(int targetIP, Action<Type, object> ChangeTrackerHandler)
         {
             TargetIP = new IPAddress(targetIP);
+            OnChange += ChangeTrackerHandler;
+
+            OnChange?.Invoke(GetType(), this);
         }
 
         #endregion

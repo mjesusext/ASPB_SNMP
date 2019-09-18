@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -17,8 +18,8 @@ namespace SNMPDiscovery.Model.DTO
         public IDictionary<string, ISNMPProcessStrategy> Processes { get; set; }
         public IDictionary<string, IOIDSettingDTO> OIDSettings { get; set; }
 
-        public IDictionary<Type, List<string>> ChangedObjects { get; set; }
-        public event Action<string> OnChange;
+        public IDictionary<Type, IList> ChangedObjects { get; set; }
+        public event Action<Type, object> OnChange;
 
         #region Interface implementations
 
@@ -37,14 +38,14 @@ namespace SNMPDiscovery.Model.DTO
                 case EnumProcessingType.None:
                     break;
                 case EnumProcessingType.TopologyDiscovery:
-                    ProcessProfile = new TopologyBuilderStrategy();
+                    ProcessProfile = new TopologyBuilderStrategy(ChangeTrackerHandler);
                     break;
                 case EnumProcessingType.PrinterConsumption:
                     break;
                 default:
                     break;
             }
-
+            
             //If profile exists, retrive the existing one
             if (Processes.ContainsKey(ProcessProfile.ProcessID))
             {
@@ -61,11 +62,16 @@ namespace SNMPDiscovery.Model.DTO
 
         #endregion
 
-        #region Constructors
+        #region Nested Object Change Handlers
 
-        public SNMPSettingDTO()
+        public void ChangeTrackerHandler(Type type, object obj)
         {
+            ChangedObjects[type].Add(obj);
         }
+
+        #endregion
+
+        #region Constructors
 
         public SNMPSettingDTO(string id, string initialIP, string finalIP, string SNMPUser)
         {
@@ -73,6 +79,12 @@ namespace SNMPDiscovery.Model.DTO
             InitialIP = IPAddress.Parse(initialIP);
             FinalIP = finalIP == null ? InitialIP : IPAddress.Parse(finalIP);
             CommunityString = SNMPUser;
+
+            ChangedObjects = new Dictionary<Type, IList>();
+            ChangedObjects.Add(typeof(ISNMPProcessStrategy), new ArrayList());
+            ChangedObjects.Add(typeof(IOIDSettingDTO), new ArrayList());
+
+            OnChange?.Invoke(GetType(), ID);
         }
 
         #endregion

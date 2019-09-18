@@ -14,7 +14,7 @@ namespace SNMPDiscovery.Model.DTO
         public string FinalOID { get; set; }
         public bool InclusiveInterval { get; set; }
         public IDictionary<string, IList<EnumSNMPOIDIndexType>> IndexedOIDSettings { get; set; }
-        public event Action<string> OnChange;
+        public event Action<Type, object> OnChange;
 
         #region Interface implementations
 
@@ -35,17 +35,16 @@ namespace SNMPDiscovery.Model.DTO
 
         #region Constructors
 
-        public OIDSettingDTO()
-        {
-        }
-
-        public OIDSettingDTO(string id, string initialOID, string finalOID, bool inclusiveInterval, IDictionary<string, IList<EnumSNMPOIDIndexType>> indexedOIDSettings = null)
+        public OIDSettingDTO(string id, string initialOID, string finalOID, bool inclusiveInterval, IDictionary<string, IList<EnumSNMPOIDIndexType>> indexedOIDSettings, Action<Type, object> ChangeTrackerHandler)
         {
             ID = id;
             InitialOID = initialOID;
             FinalOID = finalOID;
             InclusiveInterval = inclusiveInterval;
             IndexedOIDSettings = indexedOIDSettings ?? new Dictionary<string, IList<EnumSNMPOIDIndexType>>();
+            OnChange += ChangeTrackerHandler;
+
+            OnChange?.Invoke(GetType(), this);
         }
 
         #endregion
