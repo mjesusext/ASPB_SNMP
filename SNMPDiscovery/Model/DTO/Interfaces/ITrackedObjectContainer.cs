@@ -9,6 +9,6 @@ namespace SNMPDiscovery.Model.DTO
 {
     public interface ITrackedObjectContainer
     {
-        IDictionary<Type, IList> ChangedObjects { get; set; }
+        IDictionary<object, Type> ChangedObjects { get; set; }
     }
 }

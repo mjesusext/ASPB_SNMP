@@ -18,8 +18,7 @@ namespace SNMPDiscovery.Model.DTO
         public IDictionary<string, ISNMPProcessStrategy> Processes { get; set; }
         public IDictionary<string, IOIDSettingDTO> OIDSettings { get; set; }
 
-        public IDictionary<Type, IList> ChangedObjects { get; set; }
-        public event Action<Type, object> OnChange;
+        public event Action<object, Type> OnChange;
 
         #region Interface implementations
 
@@ -64,28 +63,25 @@ namespace SNMPDiscovery.Model.DTO
 
         #region Nested Object Change Handlers
 
-        public void ChangeTrackerHandler(Type type, object obj)
+        public void ChangeTrackerHandler(object obj, Type type)
         {
-            ChangedObjects[type].Add(obj);
+            OnChange?.Invoke(obj, type);
         }
 
         #endregion
 
         #region Constructors
 
-        public SNMPSettingDTO(string id, string initialIP, string finalIP, string SNMPUser, Action<Type, object> ChangeTrackerHandler)
+        public SNMPSettingDTO(string id, string initialIP, string finalIP, string SNMPUser, Action<object, Type> ChangeTrackerHandler)
         {
             ID = id;
             InitialIP = IPAddress.Parse(initialIP);
             FinalIP = finalIP == null ? InitialIP : IPAddress.Parse(finalIP);
             CommunityString = SNMPUser;
 
-            ChangedObjects = new Dictionary<Type, IList>();
-            ChangedObjects.Add(typeof(ISNMPProcessStrategy), new ArrayList());
-            ChangedObjects.Add(typeof(IOIDSettingDTO), new ArrayList());
             OnChange += ChangeTrackerHandler;
 
-            OnChange?.Invoke(typeof(ISNMPSettingDTO), this);
+            OnChange?.Invoke(this, typeof(ISNMPSettingDTO));
         }
 
         #endregion

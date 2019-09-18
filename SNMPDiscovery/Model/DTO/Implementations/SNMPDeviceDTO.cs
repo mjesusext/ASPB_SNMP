@@ -15,8 +15,7 @@ namespace SNMPDiscovery.Model.DTO
         public IDictionary<string, ISNMPRawEntryDTO> SNMPRawDataEntries { get; set; }
         public IDictionary<string, ISNMPProcessedValueDTO> SNMPProcessedData { get; set; }
 
-        public IDictionary<Type, IList> ChangedObjects { get; set; }
-        public event Action<Type, object> OnChange;
+        public event Action<object, Type> OnChange;
 
         #region Interface Implementations
 
@@ -54,7 +53,7 @@ namespace SNMPDiscovery.Model.DTO
 
         public void ChangeTrackerHandler(Type type, object obj)
         {
-            ChangedObjects[type].Add(obj);
+            OnChange?.Invoke(obj, type);
         }
 
         #endregion
@@ -77,20 +76,20 @@ namespace SNMPDiscovery.Model.DTO
 
         #region Constructors
 
-        public SNMPDeviceDTO(string targetIP, Action<Type, object> ChangeTrackerHandler)
+        public SNMPDeviceDTO(string targetIP, Action<object, Type> ChangeTrackerHandler)
         {
             TargetIP = IPAddress.Parse(targetIP);
             OnChange += ChangeTrackerHandler;
 
-            OnChange?.Invoke(typeof(ISNMPDeviceDTO), this);
+            OnChange?.Invoke(this, typeof(ISNMPDeviceDTO));
         }
 
-        public SNMPDeviceDTO(int targetIP, Action<Type, object> ChangeTrackerHandler)
+        public SNMPDeviceDTO(int targetIP, Action<object, Type> ChangeTrackerHandler)
         {
             TargetIP = new IPAddress(targetIP);
             OnChange += ChangeTrackerHandler;
 
-            OnChange?.Invoke(typeof(ISNMPDeviceDTO), this);
+            OnChange?.Invoke(this, typeof(ISNMPDeviceDTO));
         }
 
         #endregion

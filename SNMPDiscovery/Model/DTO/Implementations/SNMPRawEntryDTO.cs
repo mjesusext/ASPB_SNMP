@@ -13,26 +13,26 @@ namespace SNMPDiscovery.Model.DTO
         public string RootOID { get; set; }
         public string ValueData { get; set; }
         public EnumSNMPOIDType DataType { get; set; }
-        public event Action<Type, object> OnChange;
+        public event Action<object, Type> OnChange;
 
         #region Constructors
 
-        public SNMPRawEntryDTO(string oid, Action<Type, object> ChangeTrackerHandler)
+        public SNMPRawEntryDTO(string oid, Action<object, Type> ChangeTrackerHandler)
         {
             OID = oid;
             OnChange += ChangeTrackerHandler;
 
-            OnChange?.Invoke(typeof(ISNMPDeviceDTO), this);
+            OnChange?.Invoke(this, typeof(ISNMPDeviceDTO));
         }
 
-        public SNMPRawEntryDTO(string oid, string data, EnumSNMPOIDType datatype, Action<Type, object> ChangeTrackerHandler)
+        public SNMPRawEntryDTO(string oid, string data, EnumSNMPOIDType datatype, Action<object, Type> ChangeTrackerHandler)
         {
             OID = oid;
             ValueData = data;
             DataType = datatype;
             OnChange += ChangeTrackerHandler;
 
-            OnChange?.Invoke(typeof(ISNMPDeviceDTO), this);
+            OnChange?.Invoke(this, typeof(ISNMPDeviceDTO));
         }
 
         #endregion

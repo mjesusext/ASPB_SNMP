@@ -14,7 +14,7 @@ namespace SNMPDiscovery.Model.Services
 
         public string ProcessID { get; }
         public string RegardingSetting { get; set; }
-        public event Action<Type, object> OnChange;
+        public event Action<object, Type> OnChange;
 
         #region Interfaces implementations
 
@@ -501,12 +501,12 @@ namespace SNMPDiscovery.Model.Services
 
         #region Constructor
 
-        public TopologyBuilderStrategy(Action<Type, object> ChangeTrackerHandler)
+        public TopologyBuilderStrategy(Action<object, Type> ChangeTrackerHandler)
         {
             ProcessID = "TopologyBuilder";
             OnChange += ChangeTrackerHandler;
 
-            OnChange?.Invoke(typeof(ISNMPProcessStrategy), this);
+            OnChange?.Invoke(this, typeof(ISNMPProcessStrategy));
         }
 
         #endregion

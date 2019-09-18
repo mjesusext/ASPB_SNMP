@@ -11,17 +11,17 @@ namespace SNMPDiscovery.Model.DTO
     {
         public Type DataType { get; set; }
         public object Data { get; set; }
-        public event Action<Type, object> OnChange;
+        public event Action<object, Type> OnChange;
 
         #region Constructors
 
-        public SNMPProcessedValueDTO(Type dataType, object data, Action<Type, object> ChangeTrackerHandler)
+        public SNMPProcessedValueDTO(Type dataType, object data, Action<object, Type> ChangeTrackerHandler)
         {
             DataType = dataType;
             Data = data;
             OnChange += ChangeTrackerHandler;
 
-            OnChange?.Invoke(typeof(ISNMPDeviceDTO), this);
+            OnChange?.Invoke(this, typeof(ISNMPDeviceDTO));
         }
 
         #endregion
