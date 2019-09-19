@@ -17,7 +17,8 @@ namespace SNMPDiscovery.View
         public SNMPDiscoveryView(ISNMPModelDTO Model, ISNMPDiscoveryController Controller)
         {
             _controller = Controller;
-            
+            Model.Subscribe(this);
+
             //_observeableSubscriptions.Add()
             //    IObserver<ISNMPDeviceDTO>, 
             //    IObserver<ISNMPSettingDTO>,

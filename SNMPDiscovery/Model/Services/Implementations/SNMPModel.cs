@@ -21,7 +21,7 @@ namespace SNMPDiscovery.Model.Services
 
         public IDictionary<string, ISNMPSettingDTO> SNMPSettings { get; set; }
         public IDictionary<string, ISNMPDeviceDTO> SNMPData { get; set; }
-        public IDictionary<object, Type> ChangedObjects { get; set; }
+        public IDictionary<Type, IList> ChangedObjects { get; set; }
 
         #region Commands
 
@@ -121,9 +121,23 @@ namespace SNMPDiscovery.Model.Services
 
         public void ChangeTrackerHandler(object obj, Type type)
         {
-            if (!ChangedObjects.ContainsKey(obj))
+            if(ChangedObjects.Count == 0)
             {
-                ChangedObjects.Add(obj, type);
+                ChangedObjects.Add(type, new ArrayList() { obj });
+            }
+            else if (ChangedObjects.ContainsKey(type))
+            {
+                ChangedObjects[type].Add(obj);
+            }
+            else
+            {
+                foreach (IObserver<ISNMPModelDTO> observer in _snmpModelObservers)
+                {
+                    observer.OnNext(this);
+                }
+
+                ChangedObjects.Clear();
+                ChangedObjects.Add(type, new ArrayList() { obj });
             }
         }
 
@@ -252,7 +266,7 @@ namespace SNMPDiscovery.Model.Services
         public SNMPModel()
         {
             _snmpModelObservers = new List<IObserver<ISNMPModelDTO>>();
-            ChangedObjects = new Dictionary<object, Type>();
+            ChangedObjects = new Dictionary<Type, IList>();
 
             ////Mock for redirecting console to file
             //FileStream ostrm;
@@ -280,7 +294,6 @@ namespace SNMPDiscovery.Model.Services
             //Console.SetOut(oldOut);
             //writer.Close();
             //ostrm.Close();
-            int i = 4;
         }
 
         #endregion
