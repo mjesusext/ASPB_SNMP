@@ -15,5 +15,10 @@ namespace SNMPDiscovery.Model.Services
         ISNMPSettingDTO BuildSNMPSetting(string ID, string initialIP, string finalIP, string SNMPUser);
         ISNMPDeviceDTO BuildSNMPDevice(string targetIP);
         ISNMPDeviceDTO BuildSNMPDevice(int targetIP);
+
+        void Initialize();
+        void StartDiscovery();
+        void RunProcesses();
+        void SaveData();
     }
 }

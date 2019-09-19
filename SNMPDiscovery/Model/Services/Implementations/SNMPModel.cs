@@ -23,45 +23,23 @@ namespace SNMPDiscovery.Model.Services
         public IDictionary<string, ISNMPDeviceDTO> SNMPData { get; set; }
         public IDictionary<Type, IList> ChangedObjects { get; set; }
 
-        #region Commands
-
-        public void StartDiscovery()
-        {
-            //Iterate on all settings
-            foreach (ISNMPSettingDTO SNMPSettingEntry in SNMPSettings.Values)
-            {
-                SNMPWalkByIP(SNMPSettingEntry);
-            }
-        }
-
-        public void RunProcesses()
-        {
-            IEnumerable<ISNMPProcessStrategy> processes = SNMPSettings.SelectMany(x => x.Value.Processes.Values);
-
-            foreach (ISNMPProcessStrategy alg in processes)
-            {
-                //Notify initialization
-                Console.WriteLine($"Starting algorithm {alg.ProcessID}");
-
-                //Validate proper inputs
-                alg.ValidateInput(this);
-                //Run process
-
-                alg.Run(this);
-                //Notify alg done
-            }
-        }
-
-        public void SaveData()
-        {
-            //Validate exists DataDestination Settings
-            //Invoke DAOData exporter realization
-            //Get & serialize object to destination
-        }
-
-        #endregion
-
         #region Interface Implementations
+
+        public void NotifyError(Exception error)
+        {
+            foreach (IObserver<ISNMPModelDTO> observer in _snmpModelObservers)
+            {
+                observer.OnError(error);
+            }
+        }
+
+        public void NotifyChanges()
+        {
+            foreach (IObserver<ISNMPModelDTO> observer in _snmpModelObservers)
+            {
+                observer.OnNext(this);
+            }
+        }
 
         public IDisposable Subscribe(IObserver<ISNMPModelDTO> observer)
         {
@@ -115,26 +93,54 @@ namespace SNMPDiscovery.Model.Services
             return device;
         }
 
+        public void StartDiscovery()
+        {
+            //Iterate on all settings
+            foreach (ISNMPSettingDTO SNMPSettingEntry in SNMPSettings.Values)
+            {
+                SNMPWalkByIP(SNMPSettingEntry);
+            }
+        }
+
+        public void RunProcesses()
+        {
+            IEnumerable<ISNMPProcessStrategy> processes = SNMPSettings.SelectMany(x => x.Value.Processes.Values);
+
+            foreach (ISNMPProcessStrategy alg in processes)
+            {
+                //Validate proper inputs
+                alg.ValidateInput(this);
+                //Run process
+
+                alg.Run(this);
+                //Notify alg done
+            }
+        }
+
+        public void SaveData()
+        {
+            //Validate exists DataDestination Settings
+            //Invoke DAOData exporter realization
+            //Get & serialize object to destination
+        }
+
         #endregion
 
         #region Nested Object Change Handlers
 
         public void ChangeTrackerHandler(object obj, Type type)
         {
-            if(ChangedObjects.Count == 0)
-            {
-                ChangedObjects.Add(type, new ArrayList() { obj });
-            }
-            else if (ChangedObjects.ContainsKey(type))
+            if (ChangedObjects.ContainsKey(type))
             {
                 ChangedObjects[type].Add(obj);
             }
+            else if (ChangedObjects.Count == 0)
+            {
+                ChangedObjects.Add(type, new ArrayList() { obj });
+            }
             else
             {
-                foreach (IObserver<ISNMPModelDTO> observer in _snmpModelObservers)
-                {
-                    observer.OnNext(this);
-                }
+                NotifyChanges();
 
                 ChangedObjects.Clear();
                 ChangedObjects.Add(type, new ArrayList() { obj });
@@ -171,9 +177,6 @@ namespace SNMPDiscovery.Model.Services
                     SNMPWalkByOIDSetting(UDPtarget, pdu, param, SNMPSettingEntry, device);
                 }
             }
-
-            //Test
-            Console.WriteLine("Cantidad de entradas: {0}", SNMPData.Values.FirstOrDefault().SNMPRawDataEntries.Count);
         }
 
         private void SNMPWalkByOIDSetting(UdpTarget UDPtarget, Pdu pdu, AgentParameters param, ISNMPSettingDTO SNMPSettingEntry, ISNMPDeviceDTO SNMPDeviceData)
@@ -196,9 +199,6 @@ namespace SNMPDiscovery.Model.Services
             Oid indexOid = new Oid(OIDSetting.InitialOID); //Walk control
             Oid finalOid = new Oid(OIDSetting.FinalOID);
 
-            //Test
-            Console.WriteLine("----- {0} -----", OIDSetting.ID);
-
             while (nextEntry)
             {
                 pdu.VbList.Add(indexOid); //Add starting OID for request
@@ -210,7 +210,7 @@ namespace SNMPDiscovery.Model.Services
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Exception {0} -- Hopping to next OIDSetting", e.Message);
+                    NotifyError(e);
                     nextEntry = false;
                 }
 
@@ -233,9 +233,6 @@ namespace SNMPDiscovery.Model.Services
                     if (ResBinding.Oid < finalOid || finalOid.IsRootOf(ResBinding.Oid) && InclusiveInterval)
                     {
                         ISNMPRawEntryDTO SNMPRawData = SNMPDeviceData.BuildSNMPRawEntry(ResBinding.Oid.ToString(), ResBinding.Value.ToString(), (EnumSNMPOIDType)Enum.Parse(typeof(EnumSNMPOIDType), SnmpConstants.GetTypeName(ResBinding.Value.Type)));
-
-                        //Test
-                        Console.WriteLine("Request {0} || {1} -- {2} ({3}): {4}", SNMPDeviceData.TargetIP.ToString(), Result.Pdu.RequestId, SNMPRawData.OID, SNMPRawData.DataType.ToString(), SNMPRawData.ValueData);
 
                         //Check if we have already drilled down all contents
                         if (ResBinding.Value.Type != SnmpConstants.SMI_ENDOFMIBVIEW)
@@ -286,9 +283,9 @@ namespace SNMPDiscovery.Model.Services
             //Console.SetOut(writer);
 
             //Mock methods for development
-            MockGetSettings();
-            StartDiscovery();
-            RunProcesses();
+            //MockGetSettings();
+            //StartDiscovery();
+            //RunProcesses();
 
             ////Mock for undoing things
             //Console.SetOut(oldOut);
@@ -300,7 +297,7 @@ namespace SNMPDiscovery.Model.Services
 
         #region Mocks
 
-        public void MockGetSettings()
+        public void Initialize()
         {
             //ISNMPSettingDTO MockSNMPSetting = _model.BuildSNMPSetting("ColecciónSwitches", "192.168.1.42", "192.168.1.42", "public");
             ISNMPSettingDTO MockSNMPSetting = BuildSNMPSetting("ColecciónSwitches", "192.168.1.42", "192.168.1.51", "public");

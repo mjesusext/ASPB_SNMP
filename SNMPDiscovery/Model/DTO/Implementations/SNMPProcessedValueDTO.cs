@@ -21,7 +21,7 @@ namespace SNMPDiscovery.Model.DTO
             Data = data;
             OnChange += ChangeTrackerHandler;
 
-            OnChange?.Invoke(this, typeof(ISNMPDeviceDTO));
+            OnChange?.Invoke(this, typeof(ISNMPProcessedValueDTO));
         }
 
         #endregion

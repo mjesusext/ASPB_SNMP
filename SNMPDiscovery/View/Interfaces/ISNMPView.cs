@@ -12,7 +12,11 @@ namespace SNMPDiscovery.View
     {
         void Initialize();
         void ShowCommands();
-        void ShowSNMPDevice(ISNMPModelDTO Model);
-        void ShowSNMPSetting(ISNMPSettingDTO Model);
+        void ShowData(ISNMPDeviceDTO data);
+        void ShowData(ISNMPSettingDTO data);
+        void ShowData(ISNMPProcessStrategy data);
+        void ShowData(IOIDSettingDTO data);
+        void ShowData(ISNMPRawEntryDTO data);
+        void ShowData(ISNMPProcessedValueDTO data);
     }
 }

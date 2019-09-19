@@ -18,9 +18,9 @@ namespace SNMPDiscovery
         {
             ISNMPModelDTO model = new SNMPModel();
             ISNMPDiscoveryController controller = new SNMPDiscoveryController(model);
-            ISNMPView view = new SNMPDiscoveryView(model, controller);
 
             //TestConcepto();
+
             Console.WriteLine("Fin de ejecución. Pulse una tecla");
             Console.ReadKey();
         }

@@ -16,11 +16,17 @@ namespace SNMPDiscovery.Controller
 
         public SNMPDiscoveryController(ISNMPModelDTO ModelService)
         {
-            this._model = ModelService;
-            this._view = new SNMPDiscoveryView(ModelService, this);
+            _model = ModelService;
+            _view = new SNMPDiscoveryView(ModelService, this);
+
+            //Test
+            _model.Initialize();
+            _model.StartDiscovery();
+            _model.RunProcesses();
         }
 
         #region Controller Implementation
+
         public void GetUserInput(int i)
         {
             //Lanzar metodo de Modelo segun el input introducido y el estado previo si procede
@@ -31,6 +37,7 @@ namespace SNMPDiscovery.Controller
             //ToDo
             throw new NotImplementedException();
         }
+
         #endregion
 
     }
