@@ -11,7 +11,7 @@ namespace SNMPDiscovery.Controller
 {
     public class SNMPDiscoveryController : ISNMPDiscoveryController
     {
-        private ISNMPView _view { get; set; }
+        private IObserver<ISNMPModelDTO> _view { get; set; }
         private ISNMPModelDTO _model { get; set; }
 
         public SNMPDiscoveryController(ISNMPModelDTO ModelService)
