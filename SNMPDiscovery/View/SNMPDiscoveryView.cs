@@ -159,6 +159,8 @@ namespace SNMPDiscovery.View
             {
                 Console.WriteLine($"{i} - {CommandLabels[StateMachine[CurrentState][i]]}");
             }
+
+            Console.WriteLine();
         }
 
         private void GetCommand()
@@ -207,7 +209,20 @@ namespace SNMPDiscovery.View
 
         private void DefineDevice()
         {
-            //Posible acitons
+            string settingname, initialIP, finalIP, SNMPuser;
+
+            Console.Write("Setting name: ");
+            settingname = Console.ReadLine();
+            Console.Write("Initial IP: ");
+            initialIP = Console.ReadLine();
+            Console.Write("Final IP: ");
+            finalIP = Console.ReadLine();
+            Console.Write("SNMP community user (V2): ");
+            SNMPuser = Console.ReadLine();
+            Console.WriteLine();
+
+            //_controller.DefineDevice(settingname, initialIP, finalIP, SNMPuser);
+            _controller.DefineDevice("ColecciónSwitches", "192.168.1.42", "192.168.1.51", "public");
 
             //Next steps
             ShowCommands();

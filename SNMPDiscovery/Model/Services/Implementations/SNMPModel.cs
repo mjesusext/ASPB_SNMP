@@ -133,10 +133,12 @@ namespace SNMPDiscovery.Model.Services
             if (ChangedObjects.ContainsKey(type))
             {
                 ChangedObjects[type].Add(obj);
+                NotifyChanges();
             }
             else if (ChangedObjects.Count == 0)
             {
                 ChangedObjects.Add(type, new ArrayList() { obj });
+                NotifyChanges();
             }
             else
             {
@@ -299,7 +301,6 @@ namespace SNMPDiscovery.Model.Services
 
         public void Initialize()
         {
-            //ISNMPSettingDTO MockSNMPSetting = _model.BuildSNMPSetting("ColecciónSwitches", "192.168.1.42", "192.168.1.42", "public");
             ISNMPSettingDTO MockSNMPSetting = BuildSNMPSetting("ColecciónSwitches", "192.168.1.42", "192.168.1.51", "public");
             ISNMPProcessStrategy MockProcessProfileSetting = MockSNMPSetting.BuildProcess(EnumProcessingType.TopologyDiscovery);
         }

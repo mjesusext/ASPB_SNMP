@@ -27,6 +27,9 @@ namespace SNMPDiscovery.Controller
         
         public void DefineDevice(string settingID, string initialIP, string finalIP, string SNMPUser)
         {
+            //Validate data
+
+            //Consume data
             _model.BuildSNMPSetting(settingID, initialIP, finalIP, SNMPUser);
         }
 
