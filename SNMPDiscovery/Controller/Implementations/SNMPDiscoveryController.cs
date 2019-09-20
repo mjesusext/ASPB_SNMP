@@ -11,8 +11,8 @@ namespace SNMPDiscovery.Controller
 {
     public class SNMPDiscoveryController : ISNMPDiscoveryController
     {
-        private IObserver<ISNMPModelDTO> _view { get; set; }
-        private ISNMPModelDTO _model { get; set; }
+        public IObserver<ISNMPModelDTO> _view { get; set; }
+        public ISNMPModelDTO _model { get; set; }
 
         public SNMPDiscoveryController(ISNMPModelDTO ModelService)
         {
@@ -21,22 +21,35 @@ namespace SNMPDiscovery.Controller
 
             //Test
             _model.Initialize();
-            _model.StartDiscovery();
-            _model.RunProcesses();
         }
 
         #region Controller Implementation
-
-        public void GetUserInput(int i)
+        
+        public void DefineDevice(string settingID, string initialIP, string finalIP, string SNMPUser)
         {
-            //Lanzar metodo de Modelo segun el input introducido y el estado previo si procede
+            _model.BuildSNMPSetting(settingID, initialIP, finalIP, SNMPUser);
         }
 
-        public IDictionary<int, string> SendCommandsCollection()
+        public void LoadDiscoveryData() { }
+
+        public void DefineProcesses(string settingID, EnumProcessingType processType)
         {
-            //ToDo
-            throw new NotImplementedException();
+            _model.SNMPSettings[settingID].BuildProcess(processType);
         }
+
+        public void RunDiscovery()
+        {
+            _model.StartDiscovery();
+        }
+
+        public void PullData()
+        {
+
+        }
+
+        public void SaveDiscoveryData() { }
+
+        public void SaveProcessedData() { }
 
         #endregion
 

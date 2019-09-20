@@ -16,29 +16,11 @@ namespace SNMPDiscovery.View
         private ISNMPDiscoveryController _controller { get; set; }
         private IDisposable _observeableSubscription { get; set; }
         
-        private int CurrentState, PreviousState;
+        private EnumViewStates CurrentState, PreviousState;
 
-        private Action[] StateHandlers;
-        private readonly string[] CommandLabels =
-        {
-            "Main",
-            "Load existing SNMP data discovery",
-            "Select processing functions",
-            "Run processes",
-            "Set notification level",
-            "Prompt data",
-            "Exit",
-            "Back to previous menu"
-        };
-        private readonly int[][] StateMachine = 
-        { 
-            new int[] { 1, 2, 6 },
-            new int[] { 2, 7 },
-            new int[] { 2, 3, 7 },
-            new int[] { 4, 7 },
-            new int[] { 5, 7 },
-            new int[] { 3, 6, 7 }
-        };
+        private Dictionary<EnumViewStates, Action> StateHandlers;
+        private Dictionary<EnumViewStates, string> CommandLabels;
+        private Dictionary<EnumViewStates, EnumViewStates[]> StateMachine;
 
         //Mock for redirecting console to file
         private FileStream ostrm;
@@ -120,15 +102,49 @@ namespace SNMPDiscovery.View
         {
             CurrentState = 0;
             PreviousState = 0;
-            StateHandlers = new Action[]
+            StateHandlers = new Dictionary<EnumViewStates, Action>()
             {
-                BasicHandle,
-                LoadDataMenu,
-                ProcessingMenu,
-                RunProcessMenu,
-                SetNotificationMenu,
-                PromptDataMenu,
-                ExitMenu
+                { EnumViewStates.Main, BasicHandle },
+                { EnumViewStates.DeviceDefinition, DefineDevice },
+                { EnumViewStates.LoadDiscoveryData, LoadDataMenu },
+                { EnumViewStates.ProcessSelection, ProcessingMenu },
+                { EnumViewStates.ProcessExecution, RunProcessMenu },
+                { EnumViewStates.NotificationSetting, SetNotificationMenu },
+                { EnumViewStates.PullData, PromptDataMenu },
+                { EnumViewStates.SaveDiscoveryData, SaveDiscoveryDataMenu},
+                { EnumViewStates.SaveProcessedData, SaveProcessedDataMenu},
+                { EnumViewStates.BackMenu, null},
+                { EnumViewStates.Exit, ExitMenu}
+            };
+
+            CommandLabels = new Dictionary<EnumViewStates, string>()
+            {
+                { EnumViewStates.Main, "Main" },
+                { EnumViewStates.DeviceDefinition, "Define device" },
+                { EnumViewStates.LoadDiscoveryData, "Load existing SNMP data discovery" },
+                { EnumViewStates.ProcessSelection, "Select processing functions" },
+                { EnumViewStates.ProcessExecution, "Run processes" },
+                { EnumViewStates.NotificationSetting, "Set notification level" },
+                { EnumViewStates.PullData, "Prompt data" },
+                { EnumViewStates.SaveDiscoveryData, "Save discovery data"},
+                { EnumViewStates.SaveProcessedData, "Save processed data"},
+                { EnumViewStates.BackMenu, "Back to previous menu"},
+                { EnumViewStates.Exit, "Exit application" }
+            };
+
+            StateMachine = new Dictionary<EnumViewStates, EnumViewStates[]>
+            {
+                { EnumViewStates.Main, new EnumViewStates[]{ EnumViewStates.DeviceDefinition, EnumViewStates.LoadDiscoveryData, EnumViewStates.Exit } },
+                { EnumViewStates.DeviceDefinition, new EnumViewStates[]{ EnumViewStates.DeviceDefinition, EnumViewStates.ProcessSelection , EnumViewStates.BackMenu} },
+                { EnumViewStates.LoadDiscoveryData, new EnumViewStates[]{ EnumViewStates.ProcessSelection, EnumViewStates.BackMenu } },
+                { EnumViewStates.ProcessSelection, new EnumViewStates[]{ EnumViewStates.ProcessSelection, EnumViewStates.NotificationSetting, EnumViewStates.BackMenu } },
+                { EnumViewStates.NotificationSetting, new EnumViewStates[]{ EnumViewStates.ProcessExecution, EnumViewStates.BackMenu }  },
+                { EnumViewStates.ProcessExecution, new EnumViewStates[]{ EnumViewStates.PullData, EnumViewStates.BackMenu } },
+                { EnumViewStates.PullData, new EnumViewStates[]{ EnumViewStates.PullData, EnumViewStates.SaveDiscoveryData, EnumViewStates.SaveProcessedData, EnumViewStates.BackMenu } },
+                { EnumViewStates.SaveDiscoveryData, new EnumViewStates[]{ EnumViewStates.PullData, EnumViewStates.SaveDiscoveryData, EnumViewStates.SaveProcessedData, EnumViewStates.BackMenu }},
+                { EnumViewStates.SaveProcessedData, new EnumViewStates[]{ EnumViewStates.PullData, EnumViewStates.SaveDiscoveryData, EnumViewStates.SaveProcessedData, EnumViewStates.BackMenu }},
+                { EnumViewStates.BackMenu, null},
+                { EnumViewStates.Exit, null}
             };
 
             Console.WriteLine("Welcome to ASPB network documentation tool.\n");
@@ -167,12 +183,10 @@ namespace SNMPDiscovery.View
 
             Console.WriteLine();
 
+            //MJE - Under test
             //Back to previous level
-            if(StateMachine[CurrentState][GoingState] == 7)
+            if(StateMachine[CurrentState][GoingState] == EnumViewStates.BackMenu)
             {
-                //int NextStep = PreviousState;
-                //PreviousState = CurrentState;
-                //CurrentState = NextStep;
                 PreviousState = CurrentState--;
                 BasicHandle();
             }
@@ -185,6 +199,16 @@ namespace SNMPDiscovery.View
 
         private void BasicHandle()
         {
+            //Next steps
+            ShowCommands();
+            GetCommand();
+            StateHandlers[CurrentState].Invoke();
+        }
+
+        private void DefineDevice()
+        {
+            //Posible acitons
+
             //Next steps
             ShowCommands();
             GetCommand();
@@ -232,6 +256,26 @@ namespace SNMPDiscovery.View
         }
 
         private void PromptDataMenu()
+        {
+            //Posible acitons
+
+            //Next steps
+            ShowCommands();
+            GetCommand();
+            StateHandlers[CurrentState].Invoke();
+        }
+
+        private void SaveDiscoveryDataMenu()
+        {
+            //Posible acitons
+
+            //Next steps
+            ShowCommands();
+            GetCommand();
+            StateHandlers[CurrentState].Invoke();
+        }
+
+        private void SaveProcessedDataMenu()
         {
             //Posible acitons
 

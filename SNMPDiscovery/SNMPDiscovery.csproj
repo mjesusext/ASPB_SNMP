@@ -96,6 +96,7 @@
     <Compile Include="Model\Services\Implementations\SNMPObservableUnsubscriber.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SNMPEjemplo.cs" />
+    <Compile Include="View\EnumViewStates.cs" />
     <Compile Include="View\SNMPDiscoveryView.cs" />
   </ItemGroup>
   <ItemGroup />
