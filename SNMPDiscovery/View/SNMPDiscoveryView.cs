@@ -27,16 +27,16 @@ namespace SNMPDiscovery.View
             "Run processes",
             "Set notification level",
             "Prompt data",
-            "Back to previous menu",
-            "Exit"
+            "Exit",
+            "Back to previous menu"
         };
         private readonly int[][] StateMachine = 
         { 
-            new int[] { 1, 2, 7 },
-            new int[] { 2, 6, 7 },
-            new int[] { 2, 3, 6, 7 },
-            new int[] { 4, 6, 7 },
-            new int[] { 5, 6, 7 },
+            new int[] { 1, 2, 6 },
+            new int[] { 2, 7 },
+            new int[] { 2, 3, 7 },
+            new int[] { 4, 7 },
+            new int[] { 5, 7 },
             new int[] { 3, 6, 7 }
         };
 
@@ -122,13 +122,12 @@ namespace SNMPDiscovery.View
             PreviousState = 0;
             StateHandlers = new Action[]
             {
-                MainMenu,
+                BasicHandle,
                 LoadDataMenu,
                 ProcessingMenu,
                 RunProcessMenu,
                 SetNotificationMenu,
                 PromptDataMenu,
-                BackToPreviousMenu,
                 ExitMenu
             };
 
@@ -138,7 +137,7 @@ namespace SNMPDiscovery.View
 
         private void ShowCommands()
         {
-            Console.WriteLine("\n----- Available commands -----\n");
+            Console.WriteLine("----- Available commands -----\n");
 
             for (int i = 0; i < StateMachine[CurrentState].Length; i++)
             {
@@ -166,11 +165,25 @@ namespace SNMPDiscovery.View
                 }
             } while (wrongInput);
 
-            PreviousState = CurrentState;
-            CurrentState = StateMachine[CurrentState][GoingState];
+            Console.WriteLine();
+
+            //Back to previous level
+            if(StateMachine[CurrentState][GoingState] == 7)
+            {
+                //int NextStep = PreviousState;
+                //PreviousState = CurrentState;
+                //CurrentState = NextStep;
+                PreviousState = CurrentState--;
+                BasicHandle();
+            }
+            else
+            {
+                PreviousState = CurrentState;
+                CurrentState = StateMachine[CurrentState][GoingState];
+            }
         }
 
-        private void MainMenu()
+        private void BasicHandle()
         {
             //Next steps
             ShowCommands();
@@ -221,18 +234,6 @@ namespace SNMPDiscovery.View
         private void PromptDataMenu()
         {
             //Posible acitons
-
-            //Next steps
-            ShowCommands();
-            GetCommand();
-            StateHandlers[CurrentState].Invoke();
-        }
-
-        private void BackToPreviousMenu()
-        {
-            int NextStep = PreviousState;
-            PreviousState = CurrentState;
-            CurrentState = NextStep;
 
             //Next steps
             ShowCommands();
