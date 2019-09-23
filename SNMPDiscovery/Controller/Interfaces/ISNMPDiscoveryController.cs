@@ -10,8 +10,9 @@ namespace SNMPDiscovery.Controller
 {
     public interface ISNMPDiscoveryController
     {
-        IObserver<ISNMPModelDTO> _view { get; set; }
-        ISNMPModelDTO _model { get; set; }
+        IObserver<ISNMPModelDTO> View { get; set; }
+        ISNMPModelDTO Model { get; set; }
+        event Action<List<string>> OnInvalidInputs;
         
         //Define Devices To Discover
         void DefineDevice(string settingID, string initialIP, string finalIP, string SNMPUser);

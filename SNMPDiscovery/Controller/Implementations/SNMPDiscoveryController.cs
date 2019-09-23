@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using SNMPDiscovery.Model.DTO;
@@ -11,38 +12,66 @@ namespace SNMPDiscovery.Controller
 {
     public class SNMPDiscoveryController : ISNMPDiscoveryController
     {
-        public IObserver<ISNMPModelDTO> _view { get; set; }
-        public ISNMPModelDTO _model { get; set; }
+        public IObserver<ISNMPModelDTO> View { get; set; }
+        public ISNMPModelDTO Model { get; set; }
+        public event Action<List<string>> OnInvalidInputs;
+
+        private List<string> _valMsgs;
 
         public SNMPDiscoveryController(ISNMPModelDTO ModelService)
         {
-            _model = ModelService;
-            _view = new SNMPDiscoveryView(ModelService, this);
+            _valMsgs = new List<string>();
+            Model = ModelService;
+            View = new SNMPDiscoveryView(ModelService, this);
 
             //Test
-            _model.Initialize();
+            Model.Initialize();
         }
 
         #region Controller Implementation
-        
+
         public void DefineDevice(string settingID, string initialIP, string finalIP, string SNMPUser)
         {
             //Validate data
+            IPAddress ipaddr;
 
-            //Consume data
-            _model.BuildSNMPSetting(settingID, initialIP, finalIP, SNMPUser);
+            if (string.IsNullOrWhiteSpace(settingID))
+            {
+                _valMsgs.Add("Null or empty setting ID");
+            }
+
+            if(IPAddress.TryParse(initialIP, out ipaddr))
+            {
+                _valMsgs.Add("Invalid initial IP");
+            }
+
+            if (IPAddress.TryParse(initialIP, out ipaddr))
+            {
+                _valMsgs.Add("Invalid final IP");
+            }
+
+            if (_valMsgs.Count == 0)
+            {
+                //Consume data
+                Model.BuildSNMPSetting(settingID, initialIP, finalIP, SNMPUser);
+            }
+            else
+            {
+                OnInvalidInputs(_valMsgs);
+                _valMsgs.Clear();
+            }
         }
 
         public void LoadDiscoveryData() { }
 
         public void DefineProcesses(string settingID, EnumProcessingType processType)
         {
-            _model.SNMPSettings[settingID].BuildProcess(processType);
+            Model.SNMPSettings[settingID].BuildProcess(processType);
         }
 
         public void RunDiscovery()
         {
-            _model.StartDiscovery();
+            Model.StartDiscovery();
         }
 
         public void PullData()

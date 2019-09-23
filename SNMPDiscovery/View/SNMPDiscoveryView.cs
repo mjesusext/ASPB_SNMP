@@ -31,7 +31,7 @@ namespace SNMPDiscovery.View
         {
             _controller = Controller;
             _observeableSubscription = Model.Subscribe(this);
-
+            _controller.OnInvalidInputs += ControllerMessageHandler;
             //Mock for redirecting console to file
             //RedirectToFile(true);
 
@@ -92,6 +92,20 @@ namespace SNMPDiscovery.View
         public void OnCompleted()
         {
             throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region Controller Message Handler
+
+        private void ControllerMessageHandler(List<string> ListMsgs)
+        {
+            Console.WriteLine("Validation of input values:");
+
+            foreach (var msg in ListMsgs)
+            {
+                Console.WriteLine($"\t - {msg}");
+            }
         }
 
         #endregion
@@ -221,8 +235,8 @@ namespace SNMPDiscovery.View
             SNMPuser = Console.ReadLine();
             Console.WriteLine();
 
-            //_controller.DefineDevice(settingname, initialIP, finalIP, SNMPuser);
-            _controller.DefineDevice("ColecciónSwitches", "192.168.1.42", "192.168.1.51", "public");
+            _controller.DefineDevice(settingname, initialIP, finalIP, SNMPuser);
+            //_controller.DefineDevice("ColecciónSwitches", "192.168.1.42", "192.168.1.51", "public");
 
             //Next steps
             ShowCommands();
