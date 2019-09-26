@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using SNMPDiscovery.Model.DTO;
 using SNMPDiscovery.Model.Services;
 using SNMPDiscovery.View;
-using SNMPDiscovery.Controller.Helpers;
+using SNMPDiscovery.Model.Helpers;
 
 namespace SNMPDiscovery.Controller
 {
@@ -35,12 +35,12 @@ namespace SNMPDiscovery.Controller
                 _valMsgs.Add("Null or empty setting ID");
             }
 
-            if (!ControllerHelper.ValidateIPv4Format(initialIP))
+            if (!ModelHelper.ValidateIPAndMask(initialIP))
             {
                 _valMsgs.Add("Invalid initial IP");
             }
 
-            if (!ControllerHelper.ValidateIPv4Format(finalIP))
+            if (!ModelHelper.ValidateIPAndMask(finalIP))
             {
                 _valMsgs.Add("Invalid final IP");
             }

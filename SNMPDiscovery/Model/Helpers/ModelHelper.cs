@@ -9,6 +9,91 @@ namespace SNMPDiscovery.Model.Helpers
 {
     public static class ModelHelper
     {
+        public static bool ValidateIPAndMask(string ip)
+        {
+            bool result = false;
+            int netmask, maskpos;
+            int[] IPcomponents;
+
+            //Contains mask
+            maskpos = ip.IndexOf('/');
+            if (maskpos == -1)
+            {
+                return result;
+            }
+
+            //Mask range and conversion
+            result = int.TryParse(ip.Substring(maskpos + 1), out netmask);
+            if (!result && (netmask < 0 || netmask > 32))
+            {
+                return result;
+            }
+
+            //Address conversion
+            try
+            {
+                IPcomponents = ip.Substring(0, maskpos - 1).Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries).Select(x => int.Parse(x)).ToArray();
+            }
+            catch
+            {
+                return result;
+            }
+
+            //Check # of sections = 4
+            if (IPcomponents.Length != 4)
+            {
+                return result;
+            }
+
+            //Check 0 to 255 range of every component
+            for (int i = 0; i < IPcomponents.Length; i++)
+            {
+                if (IPcomponents[i] < 0 || IPcomponents[i] > 255)
+                {
+                    return result;
+                }
+            }
+
+            result = true;
+
+            return result;
+        }
+
+        public static IList<IPAddress> GenerateHostList(string initialIPandMask, string finalIPandMask)
+        {
+            IList<IPAddress> res = new List<IPAddress>();
+
+            string initialAddressComponent, finalAddressComponent;
+            int initialMaskComponent, finalMaskComponent, maskpos;
+
+            //Decompose inputs
+            maskpos = initialIPandMask.IndexOf('/');
+            initialAddressComponent = initialIPandMask.Substring(0, maskpos - 1);
+            initialMaskComponent = int.Parse(initialIPandMask.Substring(maskpos + 1));
+
+            maskpos = finalIPandMask.IndexOf('/');
+            finalAddressComponent = finalIPandMask.Substring(0, maskpos - 1);
+            finalMaskComponent = int.Parse(finalIPandMask.Substring(maskpos + 1));
+
+            //Get variable values of IP
+            int LowerIPboundSNMP = IPAddress.HostToNetworkOrder(BitConverter.ToInt32(IPAddress.Parse(initialAddressComponent).GetAddressBytes(), 0));
+            int UpperIPboundSNMP = IPAddress.HostToNetworkOrder(BitConverter.ToInt32(IPAddress.Parse(finalAddressComponent).GetAddressBytes(), 0));
+
+            for (int i = LowerIPboundSNMP; i <= UpperIPboundSNMP; i++)
+            {
+                IPAddress currentIP = new IPAddress(i);
+                IPAddress broadcastIP = GetBroadcastAddress(currentIP, CreateMaskByNetBitLength(initialMaskComponent));
+                IPAddress networkIP = GetNetworkAddress(currentIP, CreateMaskByNetBitLength(initialMaskComponent));
+
+                if(!currentIP.Equals(broadcastIP) && !currentIP.Equals(networkIP))
+                {
+                    res.Add(currentIP);
+                }
+            }
+
+            return res;
+        }
+
         public static IPAddress GetBroadcastAddress(IPAddress address, IPAddress subnetMask)
         {
             byte[] ipAdressBytes = address.GetAddressBytes();
