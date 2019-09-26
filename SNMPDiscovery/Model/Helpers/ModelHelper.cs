@@ -49,7 +49,7 @@ namespace SNMPDiscovery.Model.Helpers
             return network1.Equals(network2);
         }
 
-        public static IPAddress CreateByHostBitLength(int hostpartLength)
+        public static IPAddress CreateMaskByHostBitLength(int hostpartLength)
         {
             int hostPartLength = hostpartLength;
             int netPartLength = 32 - hostPartLength;
@@ -76,19 +76,19 @@ namespace SNMPDiscovery.Model.Helpers
             return new IPAddress(binaryMask);
         }
 
-        public static IPAddress CreateByNetBitLength(int netpartLength)
+        public static IPAddress CreateMaskByNetBitLength(int netpartLength)
         {
             int hostPartLength = 32 - netpartLength;
-            return CreateByHostBitLength(hostPartLength);
+            return CreateMaskByHostBitLength(hostPartLength);
         }
 
-        public static IPAddress CreateByHostNumber(int numberOfHosts)
+        public static IPAddress CreateMaskByHostNumber(int numberOfHosts)
         {
             int maxNumber = numberOfHosts + 1;
 
             string b = Convert.ToString(maxNumber, 2);
 
-            return CreateByHostBitLength(b.Length);
+            return CreateMaskByHostBitLength(b.Length);
         }
     }
 }
