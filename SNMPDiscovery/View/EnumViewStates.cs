@@ -17,7 +17,7 @@ namespace SNMPDiscovery.View
         PullData = 6,
         SaveDiscoveryData = 7,
         SaveProcessedData = 8,
-        BackMenu = 9,
+        BackAction = 9,
         Exit = 10
     }
 }

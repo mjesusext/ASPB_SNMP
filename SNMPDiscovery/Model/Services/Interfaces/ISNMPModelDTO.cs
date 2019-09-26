@@ -16,7 +16,6 @@ namespace SNMPDiscovery.Model.Services
         ISNMPDeviceDTO BuildSNMPDevice(string targetIP);
         ISNMPDeviceDTO BuildSNMPDevice(int targetIP);
 
-        void Initialize();
         void StartDiscovery();
         void RunProcesses();
         void SaveData();

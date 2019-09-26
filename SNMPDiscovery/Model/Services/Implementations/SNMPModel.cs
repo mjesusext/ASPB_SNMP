@@ -284,11 +284,6 @@ namespace SNMPDiscovery.Model.Services
             //}
             //Console.SetOut(writer);
 
-            //Mock methods for development
-            //MockGetSettings();
-            //StartDiscovery();
-            //RunProcesses();
-
             ////Mock for undoing things
             //Console.SetOut(oldOut);
             //writer.Close();
@@ -297,14 +292,5 @@ namespace SNMPDiscovery.Model.Services
 
         #endregion
 
-        #region Mocks
-
-        public void Initialize()
-        {
-            ISNMPSettingDTO MockSNMPSetting = BuildSNMPSetting("ColecciónSwitches", "192.168.1.42", "192.168.1.51", "public");
-            ISNMPProcessStrategy MockProcessProfileSetting = MockSNMPSetting.BuildProcess(EnumProcessingType.TopologyDiscovery);
-        }
-
-        #endregion
     }
 }

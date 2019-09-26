@@ -15,8 +15,8 @@ namespace SNMPDiscovery.View
     {
         private ISNMPDiscoveryController _controller { get; set; }
         private IDisposable _observeableSubscription { get; set; }
-        
-        private EnumViewStates CurrentState, PreviousState;
+        private bool _currentactionOK;
+        private Stack<EnumViewStates> StateHistory;
 
         private Dictionary<EnumViewStates, Action> StateHandlers;
         private Dictionary<EnumViewStates, string> CommandLabels;
@@ -31,7 +31,7 @@ namespace SNMPDiscovery.View
         {
             _controller = Controller;
             _observeableSubscription = Model.Subscribe(this);
-            _controller.OnInvalidInputs += ControllerMessageHandler;
+            _controller.OnInvalidInputs += ControllerErrorMessageHandler;
             //Mock for redirecting console to file
             //RedirectToFile(true);
 
@@ -98,14 +98,16 @@ namespace SNMPDiscovery.View
 
         #region Controller Message Handler
 
-        private void ControllerMessageHandler(List<string> ListMsgs)
+        private void ControllerErrorMessageHandler(List<string> ListMsgs)
         {
-            Console.WriteLine("Validation of input values:");
+            Console.WriteLine("Validation errors of input values:");
 
             foreach (var msg in ListMsgs)
             {
                 Console.WriteLine($"\t - {msg}");
             }
+
+            _currentactionOK = false;
         }
 
         #endregion
@@ -114,11 +116,12 @@ namespace SNMPDiscovery.View
 
         private void Initialize()
         {
-            CurrentState = 0;
-            PreviousState = 0;
+            _currentactionOK = true;
+            StateHistory = new Stack<EnumViewStates>(new EnumViewStates[]{ EnumViewStates.Main });
+
             StateHandlers = new Dictionary<EnumViewStates, Action>()
             {
-                { EnumViewStates.Main, BasicHandle },
+                { EnumViewStates.Main, NextActionHandle },
                 { EnumViewStates.DeviceDefinition, DefineDevice },
                 { EnumViewStates.LoadDiscoveryData, LoadDataMenu },
                 { EnumViewStates.ProcessSelection, ProcessingMenu },
@@ -127,7 +130,7 @@ namespace SNMPDiscovery.View
                 { EnumViewStates.PullData, PromptDataMenu },
                 { EnumViewStates.SaveDiscoveryData, SaveDiscoveryDataMenu},
                 { EnumViewStates.SaveProcessedData, SaveProcessedDataMenu},
-                { EnumViewStates.BackMenu, null},
+                { EnumViewStates.BackAction, null},
                 { EnumViewStates.Exit, ExitMenu}
             };
 
@@ -142,36 +145,36 @@ namespace SNMPDiscovery.View
                 { EnumViewStates.PullData, "Prompt data" },
                 { EnumViewStates.SaveDiscoveryData, "Save discovery data"},
                 { EnumViewStates.SaveProcessedData, "Save processed data"},
-                { EnumViewStates.BackMenu, "Back to previous menu"},
+                { EnumViewStates.BackAction, "Back to previous action"},
                 { EnumViewStates.Exit, "Exit application" }
             };
 
             StateMachine = new Dictionary<EnumViewStates, EnumViewStates[]>
             {
                 { EnumViewStates.Main, new EnumViewStates[]{ EnumViewStates.DeviceDefinition, EnumViewStates.LoadDiscoveryData, EnumViewStates.Exit } },
-                { EnumViewStates.DeviceDefinition, new EnumViewStates[]{ EnumViewStates.DeviceDefinition, EnumViewStates.ProcessSelection , EnumViewStates.BackMenu} },
-                { EnumViewStates.LoadDiscoveryData, new EnumViewStates[]{ EnumViewStates.ProcessSelection, EnumViewStates.BackMenu } },
-                { EnumViewStates.ProcessSelection, new EnumViewStates[]{ EnumViewStates.ProcessSelection, EnumViewStates.NotificationSetting, EnumViewStates.BackMenu } },
-                { EnumViewStates.NotificationSetting, new EnumViewStates[]{ EnumViewStates.ProcessExecution, EnumViewStates.BackMenu }  },
-                { EnumViewStates.ProcessExecution, new EnumViewStates[]{ EnumViewStates.PullData, EnumViewStates.BackMenu } },
-                { EnumViewStates.PullData, new EnumViewStates[]{ EnumViewStates.PullData, EnumViewStates.SaveDiscoveryData, EnumViewStates.SaveProcessedData, EnumViewStates.BackMenu } },
-                { EnumViewStates.SaveDiscoveryData, new EnumViewStates[]{ EnumViewStates.PullData, EnumViewStates.SaveDiscoveryData, EnumViewStates.SaveProcessedData, EnumViewStates.BackMenu }},
-                { EnumViewStates.SaveProcessedData, new EnumViewStates[]{ EnumViewStates.PullData, EnumViewStates.SaveDiscoveryData, EnumViewStates.SaveProcessedData, EnumViewStates.BackMenu }},
-                { EnumViewStates.BackMenu, null},
+                { EnumViewStates.DeviceDefinition, new EnumViewStates[]{ EnumViewStates.DeviceDefinition, EnumViewStates.ProcessSelection , EnumViewStates.BackAction} },
+                { EnumViewStates.LoadDiscoveryData, new EnumViewStates[]{ EnumViewStates.ProcessSelection, EnumViewStates.BackAction } },
+                { EnumViewStates.ProcessSelection, new EnumViewStates[]{ EnumViewStates.ProcessSelection, EnumViewStates.NotificationSetting, EnumViewStates.BackAction } },
+                { EnumViewStates.NotificationSetting, new EnumViewStates[]{ EnumViewStates.ProcessExecution, EnumViewStates.BackAction }  },
+                { EnumViewStates.ProcessExecution, new EnumViewStates[]{ EnumViewStates.PullData, EnumViewStates.BackAction } },
+                { EnumViewStates.PullData, new EnumViewStates[]{ EnumViewStates.PullData, EnumViewStates.SaveDiscoveryData, EnumViewStates.SaveProcessedData, EnumViewStates.BackAction } },
+                { EnumViewStates.SaveDiscoveryData, new EnumViewStates[]{ EnumViewStates.PullData, EnumViewStates.SaveDiscoveryData, EnumViewStates.SaveProcessedData, EnumViewStates.BackAction }},
+                { EnumViewStates.SaveProcessedData, new EnumViewStates[]{ EnumViewStates.PullData, EnumViewStates.SaveDiscoveryData, EnumViewStates.SaveProcessedData, EnumViewStates.BackAction }},
+                { EnumViewStates.BackAction, null},
                 { EnumViewStates.Exit, null}
             };
 
             Console.WriteLine("Welcome to ASPB network documentation tool.\n");
-            StateHandlers[CurrentState].Invoke();
+            StateHandlers[StateHistory.Peek()].Invoke();
         }
 
         private void ShowCommands()
         {
             Console.WriteLine("----- Available commands -----\n");
 
-            for (int i = 0; i < StateMachine[CurrentState].Length; i++)
+            for (int i = 0; i < StateMachine[StateHistory.Peek()].Length; i++)
             {
-                Console.WriteLine($"{i} - {CommandLabels[StateMachine[CurrentState][i]]}");
+                Console.WriteLine($"{i} - {CommandLabels[StateMachine[StateHistory.Peek()][i]]}");
             }
 
             Console.WriteLine();
@@ -185,13 +188,14 @@ namespace SNMPDiscovery.View
             do
             {
                 Console.Write("Select option: ");
+                                
                 wrongInput = !int.TryParse(Console.ReadLine(), out GoingState);
 
                 if (wrongInput)
                 {
                     Console.WriteLine("ERROR: Input values are not a number.");
                 }
-                else if (GoingState >= StateMachine[CurrentState].Length)
+                else if (GoingState >= StateMachine[StateHistory.Peek()].Length)
                 {
                     Console.WriteLine("ERROR: Selected option not available");
                 }
@@ -199,26 +203,28 @@ namespace SNMPDiscovery.View
 
             Console.WriteLine();
 
-            //MJE - Under test
-            //Back to previous level
-            if(StateMachine[CurrentState][GoingState] == EnumViewStates.BackMenu)
+            if(StateMachine[StateHistory.Peek()][GoingState] == EnumViewStates.BackAction)
             {
-                PreviousState = CurrentState--;
-                BasicHandle();
+                StateHistory.Pop();
+                NextActionHandle();
             }
             else
             {
-                PreviousState = CurrentState;
-                CurrentState = StateMachine[CurrentState][GoingState];
+                StateHistory.Push(StateMachine[StateHistory.Peek()][GoingState]);
             }
         }
 
-        private void BasicHandle()
+        private void NextActionHandle()
         {
-            //Next steps
+            if (!_currentactionOK)
+            {
+                StateHistory.Pop();
+                _currentactionOK = true;
+            }
+
             ShowCommands();
             GetCommand();
-            StateHandlers[CurrentState].Invoke();
+            StateHandlers[StateHistory.Peek()].Invoke();
         }
 
         private void DefineDevice()
@@ -238,80 +244,56 @@ namespace SNMPDiscovery.View
             _controller.DefineDevice(settingname, initialIP, finalIP, SNMPuser);
             //_controller.DefineDevice("ColecciónSwitches", "192.168.1.42", "192.168.1.51", "public");
 
-            //Next steps
-            ShowCommands();
-            GetCommand();
-            StateHandlers[CurrentState].Invoke();
+            NextActionHandle();
         }
 
         private void LoadDataMenu()
         {
             //Posible acitons
 
-            //Next steps
-            ShowCommands();
-            GetCommand();
-            StateHandlers[CurrentState].Invoke();
+            NextActionHandle();
         }
 
         private void ProcessingMenu()
         {
             //Posible acitons
 
-            //Next steps
-            ShowCommands();
-            GetCommand();
-            StateHandlers[CurrentState].Invoke();
+            NextActionHandle();
         }
 
         private void RunProcessMenu()
         {
             //Posible acitons
 
-            //Next steps
-            ShowCommands();
-            GetCommand();
-            StateHandlers[CurrentState].Invoke();
+            NextActionHandle();
         }
 
         private void SetNotificationMenu()
         {
             //Posible acitons
 
-            //Next steps
-            ShowCommands();
-            GetCommand();
-            StateHandlers[CurrentState].Invoke();
+            NextActionHandle();
         }
 
         private void PromptDataMenu()
         {
             //Posible acitons
 
-            //Next steps
-            ShowCommands();
-            GetCommand();
-            StateHandlers[CurrentState].Invoke();
+            NextActionHandle();
         }
 
         private void SaveDiscoveryDataMenu()
         {
             //Posible acitons
 
-            //Next steps
-            ShowCommands();
-            GetCommand();
-            StateHandlers[CurrentState].Invoke();
+            NextActionHandle();
         }
 
         private void SaveProcessedDataMenu()
         {
             //Posible acitons
 
-            //Next steps
-            ShowCommands();
-            GetCommand();
-            StateHandlers[CurrentState].Invoke();
+            NextActionHandle();
         }
 
         private void ExitMenu()

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using SNMPDiscovery.Model.DTO;
 using SNMPDiscovery.Model.Services;
 using SNMPDiscovery.View;
+using SNMPDiscovery.Controller.Helpers;
 
 namespace SNMPDiscovery.Controller
 {
@@ -23,29 +24,23 @@ namespace SNMPDiscovery.Controller
             _valMsgs = new List<string>();
             Model = ModelService;
             View = new SNMPDiscoveryView(ModelService, this);
-
-            //Test
-            Model.Initialize();
         }
 
         #region Controller Implementation
 
         public void DefineDevice(string settingID, string initialIP, string finalIP, string SNMPUser)
         {
-            //Validate data
-            IPAddress ipaddr;
-
             if (string.IsNullOrWhiteSpace(settingID))
             {
                 _valMsgs.Add("Null or empty setting ID");
             }
 
-            if(IPAddress.TryParse(initialIP, out ipaddr))
+            if (!ControllerHelper.ValidateIPv4Format(initialIP))
             {
                 _valMsgs.Add("Invalid initial IP");
             }
 
-            if (IPAddress.TryParse(initialIP, out ipaddr))
+            if (!ControllerHelper.ValidateIPv4Format(finalIP))
             {
                 _valMsgs.Add("Invalid final IP");
             }

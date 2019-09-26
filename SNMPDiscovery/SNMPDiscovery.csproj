@@ -62,6 +62,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controller\Helpers\ControllerHelper.cs" />
     <Compile Include="Model\DAO\Implementations\SNMPSettingXMLDAO.cs" />
     <Compile Include="Model\DAO\Interfaces\ISNMPDataDAO.cs" />
     <Compile Include="Model\DTO\Enums\EnumDeviceType.cs" />
@@ -73,6 +74,7 @@
     <Compile Include="Model\DTO\Implementations\SNMPDeviceDTO.cs" />
     <Compile Include="Model\DTO\Interfaces\ITrackeableObject.cs" />
     <Compile Include="Model\DTO\Interfaces\ITrackedObjectContainer.cs" />
+    <Compile Include="Model\Helpers\ModelHelper.cs" />
     <Compile Include="Model\Services\Implementations\SNMPModel.cs" />
     <Compile Include="Model\DTO\Implementations\SNMPProcessedValueDTO.cs" />
     <Compile Include="Model\DTO\Enums\EnumProcessingType.cs" />
