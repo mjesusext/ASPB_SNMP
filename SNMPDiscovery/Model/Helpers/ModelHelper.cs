@@ -75,7 +75,7 @@ namespace SNMPDiscovery.Model.Helpers
             finalMask = int.Parse(finalIPAndMask.Substring(maskpos + 1));
 
             //Previous validation
-            if(initialIPAddress <= finalIPAddress && finalMask >= initialMask)
+            if(initialIPAddress <= finalIPAddress && finalMask == initialMask)
             {
                 result = true;
             }
@@ -83,37 +83,37 @@ namespace SNMPDiscovery.Model.Helpers
             return result;
         }
 
-        public static IList<IPAddress> GenerateHostList(string initialIPAndMask, string finalIPAndMask)
+        public static IPAddress ExtractIPAddress(string targetIPAndMask)
+        {
+            int maskpos;
+            
+            maskpos = targetIPAndMask.IndexOf('/');
+            return IPAddress.Parse(targetIPAndMask.Substring(0, maskpos - 1));
+        }
+
+        public static int ExtractNetworkMask(string targetIPAndMask)
+        {
+            int maskpos;
+
+            maskpos = targetIPAndMask.IndexOf('/');
+            return int.Parse(targetIPAndMask.Substring(maskpos + 1));
+        }
+
+        public static IList<IPAddress> GenerateHostList(IPAddress initialIP, IPAddress finalIP, int NetworkMask)
         {
             IList<IPAddress> res = new List<IPAddress>();
-
-            string initialAddressComponent, finalAddressComponent;
-            int initialMaskComponent, finalMaskComponent, maskpos;
-            IPAddress initialMask, finalMask;
-
-            //Decompose inputs
-            maskpos = initialIPAndMask.IndexOf('/');
-            initialAddressComponent = initialIPAndMask.Substring(0, maskpos - 1);
-            initialMaskComponent = int.Parse(initialIPAndMask.Substring(maskpos + 1));
-
-            maskpos = finalIPAndMask.IndexOf('/');
-            finalAddressComponent = finalIPAndMask.Substring(0, maskpos - 1);
-            finalMaskComponent = int.Parse(finalIPAndMask.Substring(maskpos + 1));
-
-            //Previous validation
-            //If net IP --> generate full range
+            IPAddress netMask;
 
             //Set variables for functionality
-            int LowerIPboundSNMP = IPAddress.HostToNetworkOrder(BitConverter.ToInt32(IPAddress.Parse(initialAddressComponent).GetAddressBytes(), 0));
-            int UpperIPboundSNMP = IPAddress.HostToNetworkOrder(BitConverter.ToInt32(IPAddress.Parse(finalAddressComponent).GetAddressBytes(), 0));
-            initialMask = CreateMaskByNetBitLength(initialMaskComponent);
-            finalMask = CreateMaskByNetBitLength(initialMaskComponent);
+            int LowerIPboundSNMP = IPAddress.HostToNetworkOrder(BitConverter.ToInt32(initialIP.GetAddressBytes(), 0));
+            int UpperIPboundSNMP = IPAddress.HostToNetworkOrder(BitConverter.ToInt32(finalIP.GetAddressBytes(), 0));
+            netMask = CreateMaskByNetBitLength(NetworkMask);
 
             for (int i = LowerIPboundSNMP; i <= UpperIPboundSNMP; i++)
             {
                 IPAddress currentIP = new IPAddress(i);
-                IPAddress broadcastIP = GetBroadcastAddress(currentIP, initialMask);
-                IPAddress networkIP = GetNetworkAddress(currentIP, finalMask);
+                IPAddress broadcastIP = GetBroadcastAddress(currentIP, netMask);
+                IPAddress networkIP = GetNetworkAddress(currentIP, netMask);
 
                 if(!currentIP.Equals(broadcastIP) && !currentIP.Equals(networkIP))
                 {

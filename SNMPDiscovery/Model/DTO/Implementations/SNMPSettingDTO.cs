@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using SNMPDiscovery.Model.Helpers;
 using SNMPDiscovery.Model.Services;
 
 namespace SNMPDiscovery.Model.DTO
@@ -14,6 +15,7 @@ namespace SNMPDiscovery.Model.DTO
         public string ID { get; set; }
         public IPAddress InitialIP { get; set; }
         public IPAddress FinalIP { get; set; }
+        public int NetworkMask { get; set; }
         public string CommunityString { get; set; }
         public IDictionary<string, ISNMPProcessStrategy> Processes { get; set; }
         public IDictionary<string, IOIDSettingDTO> OIDSettings { get; set; }
@@ -72,11 +74,12 @@ namespace SNMPDiscovery.Model.DTO
 
         #region Constructors
 
-        public SNMPSettingDTO(string id, string initialIP, string finalIP, string SNMPUser, Action<object, Type> ChangeTrackerHandler)
+        public SNMPSettingDTO(string id, string initialIPAndMask, string finalIPAndMask, string SNMPUser, Action<object, Type> ChangeTrackerHandler)
         {
             ID = id;
-            InitialIP = IPAddress.Parse(initialIP);
-            FinalIP = finalIP == null ? InitialIP : IPAddress.Parse(finalIP);
+            InitialIP = ModelHelper.ExtractIPAddress(initialIPAndMask);
+            FinalIP = finalIPAndMask == null ? InitialIP : ModelHelper.ExtractIPAddress(finalIPAndMask);
+            NetworkMask = ModelHelper.ExtractNetworkMask(initialIPAndMask);
             CommunityString = SNMPUser;
 
             OnChange += ChangeTrackerHandler;

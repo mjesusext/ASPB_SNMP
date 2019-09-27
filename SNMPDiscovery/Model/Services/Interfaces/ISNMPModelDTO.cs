@@ -12,9 +12,9 @@ namespace SNMPDiscovery.Model.Services
         IDictionary<string, ISNMPSettingDTO> SNMPSettings { get; set; }
         IDictionary<string, ISNMPDeviceDTO> SNMPData { get; set; }
 
-        ISNMPSettingDTO BuildSNMPSetting(string ID, string initialIP, string finalIP, string SNMPUser);
-        ISNMPDeviceDTO BuildSNMPDevice(string targetIP);
-        ISNMPDeviceDTO BuildSNMPDevice(int targetIP);
+        ISNMPSettingDTO BuildSNMPSetting(string ID, string initialIPAndMask, string finalIPAndMask, string SNMPUser);
+        ISNMPDeviceDTO BuildSNMPDevice(string targetIPAndMask);
+        ISNMPDeviceDTO BuildSNMPDevice(int targetIP, int targetMask);
 
         void StartDiscovery();
         void RunProcesses();

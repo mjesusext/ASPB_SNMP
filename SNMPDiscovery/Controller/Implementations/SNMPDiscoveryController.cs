@@ -28,24 +28,24 @@ namespace SNMPDiscovery.Controller
 
         #region Controller Implementation
 
-        public void DefineDevice(string settingID, string initialIP, string finalIP, string SNMPUser)
+        public void DefineDevice(string settingID, string initialIPAndMask, string finalIPAndMask, string SNMPUser)
         {
             if (string.IsNullOrWhiteSpace(settingID))
             {
                 _valMsgs.Add("Null or empty setting ID");
             }
 
-            if (!ModelHelper.ValidateIPAndMask(initialIP))
+            if (!ModelHelper.ValidateIPAndMask(initialIPAndMask))
             {
                 _valMsgs.Add("Invalid initial IP");
             }
 
-            if (!ModelHelper.ValidateIPAndMask(finalIP))
+            if (!ModelHelper.ValidateIPAndMask(finalIPAndMask))
             {
                 _valMsgs.Add("Invalid final IP");
             }
 
-            if(!ModelHelper.ValidateIPandMaskRange(initialIP, finalIP))
+            if(!ModelHelper.ValidateIPandMaskRange(initialIPAndMask, finalIPAndMask))
             {
                 _valMsgs.Add("Invalid IP range");
             }
@@ -53,7 +53,7 @@ namespace SNMPDiscovery.Controller
             if (_valMsgs.Count == 0)
             {
                 //Consume data
-                Model.BuildSNMPSetting(settingID, initialIP, finalIP, SNMPUser);
+                Model.BuildSNMPSetting(settingID, initialIPAndMask, finalIPAndMask, SNMPUser);
             }
             else
             {

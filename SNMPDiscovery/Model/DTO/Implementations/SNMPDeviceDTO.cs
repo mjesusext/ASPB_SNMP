@@ -12,6 +12,7 @@ namespace SNMPDiscovery.Model.DTO
     public class SNMPDeviceDTO : ISNMPDeviceDTO
     {
         public IPAddress TargetIP { get; set; }
+        public int NetworkMask { get; set; }
         public IDictionary<string, ISNMPRawEntryDTO> SNMPRawDataEntries { get; set; }
         public IDictionary<string, ISNMPProcessedValueDTO> SNMPProcessedData { get; set; }
 
@@ -76,17 +77,28 @@ namespace SNMPDiscovery.Model.DTO
 
         #region Constructors
 
-        public SNMPDeviceDTO(string targetIP, Action<object, Type> ChangeTrackerHandler)
+        public SNMPDeviceDTO(IPAddress targetIP, int networkMask, Action<object, Type> ChangeTrackerHandler)
         {
-            TargetIP = IPAddress.Parse(targetIP);
+            TargetIP = targetIP;
+            NetworkMask = networkMask;
             OnChange += ChangeTrackerHandler;
 
             OnChange?.Invoke(this, typeof(ISNMPDeviceDTO));
         }
 
-        public SNMPDeviceDTO(int targetIP, Action<object, Type> ChangeTrackerHandler)
+        public SNMPDeviceDTO(string targetIP, int networkMask, Action<object, Type> ChangeTrackerHandler)
+        {
+            TargetIP = IPAddress.Parse(targetIP);
+            NetworkMask = networkMask;
+            OnChange += ChangeTrackerHandler;
+
+            OnChange?.Invoke(this, typeof(ISNMPDeviceDTO));
+        }
+
+        public SNMPDeviceDTO(int targetIP, int networkMask, Action<object, Type> ChangeTrackerHandler)
         {
             TargetIP = new IPAddress(targetIP);
+            NetworkMask = networkMask;
             OnChange += ChangeTrackerHandler;
 
             OnChange?.Invoke(this, typeof(ISNMPDeviceDTO));

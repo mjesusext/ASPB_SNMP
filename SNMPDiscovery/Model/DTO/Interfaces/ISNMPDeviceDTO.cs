@@ -10,6 +10,7 @@ namespace SNMPDiscovery.Model.DTO
     public interface ISNMPDeviceDTO : ITrackeableObject
     {
         IPAddress TargetIP { get; set; }
+        int NetworkMask { get; set; }
         IDictionary<string, ISNMPRawEntryDTO> SNMPRawDataEntries { get; set; }
         IDictionary<string, ISNMPProcessedValueDTO> SNMPProcessedData { get; set; }
 

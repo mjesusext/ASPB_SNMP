@@ -9,6 +9,7 @@ using System.IO;
 using System.Net;
 using SnmpSharpNet;
 using System.Collections;
+using SNMPDiscovery.Model.Helpers;
 
 namespace SNMPDiscovery.Model.Services
 {
@@ -51,7 +52,7 @@ namespace SNMPDiscovery.Model.Services
             return new SNMPObservableUnsubscriber<ISNMPModelDTO>(_snmpModelObservers, observer);
         }
 
-        public ISNMPSettingDTO BuildSNMPSetting(string ID, string initialIP, string finalIP, string SNMPUser)
+        public ISNMPSettingDTO BuildSNMPSetting(string ID, string initialIPAndMask, string finalIPAndMask, string SNMPUser)
         {
             //Lazy initialization
             if (SNMPSettings == null)
@@ -59,13 +60,13 @@ namespace SNMPDiscovery.Model.Services
                 SNMPSettings = new Dictionary<string, ISNMPSettingDTO>();
             }
 
-            ISNMPSettingDTO setting = new SNMPSettingDTO(ID, initialIP, finalIP, SNMPUser, ChangeTrackerHandler);
+            ISNMPSettingDTO setting = new SNMPSettingDTO(ID, initialIPAndMask, finalIPAndMask, SNMPUser, ChangeTrackerHandler);
             SNMPSettings.Add(ID, setting);
 
             return setting;
         }
 
-        public ISNMPDeviceDTO BuildSNMPDevice(string targetIP)
+        public ISNMPDeviceDTO BuildSNMPDevice(string targetIPAndMask)
         {
             //Lazy initialization
             if (SNMPData == null)
@@ -73,13 +74,13 @@ namespace SNMPDiscovery.Model.Services
                 SNMPData = new Dictionary<string, ISNMPDeviceDTO>();
             }
 
-            ISNMPDeviceDTO device = new SNMPDeviceDTO(targetIP, ChangeTrackerHandler);
-            SNMPData.Add(targetIP, device);
+            ISNMPDeviceDTO device = new SNMPDeviceDTO(ModelHelper.ExtractIPAddress(targetIPAndMask), ModelHelper.ExtractNetworkMask(targetIPAndMask), ChangeTrackerHandler);
+            SNMPData.Add(targetIPAndMask, device);
 
             return device;
         }
 
-        public ISNMPDeviceDTO BuildSNMPDevice(int targetIP)
+        public ISNMPDeviceDTO BuildSNMPDevice(int targetIP, int targetMask)
         {
             //Lazy initialization
             if (SNMPData == null)
@@ -87,8 +88,22 @@ namespace SNMPDiscovery.Model.Services
                 SNMPData = new Dictionary<string, ISNMPDeviceDTO>();
             }
 
-            ISNMPDeviceDTO device = new SNMPDeviceDTO(targetIP, ChangeTrackerHandler);
+            ISNMPDeviceDTO device = new SNMPDeviceDTO(targetIP, targetMask, ChangeTrackerHandler);
             SNMPData.Add(new IPAddress(targetIP).ToString(), device);
+
+            return device;
+        }
+
+        public ISNMPDeviceDTO BuildSNMPDevice(IPAddress targetIP, int targetMask)
+        {
+            //Lazy initialization
+            if (SNMPData == null)
+            {
+                SNMPData = new Dictionary<string, ISNMPDeviceDTO>();
+            }
+
+            ISNMPDeviceDTO device = new SNMPDeviceDTO(targetIP, targetMask, ChangeTrackerHandler);
+            SNMPData.Add(targetIP.ToString(), device);
 
             return device;
         }
@@ -155,28 +170,29 @@ namespace SNMPDiscovery.Model.Services
 
         private void SNMPWalkByIP(ISNMPSettingDTO SNMPSettingEntry)
         {
-            //Initialize enumerator, converting from little endian to big endian
-            int LowerIPboundSNMP = IPAddress.HostToNetworkOrder(BitConverter.ToInt32(SNMPSettingEntry.InitialIP.GetAddressBytes(), 0));
-            int UpperIPboundSNMP = IPAddress.HostToNetworkOrder(BitConverter.ToInt32(SNMPSettingEntry.FinalIP.GetAddressBytes(), 0));
-            //Exclude broadcast and network --> Take into account net masks...
+            IList<IPAddress> IPinventory;
+            OctetString Community;
+            AgentParameters AgParam;
+            Pdu pdu;
 
-            OctetString community = new OctetString(SNMPSettingEntry.CommunityString);
+            IPinventory = ModelHelper.GenerateHostList(SNMPSettingEntry.InitialIP, SNMPSettingEntry.FinalIP, SNMPSettingEntry.NetworkMask);
+            Community = new OctetString(SNMPSettingEntry.CommunityString);
 
-            AgentParameters param = new AgentParameters(community);
-            param.Version = SnmpVersion.Ver2; // Set SNMP version to 2 (GET-BULK only works with SNMP ver 2 and 3)
+            AgParam = new AgentParameters(Community);
+            AgParam.Version = SnmpVersion.Ver2; // Set SNMP version to 2 (GET-BULK only works with SNMP ver 2 and 3)
 
-            Pdu pdu = new Pdu(PduType.GetBulk);
+            pdu = new Pdu(PduType.GetBulk);
             pdu.NonRepeaters = 0; //NonRepeaters tells how many OID asociated values (leafs of this object) get. 0 is all
             pdu.MaxRepetitions = 5; // MaxRepetitions tells the agent how many Oid/Value pairs to return in the response packet.
             pdu.RequestId = 1;
 
             using (UdpTarget UDPtarget = new UdpTarget(new IPAddress(0), DefaultPort, DefaultTimeout, DefaultRetries))
             {
-                for (int i = LowerIPboundSNMP; i <= UpperIPboundSNMP; i++)
+                foreach (IPAddress target in IPinventory)
                 {
-                    ISNMPDeviceDTO device = BuildSNMPDevice(IPAddress.NetworkToHostOrder(i));
+                    ISNMPDeviceDTO device = BuildSNMPDevice(target, SNMPSettingEntry.NetworkMask);
                     UDPtarget.Address = device.TargetIP;
-                    SNMPWalkByOIDSetting(UDPtarget, pdu, param, SNMPSettingEntry, device);
+                    SNMPWalkByOIDSetting(UDPtarget, pdu, AgParam, SNMPSettingEntry, device);
                 }
             }
         }
