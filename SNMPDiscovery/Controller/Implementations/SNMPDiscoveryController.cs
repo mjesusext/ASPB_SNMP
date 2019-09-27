@@ -45,6 +45,11 @@ namespace SNMPDiscovery.Controller
                 _valMsgs.Add("Invalid final IP");
             }
 
+            if(!ModelHelper.ValidateIPandMaskRange(initialIP, finalIP))
+            {
+                _valMsgs.Add("Invalid IP range");
+            }
+
             if (_valMsgs.Count == 0)
             {
                 //Consume data
