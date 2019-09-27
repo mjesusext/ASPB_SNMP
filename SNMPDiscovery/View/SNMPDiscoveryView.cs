@@ -168,7 +168,7 @@ namespace SNMPDiscovery.View
             StateHandlers[StateHistory.Peek()].Invoke();
         }
 
-        private void ShowCommands()
+        private void ShowStateCommands()
         {
             Console.WriteLine("----- Available commands -----\n");
 
@@ -180,7 +180,7 @@ namespace SNMPDiscovery.View
             Console.WriteLine();
         }
 
-        private void GetCommand()
+        private void GetStateCommand()
         {
             int GoingState;
             bool wrongInput = false;
@@ -222,8 +222,8 @@ namespace SNMPDiscovery.View
                 _currentactionOK = true;
             }
 
-            ShowCommands();
-            GetCommand();
+            ShowStateCommands();
+            GetStateCommand();
             StateHandlers[StateHistory.Peek()].Invoke();
         }
 
@@ -233,9 +233,9 @@ namespace SNMPDiscovery.View
 
             Console.Write("Setting name: ");
             settingname = Console.ReadLine();
-            Console.Write("Initial IP: ");
+            Console.Write("Initial IP/mask: ");
             initialIP = Console.ReadLine();
-            Console.Write("Final IP: ");
+            Console.Write("Final IP/mask: ");
             finalIP = Console.ReadLine();
             Console.Write("SNMP community user (V2): ");
             SNMPuser = Console.ReadLine();
@@ -256,7 +256,61 @@ namespace SNMPDiscovery.View
 
         private void ProcessingMenu()
         {
-            //Posible acitons
+            string[] ProcessingOptions, SettingDefinitions;
+            int optionInput;
+            EnumProcessingType selectedOption;
+            bool wrongOption = false;
+
+            Console.WriteLine("Select processing option:");
+
+            ProcessingOptions = Enum.GetNames(typeof(EnumProcessingType));
+            for (int i = 0; i < ProcessingOptions.Length; i++)
+            {
+                Console.WriteLine($"{i} - {ProcessingOptions[i]}");
+            }
+
+            do
+            {
+                Console.Write("Select option: ");
+                wrongOption = !int.TryParse(Console.ReadLine(), out optionInput);
+                wrongOption = !Enum.TryParse<EnumProcessingType>(ProcessingOptions[optionInput], out selectedOption) & wrongOption;
+            }
+            while (wrongOption);
+
+            wrongOption = false;
+            Console.WriteLine("Select settings to apply this processing:");
+
+            //MJE - Pending implementation and more improvements
+            IList<ISNMPSettingDTO> settingList = (List<ISNMPSettingDTO>)(_controller.PullData(typeof(ISNMPSettingDTO)));
+            SettingDefinitions = settingList.Select(x => x.ID).ToArray();
+
+            for(int i = 0; i < SettingDefinitions.Length; i++)
+            {
+                Console.WriteLine($"{i} - {SettingDefinitions[i]}");
+            }
+            //All settings option
+            Console.WriteLine($"{SettingDefinitions.Length} - All settings");
+
+            do
+            {
+                Console.Write("Select setting: ");
+                wrongOption = !int.TryParse(Console.ReadLine(), out optionInput);
+                wrongOption = optionInput > SettingDefinitions.Length && optionInput < 0 && wrongOption;
+            }
+            while (wrongOption);
+
+            //Check if all settings options selected
+            if(optionInput == SettingDefinitions.Length)
+            {
+                foreach(string settingID in SettingDefinitions)
+                {
+                    _controller.DefineProcesses(settingID, selectedOption);
+                }
+            }
+            else
+            {
+                _controller.DefineProcesses(SettingDefinitions[optionInput], selectedOption);
+            }
 
             NextActionHandle();
         }
@@ -337,9 +391,9 @@ namespace SNMPDiscovery.View
 
         private void ShowData(ISNMPSettingDTO data)
         {
-            Console.WriteLine($"Added SNMP setting {data.ID} with this definition:\n" +
-                              $"\t-Initial IP: {data.InitialIP}\n" +
-                              $"\t-Final IP: {data.FinalIP}\n" +
+            Console.WriteLine($"Added SNMP setting \"{data.ID}\" with this definition:\n" +
+                              $"\t-Initial IP: {data.InitialIP}\\{data.NetworkMask}\n" +
+                              $"\t-Final IP: {data.FinalIP}\\{data.NetworkMask}\n" +
                               $"\t-Community string: {data.CommunityString}\n");
 
         }

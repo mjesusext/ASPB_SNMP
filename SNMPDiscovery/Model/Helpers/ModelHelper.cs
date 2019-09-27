@@ -88,7 +88,7 @@ namespace SNMPDiscovery.Model.Helpers
             int maskpos;
             
             maskpos = targetIPAndMask.IndexOf('/');
-            return IPAddress.Parse(targetIPAndMask.Substring(0, maskpos - 1));
+            return IPAddress.Parse(targetIPAndMask.Substring(0, maskpos));
         }
 
         public static int ExtractNetworkMask(string targetIPAndMask)

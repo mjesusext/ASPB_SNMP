@@ -23,7 +23,7 @@ namespace SNMPDiscovery.Controller
         //Start discovery
         void RunDiscovery();
         //Pull specific data
-        void PullData();
+        object PullData(Type dataType, string key = null);
         //Save Discovered data
         void SaveDiscoveryData();
         //Save Processed data

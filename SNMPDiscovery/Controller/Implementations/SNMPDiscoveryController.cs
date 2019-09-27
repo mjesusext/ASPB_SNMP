@@ -74,9 +74,9 @@ namespace SNMPDiscovery.Controller
             Model.StartDiscovery();
         }
 
-        public void PullData()
+        public object PullData(Type dataType, string key = null)
         {
-
+            return new List<object>();
         }
 
         public void SaveDiscoveryData() { }
