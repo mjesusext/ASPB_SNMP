@@ -314,6 +314,7 @@ namespace SNMPDiscovery.View
             Console.WriteLine("Running discovery for gathering raw data");
             _controller.RunDiscovery();
 
+            Console.WriteLine();
             Console.WriteLine("Running processes using collected data");
             _controller.RunProcesses();
 
