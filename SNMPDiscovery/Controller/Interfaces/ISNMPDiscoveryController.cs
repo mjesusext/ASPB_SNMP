@@ -16,14 +16,18 @@ namespace SNMPDiscovery.Controller
         
         //Define Devices To Discover
         void DefineDevice(string settingID, string initialIP, string finalIP, string SNMPUser);
+        //Load Devices Definition
+        void LoadDeviceDefinitions();
         //Load Discovered data
         void LoadDiscoveryData();
         //Define processes to execute
         void DefineProcesses(string settingID, EnumProcessingType processType);
         //Start discovery
         void RunDiscovery();
+        //Start processes
+        void RunProcesses();
         //Pull specific data
-        object PullData(Type dataType, string key = null);
+        object PullDataList(Type dataType, string key = null);
         //Save Discovered data
         void SaveDiscoveryData();
         //Save Processed data

@@ -11,6 +11,8 @@ namespace SNMPDiscovery.Model.Helpers
         public Tfirst First { get; set; }
         public Tsecond Second { get; set; }
 
+        public CustomPair() { }
+
         public CustomPair(Tfirst first, Tsecond second)
         {
             First = first;

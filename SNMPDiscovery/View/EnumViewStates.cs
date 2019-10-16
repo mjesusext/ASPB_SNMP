@@ -13,11 +13,10 @@ namespace SNMPDiscovery.View
         LoadDiscoveryData = 2,
         ProcessSelection = 3,
         ProcessExecution = 4,
-        NotificationSetting = 5,
-        PullData = 6,
-        SaveDiscoveryData = 7,
-        SaveProcessedData = 8,
-        BackAction = 9,
-        Exit = 10
+        PullData = 5,
+        SaveDiscoveryData = 6,
+        SaveProcessedData = 7,
+        BackAction = 8,
+        Exit = 9
     }
 }

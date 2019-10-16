@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SNMPDiscovery.Model.Helpers;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,6 @@ namespace SNMPDiscovery.Model.DTO
 {
     public interface ITrackedObjectContainer
     {
-        IDictionary<Type, IList> ChangedObjects { get; set; }
+        CustomPair<Type, object> ChangedObject { get; set; }
     }
 }

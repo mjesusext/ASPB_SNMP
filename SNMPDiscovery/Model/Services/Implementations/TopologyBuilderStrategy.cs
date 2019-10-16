@@ -194,7 +194,6 @@ namespace SNMPDiscovery.Model.Services
 
         private void BuildTopology(ISNMPModelDTO Model)
         {
-
         }
 
         private void GetBasicInfo(ISNMPDeviceDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, ITopologyInfoDTO TopologyInfo)

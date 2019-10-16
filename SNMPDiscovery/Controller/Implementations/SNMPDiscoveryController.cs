@@ -64,6 +64,8 @@ namespace SNMPDiscovery.Controller
 
         public void LoadDiscoveryData() { }
 
+        public void LoadDeviceDefinitions() { }
+
         public void DefineProcesses(string settingID, EnumProcessingType processType)
         {
             Model.SNMPSettings[settingID].BuildProcess(processType);
@@ -74,9 +76,47 @@ namespace SNMPDiscovery.Controller
             Model.StartDiscovery();
         }
 
-        public object PullData(Type dataType, string key = null)
+        public void RunProcesses()
         {
-            return new List<object>();
+            foreach (ISNMPProcessStrategy proccess in Model.SNMPSettings.Values.SelectMany(x => x.Processes.Values))
+            {
+                proccess.ValidateInput(Model);
+                proccess.Run(Model);
+            }
+        }
+
+        public object PullDataList(Type dataType, string key = null)
+        {
+            if (dataType.Equals(typeof(ISNMPDeviceDTO)))
+            {
+                return string.IsNullOrWhiteSpace(key) ? 
+                            Model.SNMPData.Values.ToList() : 
+                            new List<ISNMPDeviceDTO>(new[] { Model.SNMPData[key] });
+            }
+            else if (dataType.Equals(typeof(ISNMPSettingDTO)))
+            {
+                return string.IsNullOrWhiteSpace(key) ? 
+                            Model.SNMPSettings.Values.ToList() : 
+                            new List<ISNMPSettingDTO>(new[] { Model.SNMPSettings[key] });
+            }
+            else if (dataType.Equals(typeof(ISNMPProcessStrategy)))
+            {
+                return string.IsNullOrWhiteSpace(key) ? 
+                                Model.SNMPSettings.Values.SelectMany(x => x.Processes.Values).ToList() :
+                                new List<ISNMPProcessStrategy>(Model.SNMPSettings.Values.Select(x => x.Processes[key]));
+            }
+            else if (dataType.Equals(typeof(IOIDSettingDTO)))
+            {
+                return null;
+            }
+            else if (dataType.Equals(typeof(ISNMPRawEntryDTO)))
+            {
+                return null;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public void SaveDiscoveryData() { }

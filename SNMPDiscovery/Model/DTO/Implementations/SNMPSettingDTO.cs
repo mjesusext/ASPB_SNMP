@@ -47,16 +47,23 @@ namespace SNMPDiscovery.Model.DTO
                     break;
             }
             
-            //If profile exists, retrive the existing one
-            if (Processes.ContainsKey(ProcessProfile.ProcessID))
+            if(ProcessProfile != null)
             {
-                return Processes[ProcessProfile.ProcessID];
+                //If profile exists, retrive the existing one
+                if (Processes.ContainsKey(ProcessProfile.ProcessID))
+                {
+                    return Processes[ProcessProfile.ProcessID];
+                }
+                else
+                {
+                    OIDSettings = ProcessProfile.BuildOIDSetting(ID, OIDSettings);
+                    Processes.Add(ProcessProfile.ProcessID, ProcessProfile);
+
+                    return ProcessProfile;
+                }
             }
             else
             {
-                OIDSettings = ProcessProfile.BuildOIDSetting(ID, OIDSettings);
-                Processes.Add(ProcessProfile.ProcessID, ProcessProfile);
-
                 return ProcessProfile;
             }
         }

@@ -111,7 +111,7 @@ namespace SNMPDiscovery.Model.Helpers
 
             for (int i = LowerIPboundSNMP; i <= UpperIPboundSNMP; i++)
             {
-                IPAddress currentIP = new IPAddress(i);
+                IPAddress currentIP = new IPAddress(IPAddress.NetworkToHostOrder(i));
                 IPAddress broadcastIP = GetBroadcastAddress(currentIP, netMask);
                 IPAddress networkIP = GetNetworkAddress(currentIP, netMask);
 

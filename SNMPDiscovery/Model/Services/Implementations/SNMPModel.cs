@@ -22,7 +22,7 @@ namespace SNMPDiscovery.Model.Services
 
         public IDictionary<string, ISNMPSettingDTO> SNMPSettings { get; set; }
         public IDictionary<string, ISNMPDeviceDTO> SNMPData { get; set; }
-        public IDictionary<Type, IList> ChangedObjects { get; set; }
+        public CustomPair<Type, object> ChangedObject { get; set; }
 
         #region Interface Implementations
 
@@ -145,23 +145,10 @@ namespace SNMPDiscovery.Model.Services
 
         public void ChangeTrackerHandler(object obj, Type type)
         {
-            if (ChangedObjects.ContainsKey(type))
-            {
-                ChangedObjects[type].Add(obj);
-                NotifyChanges();
-            }
-            else if (ChangedObjects.Count == 0)
-            {
-                ChangedObjects.Add(type, new ArrayList() { obj });
-                NotifyChanges();
-            }
-            else
-            {
-                NotifyChanges();
+            ChangedObject.First = type;
+            ChangedObject.Second = obj;
 
-                ChangedObjects.Clear();
-                ChangedObjects.Add(type, new ArrayList() { obj });
-            }
+            NotifyChanges();
         }
 
         #endregion
@@ -281,29 +268,7 @@ namespace SNMPDiscovery.Model.Services
         public SNMPModel()
         {
             _snmpModelObservers = new List<IObserver<ISNMPModelDTO>>();
-            ChangedObjects = new Dictionary<Type, IList>();
-
-            ////Mock for redirecting console to file
-            //FileStream ostrm;
-            //StreamWriter writer;
-            //TextWriter oldOut = Console.Out;
-            //try
-            //{
-            //    ostrm = new FileStream("./Redirect.txt", FileMode.Create, FileAccess.Write);
-            //    writer = new StreamWriter(ostrm);
-            //}
-            //catch (Exception e)
-            //{
-            //    Console.WriteLine("Cannot open Redirect.txt for writing");
-            //    Console.WriteLine(e.Message);
-            //    return;
-            //}
-            //Console.SetOut(writer);
-
-            ////Mock for undoing things
-            //Console.SetOut(oldOut);
-            //writer.Close();
-            //ostrm.Close();
+            ChangedObject = new CustomPair<Type, object>();
         }
 
         #endregion

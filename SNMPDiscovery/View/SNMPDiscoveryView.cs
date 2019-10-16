@@ -75,13 +75,7 @@ namespace SNMPDiscovery.View
 
         public void OnNext(ISNMPModelDTO value)
         {
-            foreach (KeyValuePair<Type, IList> DataCollection in value.ChangedObjects)
-            {
-                foreach(object DataItem in DataCollection.Value)
-                {
-                    PromptDTOInfo(DataCollection.Key, DataItem);
-                }
-            }
+            PromptDTOInfo(value.ChangedObject.First, value.ChangedObject.Second);
         }
 
         public void OnError(Exception error)
@@ -126,7 +120,6 @@ namespace SNMPDiscovery.View
                 { EnumViewStates.LoadDiscoveryData, LoadDataMenu },
                 { EnumViewStates.ProcessSelection, ProcessingMenu },
                 { EnumViewStates.ProcessExecution, RunProcessMenu },
-                { EnumViewStates.NotificationSetting, SetNotificationMenu },
                 { EnumViewStates.PullData, PromptDataMenu },
                 { EnumViewStates.SaveDiscoveryData, SaveDiscoveryDataMenu},
                 { EnumViewStates.SaveProcessedData, SaveProcessedDataMenu},
@@ -141,7 +134,6 @@ namespace SNMPDiscovery.View
                 { EnumViewStates.LoadDiscoveryData, "Load existing SNMP data discovery" },
                 { EnumViewStates.ProcessSelection, "Select processing functions" },
                 { EnumViewStates.ProcessExecution, "Run processes" },
-                { EnumViewStates.NotificationSetting, "Set notification level" },
                 { EnumViewStates.PullData, "Prompt data" },
                 { EnumViewStates.SaveDiscoveryData, "Save discovery data"},
                 { EnumViewStates.SaveProcessedData, "Save processed data"},
@@ -154,8 +146,7 @@ namespace SNMPDiscovery.View
                 { EnumViewStates.Main, new EnumViewStates[]{ EnumViewStates.DeviceDefinition, EnumViewStates.LoadDiscoveryData, EnumViewStates.Exit } },
                 { EnumViewStates.DeviceDefinition, new EnumViewStates[]{ EnumViewStates.DeviceDefinition, EnumViewStates.ProcessSelection , EnumViewStates.BackAction} },
                 { EnumViewStates.LoadDiscoveryData, new EnumViewStates[]{ EnumViewStates.ProcessSelection, EnumViewStates.BackAction } },
-                { EnumViewStates.ProcessSelection, new EnumViewStates[]{ EnumViewStates.ProcessSelection, EnumViewStates.NotificationSetting, EnumViewStates.BackAction } },
-                { EnumViewStates.NotificationSetting, new EnumViewStates[]{ EnumViewStates.ProcessExecution, EnumViewStates.BackAction }  },
+                { EnumViewStates.ProcessSelection, new EnumViewStates[]{ EnumViewStates.ProcessSelection, EnumViewStates.ProcessExecution, EnumViewStates.BackAction } },
                 { EnumViewStates.ProcessExecution, new EnumViewStates[]{ EnumViewStates.PullData, EnumViewStates.BackAction } },
                 { EnumViewStates.PullData, new EnumViewStates[]{ EnumViewStates.PullData, EnumViewStates.SaveDiscoveryData, EnumViewStates.SaveProcessedData, EnumViewStates.BackAction } },
                 { EnumViewStates.SaveDiscoveryData, new EnumViewStates[]{ EnumViewStates.PullData, EnumViewStates.SaveDiscoveryData, EnumViewStates.SaveProcessedData, EnumViewStates.BackAction }},
@@ -198,6 +189,7 @@ namespace SNMPDiscovery.View
                 else if (GoingState >= StateMachine[StateHistory.Peek()].Length)
                 {
                     Console.WriteLine("ERROR: Selected option not available");
+                    wrongInput = true;
                 }
             } while (wrongInput);
 
@@ -278,10 +270,11 @@ namespace SNMPDiscovery.View
             while (wrongOption);
 
             wrongOption = false;
+            Console.WriteLine();
             Console.WriteLine("Select settings to apply this processing:");
 
             //MJE - Pending implementation and more improvements
-            IList<ISNMPSettingDTO> settingList = (List<ISNMPSettingDTO>)(_controller.PullData(typeof(ISNMPSettingDTO)));
+            IList<ISNMPSettingDTO> settingList = (List<ISNMPSettingDTO>) (_controller.PullDataList(typeof(ISNMPSettingDTO)));
             SettingDefinitions = settingList.Select(x => x.ID).ToArray();
 
             for(int i = 0; i < SettingDefinitions.Length; i++)
@@ -318,13 +311,11 @@ namespace SNMPDiscovery.View
         private void RunProcessMenu()
         {
             //Posible acitons
+            Console.WriteLine("Running discovery for gathering raw data");
+            _controller.RunDiscovery();
 
-            NextActionHandle();
-        }
-
-        private void SetNotificationMenu()
-        {
-            //Posible acitons
+            Console.WriteLine("Running processes using collected data");
+            _controller.RunProcesses();
 
             NextActionHandle();
         }
@@ -392,8 +383,8 @@ namespace SNMPDiscovery.View
         private void ShowData(ISNMPSettingDTO data)
         {
             Console.WriteLine($"Added SNMP setting \"{data.ID}\" with this definition:\n" +
-                              $"\t-Initial IP: {data.InitialIP}\\{data.NetworkMask}\n" +
-                              $"\t-Final IP: {data.FinalIP}\\{data.NetworkMask}\n" +
+                              $"\t-Initial IP: {data.InitialIP}/{data.NetworkMask}\n" +
+                              $"\t-Final IP: {data.FinalIP}/{data.NetworkMask}\n" +
                               $"\t-Community string: {data.CommunityString}\n");
 
         }
