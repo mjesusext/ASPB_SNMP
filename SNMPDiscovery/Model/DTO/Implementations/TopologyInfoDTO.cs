@@ -23,6 +23,5 @@ namespace SNMPDiscovery.Model.DTO
         public IDictionary<string, List<string>> PortVLANMapping { get; set; }
         public IDictionary<string, IDictionary<string, string>> PortLearnedAddresses { get; set; }
         public IDictionary<string, CustomPair<string,string>> DeviceDirectNeighbours { get; set; }
-
     }
 }

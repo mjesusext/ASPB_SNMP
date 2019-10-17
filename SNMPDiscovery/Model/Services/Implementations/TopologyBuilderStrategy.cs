@@ -20,6 +20,7 @@ namespace SNMPDiscovery.Model.Services
 
         public IDictionary<string, IOIDSettingDTO> BuildOIDSetting(string regardingSetting, IDictionary<string, IOIDSettingDTO> OIDSettings)
         {
+            IOIDSettingDTO MockOIDSetting;
             RegardingSetting = regardingSetting;
 
             //Lazy initialization
@@ -32,7 +33,7 @@ namespace SNMPDiscovery.Model.Services
 
             if (!OIDSettings.ContainsKey("DeviceBasicInfo"))
             {
-                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("DeviceBasicInfo", "1.3.6.1.2.1.1.1", "1.3.6.1.2.1.1.8", false, null, OnChange);
+                MockOIDSetting = new OIDSettingDTO("DeviceBasicInfo", "1.3.6.1.2.1.1.1", "1.3.6.1.2.1.1.8", false, null);
                 IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.None };
                 MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.1.1", indexes);
                 MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.1.2", indexes);
@@ -43,97 +44,164 @@ namespace SNMPDiscovery.Model.Services
                 MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.1.7", indexes);
 
                 OIDSettings.Add("DeviceBasicInfo", MockOIDSetting);
+
+                //We know data is fully ready
+                OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
             }
 
             if (!OIDSettings.ContainsKey("PhysPortDescription"))
             {
-                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("PhysPortDescription", "1.3.6.1.2.1.2.2.1.2", "1.3.6.1.2.1.2.2.1.2", true, null, OnChange);
+                MockOIDSetting = new OIDSettingDTO("PhysPortDescription", "1.3.6.1.2.1.2.2.1.2", "1.3.6.1.2.1.2.2.1.2", true, null);
                 IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number };
                 MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.2.2.1.2", indexes);
 
                 OIDSettings.Add("PhysPortDescription", MockOIDSetting);
+
+                //We know data is fully ready
+                OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
             }
 
             if (!OIDSettings.ContainsKey("PhysPortMACAddress"))
             {
-                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("PhysPortMACAddress", "1.3.6.1.2.1.2.2.1.6", "1.3.6.1.2.1.2.2.1.6", true, null, OnChange);
+                MockOIDSetting = new OIDSettingDTO("PhysPortMACAddress", "1.3.6.1.2.1.2.2.1.6", "1.3.6.1.2.1.2.2.1.6", true, null);
                 IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number };
                 MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.2.2.1.6", indexes);
 
                 OIDSettings.Add("PhysPortMACAddress", MockOIDSetting);
+
+                //We know data is fully ready
+                OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
             }
 
             if (!OIDSettings.ContainsKey("VLANDescription"))
             {
-                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("VLANDescription", "1.3.6.1.2.1.17.7.1.4.3.1.1", "1.3.6.1.2.1.17.7.1.4.3.1.1", true, null, OnChange);
+                MockOIDSetting = new OIDSettingDTO("VLANDescription", "1.3.6.1.2.1.17.7.1.4.3.1.1", "1.3.6.1.2.1.17.7.1.4.3.1.1", true, null);
                 IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number };
                 MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.17.7.1.4.3.1.1", indexes);
 
                 OIDSettings.Add("VLANDescription", MockOIDSetting);
+
+                //We know data is fully ready
+                OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
             }
 
             if (!OIDSettings.ContainsKey("VLANMapping"))
             {
-                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("VLANDescription", "1.3.6.1.2.1.17.7.1.4.3.1.2", "1.3.6.1.2.1.17.7.1.4.3.1.2", true, null, OnChange);
+                MockOIDSetting = new OIDSettingDTO("VLANDescription", "1.3.6.1.2.1.17.7.1.4.3.1.2", "1.3.6.1.2.1.17.7.1.4.3.1.2", true, null);
                 IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number };
                 MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.17.7.1.4.3.1.2", indexes);
 
                 OIDSettings.Add("VLANMapping", MockOIDSetting);
+
+                //We know data is fully ready
+                OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
             }
 
             if (!OIDSettings.ContainsKey("LearnedMACByPhysPortID"))
             {
-                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("LearnedMACByPhysPortID", "1.3.6.1.2.1.17.7.1.2.2.1.2", "1.3.6.1.2.1.17.7.1.2.2.1.2", true, null, OnChange);
+                MockOIDSetting = new OIDSettingDTO("LearnedMACByPhysPortID", "1.3.6.1.2.1.17.7.1.2.2.1.2", "1.3.6.1.2.1.17.7.1.2.2.1.2", true, null);
                 IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number, EnumSNMPOIDIndexType.MacAddress };
                 MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.17.7.1.2.2.1.2", indexes);
 
                 OIDSettings.Add("LearnedMACByPhysPortID", MockOIDSetting);
+
+                //We know data is fully ready
+                OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
             }
 
             if (!OIDSettings.ContainsKey("LearnedMACByPhysPortMAC"))
             {
-                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("LearnedMACByPhysPortMAC", "1.3.6.1.2.1.17.4.3.1", "1.3.6.1.2.1.17.4.3.4", false, null, OnChange);
+                MockOIDSetting = new OIDSettingDTO("LearnedMACByPhysPortMAC", "1.3.6.1.2.1.17.4.3.1", "1.3.6.1.2.1.17.4.3.4", false, null);
                 IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.MacAddress };
                 MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.17.4.3.1.1", indexes);
                 MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.17.4.3.1.2", indexes);
                 MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.17.4.3.1.3", indexes);
 
                 OIDSettings.Add("LearnedMACByPhysPortMAC", MockOIDSetting);
+
+                //We know data is fully ready
+                OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
             }
 
             if (!OIDSettings.ContainsKey("LACPSetting"))
             {
-                //OIDSettings.Add("LACPSetting", new OIDSettingDTO("LACPSetting", "1.2.840.10006.300.43", "1.2.840.10006.300.43", true));
-                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("LACPSetting", "1.2.840.10006.300.43.1.1.2.1.1", "1.2.840.10006.300.43.1.1.2.1.1", true, null, OnChange);
+                MockOIDSetting = new OIDSettingDTO("LACPSetting", "1.2.840.10006.300.43.1.1.2.1.1", "1.2.840.10006.300.43.1.1.2.1.1", true, null);
                 IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number };
                 MockOIDSetting.BuildIndexedOIDSetting("1.2.840.10006.300.43.1.1.2.1.1", indexes);
 
                 OIDSettings.Add("LACPSetting", MockOIDSetting);
+
+                //We know data is fully ready
+                OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
             }
 
             if (!OIDSettings.ContainsKey("PortHierarchy"))
             {
-                IOIDSettingDTO MockOIDSetting = new OIDSettingDTO("PortHierarchy", "1.3.6.1.2.1.31.1.2.1.3", "1.3.6.1.2.1.31.1.2.1.3", true, null, OnChange);
+                MockOIDSetting = new OIDSettingDTO("PortHierarchy", "1.3.6.1.2.1.31.1.2.1.3", "1.3.6.1.2.1.31.1.2.1.3", true, null);
                 IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number, EnumSNMPOIDIndexType.Number };
                 MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.2.1.31.1.2.1.3", indexes);
 
                 OIDSettings.Add("PortHierarchy", MockOIDSetting);
+
+                //We know data is fully ready
+                OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
             }
 
+            #region MJE - TEST
 
-            //OIDSettings.Add("Step2A", new OIDSettingDTO("Step2A", "1.0.8802.1.1.2.1.4.2.1.4", "1.0.8802.1.1.2.1.4.2.1.4", true));
-            //OIDSettings.Add("Step2B", new OIDSettingDTO("Step2B", "1.0.8802.1.1.2.1.4.1.1.7", "1.0.8802.1.1.2.1.4.1.1.7", false));
-            //OIDSettings.Add("Step2C", new OIDSettingDTO("Step2C", "1.2.840.10006.300.43.1.1.1.1.7", "1.2.840.10006.300.43.1.1.1.1.7", true));
-            //OIDSettings.Add("Step2D", new OIDSettingDTO("Step2D", "1.2.840.10006.300.43.1.2.1.1.5", "1.2.840.10006.300.43.1.2.1.1.5", true));
-            //OIDSettings.Add("Step2F", new OIDSettingDTO("Step2F", "1.3.6.1.4.1.9.9.46.1.3.1.1.4", "1.3.6.1.4.1.9.9.46.1.3.1.1.4", true));
-            //OIDSettings.Add("Step2G", new OIDSettingDTO("Step2G", "1.3.6.1.2.1.17.1.4.1.2", "1.3.6.1.2.1.17.1.4.1.2", true));
-            //OIDSettings.Add("Step2H", new OIDSettingDTO("Step2H", "1.3.6.1.2.1.17.2.15.1.3", "1.3.6.1.2.1.17.2.15.1.3", true));
-            //OIDSettings.Add("Step2K", new OIDSettingDTO("Step2K", "1.3.6.1.2.1.31.1.1.1.1", "1.3.6.1.2.1.31.1.1.1.1", true));
-            //OIDSettings.Add("Step2L", new OIDSettingDTO("Step2L", "1.3.6.1.2.1.31.1.1.1.6", "1.3.6.1.2.1.31.1.1.1.6", true));
-            //OIDSettings.Add("Step2M", new OIDSettingDTO("Step2M", "1.3.6.1.2.1.31.1.1.1.10", "1.3.6.1.2.1.31.1.1.1.10", true));
-            //OIDSettings.Add("Step2N", new OIDSettingDTO("Step2N", "1.3.6.1.2.1.31.1.1.1.15", "1.3.6.1.2.1.31.1.1.1.15", true));
-            //OIDSettings.Add("Step2Ñ", new OIDSettingDTO("Step2Ñ", "1.3.6.1.2.1.31.1.1.1.18", "1.3.6.1.2.1.31.1.1.1.18", true));
-            //OIDSettings.Add("PortHierarchy", new OIDSettingDTO("PortHierarchy", "1.3.6.1.2.1.31.1.2", "1.3.6.1.2.1.31.1.2.1.3", true));
+            MockOIDSetting = new OIDSettingDTO("Step2A", "1.0.8802.1.1.2.1.4.2.1.4", "1.0.8802.1.1.2.1.4.2.1.4", true, null);
+            OIDSettings.Add("Step2A", MockOIDSetting);
+            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+
+            MockOIDSetting = new OIDSettingDTO("Step2B", "1.0.8802.1.1.2.1.4.1.1.7", "1.0.8802.1.1.2.1.4.1.1.7", false, null);
+            OIDSettings.Add("Step2B", MockOIDSetting);
+            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+
+            MockOIDSetting = new OIDSettingDTO("Step2C", "1.2.840.10006.300.43.1.1.1.1.7", "1.2.840.10006.300.43.1.1.1.1.7", true, null);
+            OIDSettings.Add("Step2C", MockOIDSetting);
+            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+
+            MockOIDSetting = new OIDSettingDTO("Step2D", "1.2.840.10006.300.43.1.2.1.1.5", "1.2.840.10006.300.43.1.2.1.1.5", true, null);
+            OIDSettings.Add("Step2D", MockOIDSetting);
+            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+
+            MockOIDSetting = new OIDSettingDTO("Step2F", "1.3.6.1.4.1.9.9.46.1.3.1.1.4", "1.3.6.1.4.1.9.9.46.1.3.1.1.4", true, null);
+            OIDSettings.Add("Step2F", MockOIDSetting);
+            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+
+            MockOIDSetting = new OIDSettingDTO("Step2G", "1.3.6.1.2.1.17.1.4.1.2", "1.3.6.1.2.1.17.1.4.1.2", true, null);
+            OIDSettings.Add("Step2G", MockOIDSetting);
+            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+
+            MockOIDSetting = new OIDSettingDTO("Step2H", "1.3.6.1.2.1.17.2.15.1.3", "1.3.6.1.2.1.17.2.15.1.3", true, null);
+            OIDSettings.Add("Step2H", MockOIDSetting);
+            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+
+            MockOIDSetting = new OIDSettingDTO("Step2K", "1.3.6.1.2.1.31.1.1.1.1", "1.3.6.1.2.1.31.1.1.1.1", true, null);
+            OIDSettings.Add("Step2K", MockOIDSetting);
+            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+
+            MockOIDSetting = new OIDSettingDTO("Step2L", "1.3.6.1.2.1.31.1.1.1.6", "1.3.6.1.2.1.31.1.1.1.6", true, null);
+            OIDSettings.Add("Step2L", MockOIDSetting);
+            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+
+            MockOIDSetting = new OIDSettingDTO("Step2M", "1.3.6.1.2.1.31.1.1.1.10", "1.3.6.1.2.1.31.1.1.1.10", true, null);
+            OIDSettings.Add("Step2M", MockOIDSetting);
+            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+
+            MockOIDSetting = new OIDSettingDTO("Step2N", "1.3.6.1.2.1.31.1.1.1.15", "1.3.6.1.2.1.31.1.1.1.15", true, null);
+            OIDSettings.Add("Step2N", MockOIDSetting);
+            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+
+            MockOIDSetting = new OIDSettingDTO("Step2Ñ", "1.3.6.1.2.1.31.1.1.1.18", "1.3.6.1.2.1.31.1.1.1.18", true, null);
+            OIDSettings.Add("Step2Ñ", MockOIDSetting);
+            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+
+            MockOIDSetting = new OIDSettingDTO("PortHierarchyTEST", "1.3.6.1.2.1.31.1.2", "1.3.6.1.2.1.31.1.2", true, null);
+            OIDSettings.Add("PortHierarchyTEST", MockOIDSetting);
+            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+
+            #endregion
 
             #endregion
 
@@ -181,7 +249,7 @@ namespace SNMPDiscovery.Model.Services
             {
                 //Create DTO and attach to device
                 ITopologyInfoDTO TopologyInfo = new TopologyInfoDTO();
-                Device.AttachSNMPProcessedValue(typeof(ITopologyInfoDTO), TopologyInfo);
+                ISNMPProcessedValueDTO DataContainer = Device.AttachSNMPProcessedValue(typeof(ITopologyInfoDTO), TopologyInfo);
 
                 GetBasicInfo(Device, OIDSettings, TopologyInfo); //Fill with basic info
                 GetLearnedMACAddresses(Device, OIDSettings, TopologyInfo); //Fill with LearnedAddress inventory
@@ -189,6 +257,9 @@ namespace SNMPDiscovery.Model.Services
                 GetPortIDInfo(Device, OIDSettings, TopologyInfo); //Fill with port IDs inventory
                 GetVLANInfo(Device, OIDSettings, TopologyInfo); //Get VLANInventory and mappings
                 ComputeDirectNeighbours(TopologyInfo); //Get first address seen by Access Ports
+
+                //We know data is fully ready
+                OnChange?.Invoke(DataContainer, typeof(ISNMPProcessedValueDTO));
             }
         }
 
@@ -427,9 +498,17 @@ namespace SNMPDiscovery.Model.Services
             TopologyInfo.DeviceDirectNeighbours = new Dictionary<string, CustomPair<string, string>>();
 
             //Search access type
-            IEnumerable<string> AccessPorts = TopologyInfo.PortSettings.Where(x => x.Value.First == EnumPhysPortType.Access).Select(x => x.Key);
+            IEnumerable<string> ConnectedPorts = TopologyInfo.PortSettings.Where(x => x.Value.First == EnumPhysPortType.Access).Select(x => x.Key);
+            
+            //MJE Testing for getting trunk direct connections...
+            //IEnumerable<string> ConnectedPorts = TopologyInfo.PortSettings
+            //                                    .Where(x => 
+            //                                                x.Value.First == EnumPhysPortType.Access ||
+            //                                                x.Value.First == EnumPhysPortType.LACP ||
+            //                                                x.Value.First == EnumPhysPortType.Trunk)
+            //                                    .Select(x => x.Key);
 
-            foreach (string port in AccessPorts)
+            foreach (string port in ConnectedPorts)
             {
                 if (TopologyInfo.PortLearnedAddresses.ContainsKey(port))
                 {

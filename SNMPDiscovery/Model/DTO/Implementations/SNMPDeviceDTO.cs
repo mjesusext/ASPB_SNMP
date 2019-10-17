@@ -28,8 +28,11 @@ namespace SNMPDiscovery.Model.DTO
                 SNMPRawDataEntries = new Dictionary<string, ISNMPRawEntryDTO>();
             }
 
-            ISNMPRawEntryDTO RawEntry = new SNMPRawEntryDTO(OID, OnChange);
+            ISNMPRawEntryDTO RawEntry = new SNMPRawEntryDTO(OID);
             SNMPRawDataEntries.Add(OID, RawEntry);
+
+            //We know data is fully ready
+            OnChange?.Invoke(RawEntry, typeof(ISNMPRawEntryDTO));
 
             return RawEntry;
         }
@@ -42,26 +45,20 @@ namespace SNMPDiscovery.Model.DTO
                 SNMPRawDataEntries = new Dictionary<string, ISNMPRawEntryDTO>();
             }
 
-            ISNMPRawEntryDTO RawEntry = new SNMPRawEntryDTO(OID, RawValue, DataType, OnChange);
+            ISNMPRawEntryDTO RawEntry = new SNMPRawEntryDTO(OID, RawValue, DataType);
             SNMPRawDataEntries.Add(OID, RawEntry);
+
+            //We know data is fully ready
+            OnChange?.Invoke(RawEntry, typeof(ISNMPRawEntryDTO));
 
             return RawEntry;
         }
 
         #endregion
 
-        #region Nested Object Change Handlers
-
-        public void ChangeTrackerHandler(Type type, object obj)
-        {
-            OnChange?.Invoke(obj, type);
-        }
-
-        #endregion
-
         #region Helpful methods
 
-        public void AttachSNMPProcessedValue(Type DataType, object Data)
+        public ISNMPProcessedValueDTO AttachSNMPProcessedValue(Type DataType, object Data)
         {
             //Lazy initialization
             if (SNMPProcessedData == null)
@@ -69,8 +66,11 @@ namespace SNMPDiscovery.Model.DTO
                 SNMPProcessedData = new Dictionary<string, ISNMPProcessedValueDTO>();
             }
 
-            ISNMPProcessedValueDTO ProcessedValue = new SNMPProcessedValueDTO(DataType, Data, OnChange);
+            ISNMPProcessedValueDTO ProcessedValue = new SNMPProcessedValueDTO(DataType, Data);
             SNMPProcessedData.Add(DataType.Name, ProcessedValue);
+            //We don't trigger OnChange because we only set the poiner, information is still not filled.
+
+            return ProcessedValue;
         }
 
         #endregion
@@ -83,6 +83,7 @@ namespace SNMPDiscovery.Model.DTO
             NetworkMask = networkMask;
             OnChange += ChangeTrackerHandler;
 
+            //We know data is fully ready
             OnChange?.Invoke(this, typeof(ISNMPDeviceDTO));
         }
 
@@ -92,6 +93,7 @@ namespace SNMPDiscovery.Model.DTO
             NetworkMask = networkMask;
             OnChange += ChangeTrackerHandler;
 
+            //We know data is fully ready
             OnChange?.Invoke(this, typeof(ISNMPDeviceDTO));
         }
 
@@ -101,6 +103,7 @@ namespace SNMPDiscovery.Model.DTO
             NetworkMask = networkMask;
             OnChange += ChangeTrackerHandler;
 
+            //We know data is fully ready
             OnChange?.Invoke(this, typeof(ISNMPDeviceDTO));
         }
 

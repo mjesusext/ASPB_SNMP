@@ -8,6 +8,7 @@ using SNMPDiscovery.Model.Services;
 using SNMPDiscovery.Controller;
 using System.Collections;
 using System.IO;
+using SNMPDiscovery.Model.Helpers;
 
 namespace SNMPDiscovery.View
 {
@@ -32,8 +33,6 @@ namespace SNMPDiscovery.View
             _controller = Controller;
             _observeableSubscription = Model.Subscribe(this);
             _controller.OnInvalidInputs += ControllerErrorMessageHandler;
-            //Mock for redirecting console to file
-            //RedirectToFile(true);
 
             Initialize();
         }
@@ -41,7 +40,7 @@ namespace SNMPDiscovery.View
         //Mock for disposing redirection to file
         ~SNMPDiscoveryView()
         {
-            //RedirectToFile(false);
+            RedirectToFile(false);
         }
 
         //Mock for redirecting console to file
@@ -52,7 +51,7 @@ namespace SNMPDiscovery.View
                 oldOut = Console.Out;
                 try
                 {
-                    ostrm = new FileStream("./Redirect.txt", FileMode.Create, FileAccess.Write);
+                    ostrm = new FileStream("./Redirect.txt", FileMode.Append, FileAccess.Write);
                     writer = new StreamWriter(ostrm);
                 }
                 catch (Exception e)
@@ -349,6 +348,8 @@ namespace SNMPDiscovery.View
 
         private void PromptDTOInfo(Type datatype, object data)
         {
+            RedirectToFile(true);
+
             if (datatype.Equals(typeof(ISNMPDeviceDTO)))
             {
                 ShowData((ISNMPDeviceDTO)data);
@@ -369,10 +370,15 @@ namespace SNMPDiscovery.View
             {
                 ShowData((ISNMPRawEntryDTO)data);
             }
-            else
+            else if (datatype.Equals(typeof(ISNMPProcessedValueDTO)))
             {
                 ShowData((ISNMPProcessedValueDTO)data);
             }
+            else
+            {
+            }
+
+            RedirectToFile(false);
         }
 
         private void ShowData(ISNMPDeviceDTO data)
@@ -386,7 +392,6 @@ namespace SNMPDiscovery.View
                               $"\t-Initial IP: {data.InitialIP}/{data.NetworkMask}\n" +
                               $"\t-Final IP: {data.FinalIP}/{data.NetworkMask}\n" +
                               $"\t-Community string: {data.CommunityString}\n");
-
         }
 
         private void ShowData(ISNMPProcessStrategy data)
@@ -409,7 +414,39 @@ namespace SNMPDiscovery.View
 
         private void ShowData(ISNMPProcessedValueDTO data)
         {
-            //throw new NotImplementedException();
+            //PromptBasicInfo
+            IDiscoveredBasicInfo BasicInfoObj = (IDiscoveredBasicInfo)data.Data;
+
+            Console.WriteLine($"Processed device basic data:\n" +
+                              $"\t-Device name: {BasicInfoObj.DeviceName}\n" +
+                              $"\t-Device Type: {BasicInfoObj.DeviceType}\n" +
+                              $"\t-Location: {BasicInfoObj.Location}\n" +
+                              $"\t-Description: {BasicInfoObj.Description}\n" +
+                              $"\t-OSI Implemented Layers: {BasicInfoObj.OSIImplementedLayers}\n");
+
+            //PromptSpecificTypeInfo
+            if (data.DataType.Equals(typeof(ITopologyInfoDTO)))
+            {
+                ITopologyInfoDTO DataObj = (ITopologyInfoDTO)data.Data;
+
+                Console.WriteLine("\nAssigned MAC Addresses by port :\n");
+                Console.WriteLine("Port ID \t MAC Address");
+
+                //Further details of processing
+                foreach (KeyValuePair<string, string> MACPort in DataObj.PortMACAddress)
+                {
+                    Console.WriteLine($"{MACPort.Key} \t {MACPort.Value}");
+                }
+
+                Console.WriteLine("\nDirect neighbouts detection:\n");
+                Console.WriteLine("Port ID \t MAC Address \t IP Address");
+
+                //Further details of processing
+                foreach (KeyValuePair<string, CustomPair<string,string>> neightbour in DataObj.DeviceDirectNeighbours)
+                {
+                    Console.WriteLine($"{neightbour.Key} \t {neightbour.Value.First} \t {neightbour.Value.Second}");
+                }
+            }
         }
 
         #endregion

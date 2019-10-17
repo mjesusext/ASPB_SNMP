@@ -16,6 +16,6 @@ namespace SNMPDiscovery.Model.DTO
 
         ISNMPRawEntryDTO BuildSNMPRawEntry(string OID);
         ISNMPRawEntryDTO BuildSNMPRawEntry(string OID, string RawValue, EnumSNMPOIDType DataType);
-        void AttachSNMPProcessedValue(Type DataType, object Data);
+        ISNMPProcessedValueDTO AttachSNMPProcessedValue(Type DataType, object Data);
     }
 }

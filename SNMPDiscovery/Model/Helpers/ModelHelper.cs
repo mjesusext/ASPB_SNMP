@@ -65,6 +65,11 @@ namespace SNMPDiscovery.Model.Helpers
             int initialIPAddress, finalIPAddress;
             int initialMask, finalMask, maskpos;
 
+            if (string.IsNullOrWhiteSpace(initialIPAndMask) || string.IsNullOrWhiteSpace(finalIPAndMask))
+            {
+                return result;
+            }
+
             //Decompose inputs
             maskpos = initialIPAndMask.IndexOf('/');
             initialIPAddress = IPAddress.HostToNetworkOrder(BitConverter.ToInt32(IPAddress.Parse(initialIPAndMask.Substring(0, maskpos - 1)).GetAddressBytes(), 0));

@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 
 namespace SNMPDiscovery.Model.DTO
 {
-    public interface ISNMPProcessedValueDTO: ITrackeableObject
+    //Wrappers are not included on change tracking. Only the editor of wrapper object triggers change tracking when properly informed
+    public interface ISNMPProcessedValueDTO
     {
         Type DataType { get; set; }
         object Data { get; set; }

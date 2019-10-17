@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace SNMPDiscovery.Model.DTO
 {
-    public interface IOIDSettingDTO : ITrackeableObject
+    //Leafs of DTO object hierarchy don't need onchange events
+    public interface IOIDSettingDTO
     {
         string ID { get; set; }
         string InitialOID { get; set; }
