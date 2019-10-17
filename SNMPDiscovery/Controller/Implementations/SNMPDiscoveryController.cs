@@ -107,11 +107,21 @@ namespace SNMPDiscovery.Controller
             }
             else if (dataType.Equals(typeof(IOIDSettingDTO)))
             {
-                return null;
+                return string.IsNullOrWhiteSpace(key) ? 
+                                Model.SNMPSettings.Values.SelectMany(x => x.OIDSettings.Values).ToList() :
+                                new List<IOIDSettingDTO>(Model.SNMPSettings.Values.Select(x => x.OIDSettings[key]));
             }
             else if (dataType.Equals(typeof(ISNMPRawEntryDTO)))
             {
-                return null;
+                return string.IsNullOrWhiteSpace(key) ? 
+                                Model.SNMPData.Values.SelectMany(x => x.SNMPRawDataEntries.Values).ToList() : 
+                                new List<ISNMPRawEntryDTO>(Model.SNMPData.Values.Select(x => x.SNMPRawDataEntries[key]));
+            }
+            else if (dataType.Equals(typeof(ISNMPProcessedValueDTO)))
+            {
+                return string.IsNullOrWhiteSpace(key) ?
+                                Model.SNMPData.Values.SelectMany(x => x.SNMPProcessedData.Values).ToList() :
+                                new List<ISNMPProcessedValueDTO>(Model.SNMPData.Values.Select(x => x.SNMPProcessedData[key]));
             }
             else
             {

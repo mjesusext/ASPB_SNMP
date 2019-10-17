@@ -273,7 +273,6 @@ namespace SNMPDiscovery.View
             Console.WriteLine();
             Console.WriteLine("Select settings to apply this processing:");
 
-            //MJE - Pending implementation and more improvements
             IList<ISNMPSettingDTO> settingList = (List<ISNMPSettingDTO>) (_controller.PullDataList(typeof(ISNMPSettingDTO)));
             SettingDefinitions = settingList.Select(x => x.ID).ToArray();
 
