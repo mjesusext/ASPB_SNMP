@@ -201,6 +201,22 @@ namespace SNMPDiscovery.Model.Services
             OIDSettings.Add("PortHierarchyTEST", MockOIDSetting);
             OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
 
+            //MockOIDSetting = new OIDSettingDTO("CDPtest", "1.3.6.1.4.1.9.9.23.1.2.1.1.4", "1.3.6.1.4.1.9.9.23.1.2.1.1.4", true, null);
+            //OIDSettings.Add("CDPtest", MockOIDSetting);
+            //OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+
+            //MockOIDSetting = new OIDSettingDTO("CDPtestB", "1.3.6.1.4.1.9.9.23.1.2.1.1.7", "1.3.6.1.4.1.9.9.23.1.2.1.1.7", true, null);
+            //OIDSettings.Add("CDPtestB", MockOIDSetting);
+            //OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+
+            MockOIDSetting = new OIDSettingDTO("MJE - ValoresCiscoLACP", "1.3.6.1.4.1.9.9.23.1.2.1", "1.3.6.1.4.1.9.9.23.1.2.2", true, null);
+            OIDSettings.Add("MJE - ValoresCiscoLACP", MockOIDSetting);
+            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+
+            MockOIDSetting = new OIDSettingDTO("MJE - CDPInterfaceTable", "1.3.6.1.4.1.9.9.23.1.1.1", "1.3.6.1.4.1.9.9.23.1.1.1", true, null);
+            OIDSettings.Add("MJE - CDPInterfaceTable", MockOIDSetting);
+            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+
             #endregion
 
             #endregion

@@ -40,7 +40,7 @@ namespace SNMPDiscovery.View
         //Mock for disposing redirection to file
         ~SNMPDiscoveryView()
         {
-            RedirectToFile(false);
+            //RedirectToFile(false);
         }
 
         //Mock for redirecting console to file
@@ -129,7 +129,7 @@ namespace SNMPDiscovery.View
             CommandLabels = new Dictionary<EnumViewStates, string>()
             {
                 { EnumViewStates.Main, "Main" },
-                { EnumViewStates.DeviceDefinition, "Define device" },
+                { EnumViewStates.DeviceDefinition, "Define devices" },
                 { EnumViewStates.LoadDiscoveryData, "Load existing SNMP data discovery" },
                 { EnumViewStates.ProcessSelection, "Select processing functions" },
                 { EnumViewStates.ProcessExecution, "Run processes" },
@@ -222,7 +222,7 @@ namespace SNMPDiscovery.View
         {
             string settingname, initialIP, finalIP, SNMPuser;
 
-            Console.Write("Setting name: ");
+            Console.Write("Device definition name: ");
             settingname = Console.ReadLine();
             Console.Write("Initial IP/mask: ");
             initialIP = Console.ReadLine();
@@ -232,7 +232,7 @@ namespace SNMPDiscovery.View
             SNMPuser = Console.ReadLine();
             Console.WriteLine();
 
-            _controller.DefineDevice(settingname, initialIP, finalIP, SNMPuser);
+            _controller.DefineDevices(settingname, initialIP, finalIP, SNMPuser);
             //_controller.DefineDevice("ColecciónSwitches", "192.168.1.42", "192.168.1.51", "public");
 
             NextActionHandle();
@@ -429,22 +429,38 @@ namespace SNMPDiscovery.View
             {
                 ITopologyInfoDTO DataObj = (ITopologyInfoDTO)data.Data;
 
-                Console.WriteLine("\nAssigned MAC Addresses by port :\n");
-                Console.WriteLine("Port ID \t MAC Address");
+                Console.WriteLine("\nPort inventory by internal ID :\n");
+                Console.WriteLine("{0,-40} {1,-40} {2,-40} {3,-40} {4,-40} {5,-40}", "Port ID", "Port Name", "MAC Address", "Port Type", "Port Referer", "VLAN");
 
                 //Further details of processing
                 foreach (KeyValuePair<string, string> MACPort in DataObj.PortMACAddress)
                 {
-                    Console.WriteLine($"{MACPort.Key} \t {MACPort.Value}");
+                    List<string> relVLANs;
+                    bool existVLAN = DataObj.PortVLANMapping.TryGetValue(MACPort.Key, out relVLANs);
+                    string VLANList = existVLAN ? string.Join(",", relVLANs.Select(x => DataObj.VLANInventory[x])) : string.Empty;
+
+                    Console.WriteLine($"{MACPort.Key,-40} {DataObj.PortInventory[MACPort.Key],-40} {MACPort.Value,-40} {DataObj.PortSettings[MACPort.Key].First,-40} {DataObj.PortSettings[MACPort.Key].Second,-40} {VLANList,-40}");
                 }
 
-                Console.WriteLine("\nDirect neighbouts detection:\n");
+                Console.WriteLine("\nVolumetry MACs by port:\n");
+                Console.WriteLine("Port ID \t Quantity");
+
+                //Further details of processing
+                foreach (KeyValuePair<string, IDictionary<string, string>> portlearned in DataObj.PortLearnedAddresses)
+                {
+                    Console.WriteLine($"{portlearned.Key} \t {portlearned.Value.Count}");
+                }
+
+                Console.WriteLine("\nLearned MACs by port:\n");
                 Console.WriteLine("Port ID \t MAC Address \t IP Address");
 
                 //Further details of processing
-                foreach (KeyValuePair<string, CustomPair<string,string>> neightbour in DataObj.DeviceDirectNeighbours)
+                foreach (KeyValuePair<string, IDictionary<string,string>> portlearned in DataObj.PortLearnedAddresses)
                 {
-                    Console.WriteLine($"{neightbour.Key} \t {neightbour.Value.First} \t {neightbour.Value.Second}");
+                    foreach (KeyValuePair<string,string> maclist in portlearned.Value)
+                    {
+                        Console.WriteLine($"{portlearned.Key} \t {maclist.Key} \t {maclist.Value}");
+                    }
                 }
             }
         }

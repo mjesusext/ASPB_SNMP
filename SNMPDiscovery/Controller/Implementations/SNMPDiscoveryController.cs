@@ -28,7 +28,7 @@ namespace SNMPDiscovery.Controller
 
         #region Controller Implementation
 
-        public void DefineDevice(string settingID, string initialIPAndMask, string finalIPAndMask, string SNMPUser)
+        public void DefineDevices(string settingID, string initialIPAndMask, string finalIPAndMask, string SNMPUser)
         {
             if (string.IsNullOrWhiteSpace(settingID))
             {

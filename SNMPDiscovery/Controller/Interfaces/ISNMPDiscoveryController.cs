@@ -15,7 +15,7 @@ namespace SNMPDiscovery.Controller
         event Action<List<string>> OnInvalidInputs;
         
         //Define Devices To Discover
-        void DefineDevice(string settingID, string initialIP, string finalIP, string SNMPUser);
+        void DefineDevices(string settingID, string initialIP, string finalIP, string SNMPUser);
         //Load Devices Definition
         void LoadDeviceDefinitions();
         //Load Discovered data
