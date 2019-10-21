@@ -10,10 +10,10 @@ namespace SNMPDiscovery.Model.Services
 {
     public class TopologyBuilderStrategy : ISNMPProcessStrategy
     {
-        private const int LearnedMACThreshold = 3;
+        private const int LearnedMACThreshold = 1;
 
         public string ProcessID { get; }
-        public string RegardingSetting { get; set; }
+        public string RegardingDeviceSetting { get; set; }
         public event Action<object, Type> OnChange;
 
         #region Interfaces implementations
@@ -21,7 +21,7 @@ namespace SNMPDiscovery.Model.Services
         public IDictionary<string, IOIDSettingDTO> BuildOIDSetting(string regardingSetting, IDictionary<string, IOIDSettingDTO> OIDSettings)
         {
             IOIDSettingDTO MockOIDSetting;
-            RegardingSetting = regardingSetting;
+            RegardingDeviceSetting = regardingSetting;
 
             //Lazy initialization
             if (OIDSettings == null)
@@ -147,75 +147,73 @@ namespace SNMPDiscovery.Model.Services
                 OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
             }
 
+            if (!OIDSettings.ContainsKey(""))
+            {
+                MockOIDSetting = new OIDSettingDTO("TrunkDestinationsCDP", "1.3.6.1.4.1.9.9.23.1.2.1.1.6", "1.3.6.1.4.1.9.9.23.1.2.1.1.7", true, null);
+
+                IList<EnumSNMPOIDIndexType> indexes = new List<EnumSNMPOIDIndexType>() { EnumSNMPOIDIndexType.Number, EnumSNMPOIDIndexType.None };
+                MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.4.1.9.9.23.1.2.1.1.6", indexes);
+                MockOIDSetting.BuildIndexedOIDSetting("1.3.6.1.4.1.9.9.23.1.2.1.1.7", indexes);
+
+                OIDSettings.Add("TrunkDestinationsCDP", MockOIDSetting);
+
+                //We know data is fully ready
+                OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+            }
+
             #region MJE - TEST
 
-            MockOIDSetting = new OIDSettingDTO("Step2A", "1.0.8802.1.1.2.1.4.2.1.4", "1.0.8802.1.1.2.1.4.2.1.4", true, null);
-            OIDSettings.Add("Step2A", MockOIDSetting);
-            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
-
-            MockOIDSetting = new OIDSettingDTO("Step2B", "1.0.8802.1.1.2.1.4.1.1.7", "1.0.8802.1.1.2.1.4.1.1.7", false, null);
-            OIDSettings.Add("Step2B", MockOIDSetting);
-            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
-
-            MockOIDSetting = new OIDSettingDTO("Step2C", "1.2.840.10006.300.43.1.1.1.1.7", "1.2.840.10006.300.43.1.1.1.1.7", true, null);
-            OIDSettings.Add("Step2C", MockOIDSetting);
-            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
-
-            MockOIDSetting = new OIDSettingDTO("Step2D", "1.2.840.10006.300.43.1.2.1.1.5", "1.2.840.10006.300.43.1.2.1.1.5", true, null);
-            OIDSettings.Add("Step2D", MockOIDSetting);
-            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
-
-            MockOIDSetting = new OIDSettingDTO("Step2F", "1.3.6.1.4.1.9.9.46.1.3.1.1.4", "1.3.6.1.4.1.9.9.46.1.3.1.1.4", true, null);
-            OIDSettings.Add("Step2F", MockOIDSetting);
-            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
-
-            MockOIDSetting = new OIDSettingDTO("Step2G", "1.3.6.1.2.1.17.1.4.1.2", "1.3.6.1.2.1.17.1.4.1.2", true, null);
-            OIDSettings.Add("Step2G", MockOIDSetting);
-            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
-
-            MockOIDSetting = new OIDSettingDTO("Step2H", "1.3.6.1.2.1.17.2.15.1.3", "1.3.6.1.2.1.17.2.15.1.3", true, null);
-            OIDSettings.Add("Step2H", MockOIDSetting);
-            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
-
-            MockOIDSetting = new OIDSettingDTO("Step2K", "1.3.6.1.2.1.31.1.1.1.1", "1.3.6.1.2.1.31.1.1.1.1", true, null);
-            OIDSettings.Add("Step2K", MockOIDSetting);
-            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
-
-            MockOIDSetting = new OIDSettingDTO("Step2L", "1.3.6.1.2.1.31.1.1.1.6", "1.3.6.1.2.1.31.1.1.1.6", true, null);
-            OIDSettings.Add("Step2L", MockOIDSetting);
-            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
-
-            MockOIDSetting = new OIDSettingDTO("Step2M", "1.3.6.1.2.1.31.1.1.1.10", "1.3.6.1.2.1.31.1.1.1.10", true, null);
-            OIDSettings.Add("Step2M", MockOIDSetting);
-            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
-
-            MockOIDSetting = new OIDSettingDTO("Step2N", "1.3.6.1.2.1.31.1.1.1.15", "1.3.6.1.2.1.31.1.1.1.15", true, null);
-            OIDSettings.Add("Step2N", MockOIDSetting);
-            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
-
-            MockOIDSetting = new OIDSettingDTO("Step2Ñ", "1.3.6.1.2.1.31.1.1.1.18", "1.3.6.1.2.1.31.1.1.1.18", true, null);
-            OIDSettings.Add("Step2Ñ", MockOIDSetting);
-            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
-
-            MockOIDSetting = new OIDSettingDTO("PortHierarchyTEST", "1.3.6.1.2.1.31.1.2", "1.3.6.1.2.1.31.1.2", true, null);
-            OIDSettings.Add("PortHierarchyTEST", MockOIDSetting);
-            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
-
-            //MockOIDSetting = new OIDSettingDTO("CDPtest", "1.3.6.1.4.1.9.9.23.1.2.1.1.4", "1.3.6.1.4.1.9.9.23.1.2.1.1.4", true, null);
-            //OIDSettings.Add("CDPtest", MockOIDSetting);
+            //MockOIDSetting = new OIDSettingDTO("Step2A", "1.0.8802.1.1.2.1.4.2.1.4", "1.0.8802.1.1.2.1.4.2.1.4", true, null);
+            //OIDSettings.Add("Step2A", MockOIDSetting);
             //OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
-
-            //MockOIDSetting = new OIDSettingDTO("CDPtestB", "1.3.6.1.4.1.9.9.23.1.2.1.1.7", "1.3.6.1.4.1.9.9.23.1.2.1.1.7", true, null);
-            //OIDSettings.Add("CDPtestB", MockOIDSetting);
+            //
+            //MockOIDSetting = new OIDSettingDTO("Step2B", "1.0.8802.1.1.2.1.4.1.1.7", "1.0.8802.1.1.2.1.4.1.1.7", false, null);
+            //OIDSettings.Add("Step2B", MockOIDSetting);
             //OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
-
-            MockOIDSetting = new OIDSettingDTO("MJE - ValoresCiscoLACP", "1.3.6.1.4.1.9.9.23.1.2.1", "1.3.6.1.4.1.9.9.23.1.2.2", true, null);
-            OIDSettings.Add("MJE - ValoresCiscoLACP", MockOIDSetting);
-            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
-
-            MockOIDSetting = new OIDSettingDTO("MJE - CDPInterfaceTable", "1.3.6.1.4.1.9.9.23.1.1.1", "1.3.6.1.4.1.9.9.23.1.1.1", true, null);
-            OIDSettings.Add("MJE - CDPInterfaceTable", MockOIDSetting);
-            OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+            //
+            //MockOIDSetting = new OIDSettingDTO("Step2C", "1.2.840.10006.300.43.1.1.1.1.7", "1.2.840.10006.300.43.1.1.1.1.7", true, null);
+            //OIDSettings.Add("Step2C", MockOIDSetting);
+            //OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+            //
+            //MockOIDSetting = new OIDSettingDTO("Step2D", "1.2.840.10006.300.43.1.2.1.1.5", "1.2.840.10006.300.43.1.2.1.1.5", true, null);
+            //OIDSettings.Add("Step2D", MockOIDSetting);
+            //OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+            //
+            //MockOIDSetting = new OIDSettingDTO("Step2F", "1.3.6.1.4.1.9.9.46.1.3.1.1.4", "1.3.6.1.4.1.9.9.46.1.3.1.1.4", true, null);
+            //OIDSettings.Add("Step2F", MockOIDSetting);
+            //OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+            //
+            //MockOIDSetting = new OIDSettingDTO("Step2G", "1.3.6.1.2.1.17.1.4.1.2", "1.3.6.1.2.1.17.1.4.1.2", true, null);
+            //OIDSettings.Add("Step2G", MockOIDSetting);
+            //OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+            //
+            //MockOIDSetting = new OIDSettingDTO("Step2H", "1.3.6.1.2.1.17.2.15.1.3", "1.3.6.1.2.1.17.2.15.1.3", true, null);
+            //OIDSettings.Add("Step2H", MockOIDSetting);
+            //OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+            //
+            //MockOIDSetting = new OIDSettingDTO("Step2K", "1.3.6.1.2.1.31.1.1.1.1", "1.3.6.1.2.1.31.1.1.1.1", true, null);
+            //OIDSettings.Add("Step2K", MockOIDSetting);
+            //OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+            //
+            //MockOIDSetting = new OIDSettingDTO("Step2L", "1.3.6.1.2.1.31.1.1.1.6", "1.3.6.1.2.1.31.1.1.1.6", true, null);
+            //OIDSettings.Add("Step2L", MockOIDSetting);
+            //OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+            //
+            //MockOIDSetting = new OIDSettingDTO("Step2M", "1.3.6.1.2.1.31.1.1.1.10", "1.3.6.1.2.1.31.1.1.1.10", true, null);
+            //OIDSettings.Add("Step2M", MockOIDSetting);
+            //OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+            //
+            //MockOIDSetting = new OIDSettingDTO("Step2N", "1.3.6.1.2.1.31.1.1.1.15", "1.3.6.1.2.1.31.1.1.1.15", true, null);
+            //OIDSettings.Add("Step2N", MockOIDSetting);
+            //OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+            //
+            //MockOIDSetting = new OIDSettingDTO("Step2Ñ", "1.3.6.1.2.1.31.1.1.1.18", "1.3.6.1.2.1.31.1.1.1.18", true, null);
+            //OIDSettings.Add("Step2Ñ", MockOIDSetting);
+            //OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
+            //
+            //MockOIDSetting = new OIDSettingDTO("PortHierarchyTEST", "1.3.6.1.2.1.31.1.2", "1.3.6.1.2.1.31.1.2", true, null);
+            //OIDSettings.Add("PortHierarchyTEST", MockOIDSetting);
+            //OnChange?.Invoke(MockOIDSetting, typeof(IOIDSettingDTO));
 
             #endregion
 
@@ -227,6 +225,7 @@ namespace SNMPDiscovery.Model.Services
         public void Run(ISNMPModelDTO Model)
         {
             TransformRawData(Model);
+            ComputeDirectNeighbours(Model);
             BuildTopology(Model);
         }
 
@@ -259,23 +258,54 @@ namespace SNMPDiscovery.Model.Services
 
         private void TransformRawData(ISNMPModelDTO Model)
         {
-            IDictionary<string, IOIDSettingDTO> OIDSettings = Model.SNMPSettings[RegardingSetting].OIDSettings;
+            IDictionary<string, IOIDSettingDTO> OIDSettings = Model.SNMPDeviceSettings[RegardingDeviceSetting].OIDSettings;
 
-            foreach (ISNMPDeviceDTO Device in Model.SNMPData.Values)
+            foreach (ISNMPDeviceDataDTO Device in Model.SNMPDeviceData.Values)
             {
                 //Create DTO and attach to device
-                ITopologyInfoDTO TopologyInfo = new TopologyInfoDTO();
-                ISNMPProcessedValueDTO DataContainer = Device.AttachSNMPProcessedValue(typeof(ITopologyInfoDTO), TopologyInfo);
+                IDeviceTopologyInfoDTO TopologyInfo = new TopologyInfoDTO();
+                ISNMPProcessedValueDTO DataContainer = Device.AttachSNMPProcessedValue(typeof(IDeviceTopologyInfoDTO), TopologyInfo);
 
                 GetBasicInfo(Device, OIDSettings, TopologyInfo); //Fill with basic info
                 GetLearnedMACAddresses(Device, OIDSettings, TopologyInfo); //Fill with LearnedAddress inventory
                 GetPortMACAddress(Device, OIDSettings, TopologyInfo); //Fill with MAC address of each port
                 GetPortIDInfo(Device, OIDSettings, TopologyInfo); //Fill with port IDs inventory
                 GetVLANInfo(Device, OIDSettings, TopologyInfo); //Get VLANInventory and mappings
-                ComputeDirectNeighbours(TopologyInfo); //Get first address seen by Access Ports
-
+                GetAggregateDestinations(Device, OIDSettings, TopologyInfo); //Get destinations of each aggregate / infered trunk 
                 //We know data is fully ready
-                OnChange?.Invoke(DataContainer, typeof(ISNMPProcessedValueDTO));
+                //OnChange?.Invoke(DataContainer, typeof(ISNMPProcessedValueDTO));
+            }
+        }
+
+        private void ComputeDirectNeighbours(ISNMPModelDTO Model)
+        {
+            foreach (ISNMPDeviceDataDTO Device in Model.SNMPDeviceData.Values)
+            {
+                IDeviceTopologyInfoDTO DeviceTopology = (IDeviceTopologyInfoDTO)Device.SNMPProcessedData[ProcessID].Data;
+                DeviceTopology.DeviceDirectNeighbours = new Dictionary<string, IDictionary<string, string>>();
+
+                //1) Get access ports
+                //1.2) Get Learned MAC from access port
+                IEnumerable<string> AccessPorts = DeviceTopology.PortSettings.Where(x => x.Value.First == EnumPhysPortType.Access).Select(x => x.Key);
+                
+                foreach (string acports in AccessPorts)
+                {
+                    if (DeviceTopology.PortLearnedAddresses.ContainsKey(acports))
+                    {
+                        DeviceTopology.DeviceDirectNeighbours.Add(acports, DeviceTopology.PortLearnedAddresses[acports]);
+                    }
+                }
+
+                //2) Get Aggregates - InferedTrunks
+                //2.2) Get CISCO OID for SWITCH MAC and port
+                //2.3) Get Interface MAC linked to port of SWITCH MAC
+
+                foreach (KeyValuePair<string, CustomPair<string,string>> aggports in DeviceTopology.PortAggregateDestinations)
+                {
+                    //MJE Demasiado complejo... Crear objeto global en modelo simplifica todo.
+
+                    IDeviceTopologyInfoDTO DestinationDevice = (IDeviceTopologyInfoDTO)(Model.SNMPDeviceData.Values.First(x => x.MACAddress == aggports.Value.First).SNMPProcessedData[RegardingDeviceSetting].Data);
+                }
             }
         }
 
@@ -283,7 +313,7 @@ namespace SNMPDiscovery.Model.Services
         {
         }
 
-        private void GetBasicInfo(ISNMPDeviceDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, ITopologyInfoDTO TopologyInfo)
+        private void GetBasicInfo(ISNMPDeviceDataDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, IDeviceTopologyInfoDTO TopologyInfo)
         {
             IOIDSettingDTO SelectedSetting;
             IList<Action<IList<string>, string, object>> MappingHandlers;
@@ -293,19 +323,19 @@ namespace SNMPDiscovery.Model.Services
 
             //Define handle collection in order
             MappingHandlers = new List<Action<IList<string>, string, object>>();
-            MappingHandlers.Add((x, y, z) => { ((ITopologyInfoDTO)z).Description = y; });
-            MappingHandlers.Add((x, y, z) => { ((ITopologyInfoDTO)z).OIDobjectID = y; });
+            MappingHandlers.Add((x, y, z) => { ((IDeviceTopologyInfoDTO)z).Description = y; });
+            MappingHandlers.Add((x, y, z) => { ((IDeviceTopologyInfoDTO)z).OIDobjectID = y; });
             MappingHandlers.Add(null);
             MappingHandlers.Add(null);
-            MappingHandlers.Add((x, y, z) => { ((ITopologyInfoDTO)z).DeviceName = y; });
-            MappingHandlers.Add((x, y, z) => { ((ITopologyInfoDTO)z).Location = y; });
+            MappingHandlers.Add((x, y, z) => { ((IDeviceTopologyInfoDTO)z).DeviceName = y; });
+            MappingHandlers.Add((x, y, z) => { ((IDeviceTopologyInfoDTO)z).Location = y; });
             MappingHandlers.Add(null);
 
             //Collect data mapping with handlers
             StrategyHelper.OIDEntryProcessor(Device, TopologyInfo, SelectedSetting, MappingHandlers);
         }
 
-        private void GetLearnedMACAddresses(ISNMPDeviceDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, ITopologyInfoDTO TopologyInfo)
+        private void GetLearnedMACAddresses(ISNMPDeviceDataDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, IDeviceTopologyInfoDTO TopologyInfo)
         {
             IOIDSettingDTO SelectedSetting;
             IList<Action<IList<string>, string, object>> MappingHandlers;
@@ -324,7 +354,7 @@ namespace SNMPDiscovery.Model.Services
             StrategyHelper.OIDEntryProcessor(Device, TopologyInfo, SelectedSetting, MappingHandlers);
         }
 
-        private void GetPortMACAddress(ISNMPDeviceDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, ITopologyInfoDTO TopologyInfo)
+        private void GetPortMACAddress(ISNMPDeviceDataDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, IDeviceTopologyInfoDTO TopologyInfo)
         {
             IOIDSettingDTO SelectedSetting;
             IList<Action<IList<string>, string, object>> MappingHandlers;
@@ -334,7 +364,7 @@ namespace SNMPDiscovery.Model.Services
 
             //Define handle collection in order
             MappingHandlers = new List<Action<IList<string>, string, object>>();
-            MappingHandlers.Add((x,y,z) => { ((ITopologyInfoDTO)z).PortMACAddress.Add(x[0], y); });
+            MappingHandlers.Add((x,y,z) => { ((IDeviceTopologyInfoDTO)z).PortMACAddress.Add(x[0], y); });
 
             //Define container if necesary
             TopologyInfo.PortMACAddress = new Dictionary<string, string>();
@@ -343,7 +373,7 @@ namespace SNMPDiscovery.Model.Services
             StrategyHelper.OIDEntryProcessor(Device, TopologyInfo, SelectedSetting, MappingHandlers);
         }
 
-        private void GetPortIDInfo(ISNMPDeviceDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, ITopologyInfoDTO TopologyInfo)
+        private void GetPortIDInfo(ISNMPDeviceDataDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, IDeviceTopologyInfoDTO TopologyInfo)
         {
             IOIDSettingDTO SelectedSetting;
             IList<Action<IList<string>, string, object>> MappingHandlers;
@@ -355,7 +385,7 @@ namespace SNMPDiscovery.Model.Services
             SelectedSetting = OIDSettings["PhysPortDescription"];
 
             MappingHandlers = new List<Action<IList<string>, string, object>>();
-            MappingHandlers.Add((x, y, z) => { ((ITopologyInfoDTO)z).PortInventory.Add(x[0], y); });
+            MappingHandlers.Add((x, y, z) => { ((IDeviceTopologyInfoDTO)z).PortInventory.Add(x[0], y); });
 
             TopologyInfo.PortInventory = new Dictionary<string, string>();
             StrategyHelper.OIDEntryProcessor(Device, TopologyInfo, SelectedSetting, MappingHandlers);
@@ -445,7 +475,7 @@ namespace SNMPDiscovery.Model.Services
             #endregion
         }
 
-        private void GetVLANInfo(ISNMPDeviceDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, ITopologyInfoDTO TopologyInfo)
+        private void GetVLANInfo(ISNMPDeviceDataDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, IDeviceTopologyInfoDTO TopologyInfo)
         {
             //Key: Port ID, Value: Tuple of VLAN ID and VLAN name
             //IDictionary<string, CustomPair<string, string>> VLANByInterfaceID { get; set; }
@@ -504,34 +534,26 @@ namespace SNMPDiscovery.Model.Services
 
             #endregion
 
-
-
-
         }
 
-        private void ComputeDirectNeighbours(ITopologyInfoDTO TopologyInfo)
+        private void GetAggregateDestinations(ISNMPDeviceDataDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, IDeviceTopologyInfoDTO TopologyInfo)
         {
-            TopologyInfo.DeviceDirectNeighbours = new Dictionary<string, CustomPair<string, string>>();
+            IOIDSettingDTO SelectedSetting;
+            IList<Action<IList<string>, string, object>> MappingHandlers;
 
-            //Search access type
-            IEnumerable<string> ConnectedPorts = TopologyInfo.PortSettings.Where(x => x.Value.First == EnumPhysPortType.Access).Select(x => x.Key);
-            
-            //MJE Testing for getting trunk direct connections...
-            //IEnumerable<string> ConnectedPorts = TopologyInfo.PortSettings
-            //                                    .Where(x => 
-            //                                                x.Value.First == EnumPhysPortType.Access ||
-            //                                                x.Value.First == EnumPhysPortType.LACP ||
-            //                                                x.Value.First == EnumPhysPortType.Trunk)
-            //                                    .Select(x => x.Key);
+            //Get setting of interest 
+            SelectedSetting = OIDSettings["TrunkDestinationsCDP"];
 
-            foreach (string port in ConnectedPorts)
-            {
-                if (TopologyInfo.PortLearnedAddresses.ContainsKey(port))
-                {
-                    KeyValuePair<string, string> LearnedAddress = TopologyInfo.PortLearnedAddresses[port].First();
-                    TopologyInfo.DeviceDirectNeighbours.Add(port, new CustomPair<string, string>(LearnedAddress.Key, LearnedAddress.Value));
-                }
-            }
+            //Define handle collection in order
+            MappingHandlers = new List<Action<IList<string>, string, object>>();
+            MappingHandlers.Add((x, y, z) => { ((IDeviceTopologyInfoDTO)z).PortAggregateDestinations.Add(x[0], new CustomPair<string, string>(y, null)); });
+            MappingHandlers.Add((x, y, z) => { ((IDeviceTopologyInfoDTO)z).PortAggregateDestinations[x[0]].Second = y; });
+
+            //Define container if necesary
+            TopologyInfo.PortAggregateDestinations = new Dictionary<string, CustomPair<string,string>>();
+
+            //Collect data mapping with handlers
+            StrategyHelper.OIDEntryProcessor(Device, TopologyInfo, SelectedSetting, MappingHandlers);
         }
 
         #endregion
@@ -540,7 +562,7 @@ namespace SNMPDiscovery.Model.Services
 
         private void LearnedAddressMapper(IList<string> IndexValues, string Value, object StrategyDTOobject)
         {
-            ITopologyInfoDTO TopologyInfo = StrategyDTOobject as ITopologyInfoDTO;
+            IDeviceTopologyInfoDTO TopologyInfo = StrategyDTOobject as IDeviceTopologyInfoDTO;
 
             IDictionary<string, IDictionary<string, string>> LearnedAddress = TopologyInfo.PortLearnedAddresses;
 

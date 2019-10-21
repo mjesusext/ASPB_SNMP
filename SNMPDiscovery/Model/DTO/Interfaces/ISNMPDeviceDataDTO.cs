@@ -7,9 +7,10 @@ using System.Threading.Tasks;
 
 namespace SNMPDiscovery.Model.DTO
 {
-    public interface ISNMPDeviceDTO : ITrackeableObject
+    public interface ISNMPDeviceDataDTO : ITrackeableObject
     {
         IPAddress TargetIP { get; set; }
+        string MACAddress { get; set; }
         int NetworkMask { get; set; }
         IDictionary<string, ISNMPRawEntryDTO> SNMPRawDataEntries { get; set; }
         IDictionary<string, ISNMPProcessedValueDTO> SNMPProcessedData { get; set; }

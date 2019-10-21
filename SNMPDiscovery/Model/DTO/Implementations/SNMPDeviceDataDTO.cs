@@ -9,9 +9,10 @@ using System.Threading.Tasks;
 
 namespace SNMPDiscovery.Model.DTO
 {
-    public class SNMPDeviceDTO : ISNMPDeviceDTO
+    public class SNMPDeviceDataDTO : ISNMPDeviceDataDTO
     {
         public IPAddress TargetIP { get; set; }
+        public string MACAddress { get; set; }
         public int NetworkMask { get; set; }
         public IDictionary<string, ISNMPRawEntryDTO> SNMPRawDataEntries { get; set; }
         public IDictionary<string, ISNMPProcessedValueDTO> SNMPProcessedData { get; set; }
@@ -77,34 +78,34 @@ namespace SNMPDiscovery.Model.DTO
 
         #region Constructors
 
-        public SNMPDeviceDTO(IPAddress targetIP, int networkMask, Action<object, Type> ChangeTrackerHandler)
+        public SNMPDeviceDataDTO(IPAddress targetIP, int networkMask, Action<object, Type> ChangeTrackerHandler)
         {
             TargetIP = targetIP;
             NetworkMask = networkMask;
             OnChange += ChangeTrackerHandler;
 
             //We know data is fully ready
-            OnChange?.Invoke(this, typeof(ISNMPDeviceDTO));
+            OnChange?.Invoke(this, typeof(ISNMPDeviceDataDTO));
         }
 
-        public SNMPDeviceDTO(string targetIP, int networkMask, Action<object, Type> ChangeTrackerHandler)
+        public SNMPDeviceDataDTO(string targetIP, int networkMask, Action<object, Type> ChangeTrackerHandler)
         {
             TargetIP = IPAddress.Parse(targetIP);
             NetworkMask = networkMask;
             OnChange += ChangeTrackerHandler;
 
             //We know data is fully ready
-            OnChange?.Invoke(this, typeof(ISNMPDeviceDTO));
+            OnChange?.Invoke(this, typeof(ISNMPDeviceDataDTO));
         }
 
-        public SNMPDeviceDTO(int targetIP, int networkMask, Action<object, Type> ChangeTrackerHandler)
+        public SNMPDeviceDataDTO(int targetIP, int networkMask, Action<object, Type> ChangeTrackerHandler)
         {
             TargetIP = new IPAddress(targetIP);
             NetworkMask = networkMask;
             OnChange += ChangeTrackerHandler;
 
             //We know data is fully ready
-            OnChange?.Invoke(this, typeof(ISNMPDeviceDTO));
+            OnChange?.Invoke(this, typeof(ISNMPDeviceDataDTO));
         }
 
         #endregion

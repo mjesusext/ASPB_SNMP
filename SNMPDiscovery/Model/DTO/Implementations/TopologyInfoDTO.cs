@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SNMPDiscovery.Model.DTO
 {
-    public class TopologyInfoDTO : ITopologyInfoDTO
+    public class TopologyInfoDTO : IDeviceTopologyInfoDTO
     {
         public string DeviceName { get; set; }
         public string Description { get; set; }
@@ -22,6 +22,7 @@ namespace SNMPDiscovery.Model.DTO
         public IDictionary<string, string> VLANInventory { get; set; }
         public IDictionary<string, List<string>> PortVLANMapping { get; set; }
         public IDictionary<string, IDictionary<string, string>> PortLearnedAddresses { get; set; }
-        public IDictionary<string, CustomPair<string,string>> DeviceDirectNeighbours { get; set; }
+        public IDictionary<string, CustomPair<string, string>> PortAggregateDestinations { get; set; }
+        public IDictionary<string, IDictionary<string, string>> DeviceDirectNeighbours { get; set; }
     }
 }

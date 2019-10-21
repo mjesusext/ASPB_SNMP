@@ -20,8 +20,9 @@ namespace SNMPDiscovery.Model.Services
         private const int DefaultRetries = 1;
         private IList<IObserver<ISNMPModelDTO>> _snmpModelObservers;
 
-        public IDictionary<string, ISNMPSettingDTO> SNMPSettings { get; set; }
-        public IDictionary<string, ISNMPDeviceDTO> SNMPData { get; set; }
+        public IDictionary<string, ISNMPDeviceSettingDTO> SNMPDeviceSettings { get; set; }
+        public IDictionary<string, ISNMPDeviceDataDTO> SNMPDeviceData { get; set; }
+        public IDictionary<string, ISNMPProcessedValueDTO> SNMPGlobalProcessedData { get; set; }
         public CustomPair<Type, object> ChangedObject { get; set; }
 
         #region Interface Implementations
@@ -52,66 +53,81 @@ namespace SNMPDiscovery.Model.Services
             return new SNMPObservableUnsubscriber<ISNMPModelDTO>(_snmpModelObservers, observer);
         }
 
-        public ISNMPSettingDTO BuildSNMPSetting(string ID, string initialIPAndMask, string finalIPAndMask, string SNMPUser)
+        public ISNMPDeviceSettingDTO BuildSNMPSetting(string ID, string initialIPAndMask, string finalIPAndMask, string SNMPUser)
         {
             //Lazy initialization
-            if (SNMPSettings == null)
+            if (SNMPDeviceSettings == null)
             {
-                SNMPSettings = new Dictionary<string, ISNMPSettingDTO>();
+                SNMPDeviceSettings = new Dictionary<string, ISNMPDeviceSettingDTO>();
             }
 
-            ISNMPSettingDTO setting = new SNMPSettingDTO(ID, initialIPAndMask, finalIPAndMask, SNMPUser, ChangeTrackerHandler);
-            SNMPSettings.Add(ID, setting);
+            ISNMPDeviceSettingDTO setting = new SNMPDeviceSettingDTO(ID, initialIPAndMask, finalIPAndMask, SNMPUser, ChangeTrackerHandler);
+            SNMPDeviceSettings.Add(ID, setting);
 
             return setting;
         }
 
-        public ISNMPDeviceDTO BuildSNMPDevice(string targetIPAndMask)
+        public ISNMPDeviceDataDTO BuildSNMPDevice(string targetIPAndMask)
         {
             //Lazy initialization
-            if (SNMPData == null)
+            if (SNMPDeviceData == null)
             {
-                SNMPData = new Dictionary<string, ISNMPDeviceDTO>();
+                SNMPDeviceData = new Dictionary<string, ISNMPDeviceDataDTO>();
             }
 
-            ISNMPDeviceDTO device = new SNMPDeviceDTO(ModelHelper.ExtractIPAddress(targetIPAndMask), ModelHelper.ExtractNetworkMask(targetIPAndMask), ChangeTrackerHandler);
-            SNMPData.Add(targetIPAndMask, device);
+            ISNMPDeviceDataDTO device = new SNMPDeviceDataDTO(ModelHelper.ExtractIPAddress(targetIPAndMask), ModelHelper.ExtractNetworkMask(targetIPAndMask), ChangeTrackerHandler);
+            SNMPDeviceData.Add(targetIPAndMask, device);
 
             return device;
         }
 
-        public ISNMPDeviceDTO BuildSNMPDevice(int targetIP, int targetMask)
+        public ISNMPDeviceDataDTO BuildSNMPDevice(int targetIP, int targetMask)
         {
             //Lazy initialization
-            if (SNMPData == null)
+            if (SNMPDeviceData == null)
             {
-                SNMPData = new Dictionary<string, ISNMPDeviceDTO>();
+                SNMPDeviceData = new Dictionary<string, ISNMPDeviceDataDTO>();
             }
 
-            ISNMPDeviceDTO device = new SNMPDeviceDTO(targetIP, targetMask, ChangeTrackerHandler);
-            SNMPData.Add(new IPAddress(targetIP).ToString(), device);
+            ISNMPDeviceDataDTO device = new SNMPDeviceDataDTO(targetIP, targetMask, ChangeTrackerHandler);
+            SNMPDeviceData.Add(new IPAddress(targetIP).ToString(), device);
 
             return device;
         }
 
-        public ISNMPDeviceDTO BuildSNMPDevice(IPAddress targetIP, int targetMask)
+        public ISNMPDeviceDataDTO BuildSNMPDevice(IPAddress targetIP, int targetMask)
         {
             //Lazy initialization
-            if (SNMPData == null)
+            if (SNMPDeviceData == null)
             {
-                SNMPData = new Dictionary<string, ISNMPDeviceDTO>();
+                SNMPDeviceData = new Dictionary<string, ISNMPDeviceDataDTO>();
             }
 
-            ISNMPDeviceDTO device = new SNMPDeviceDTO(targetIP, targetMask, ChangeTrackerHandler);
-            SNMPData.Add(targetIP.ToString(), device);
+            ISNMPDeviceDataDTO device = new SNMPDeviceDataDTO(targetIP, targetMask, ChangeTrackerHandler);
+            SNMPDeviceData.Add(targetIP.ToString(), device);
 
             return device;
+        }
+
+        public ISNMPProcessedValueDTO AttachSNMPProcessedValue(Type DataType, object Data)
+        {
+            //Lazy initialization
+            if (SNMPGlobalProcessedData == null)
+            {
+                SNMPGlobalProcessedData = new Dictionary<string, ISNMPProcessedValueDTO>();
+            }
+
+            ISNMPProcessedValueDTO ProcessedValue = new SNMPProcessedValueDTO(DataType, Data);
+            SNMPGlobalProcessedData.Add(DataType.Name, ProcessedValue);
+            //We don't trigger OnChange because we only set the poiner, information is still not filled.
+
+            return ProcessedValue;
         }
 
         public void StartDiscovery()
         {
             //Iterate on all settings
-            foreach (ISNMPSettingDTO SNMPSettingEntry in SNMPSettings.Values)
+            foreach (ISNMPDeviceSettingDTO SNMPSettingEntry in SNMPDeviceSettings.Values)
             {
                 SNMPWalkByIP(SNMPSettingEntry);
             }
@@ -119,7 +135,7 @@ namespace SNMPDiscovery.Model.Services
 
         public void RunProcesses()
         {
-            IEnumerable<ISNMPProcessStrategy> processes = SNMPSettings.SelectMany(x => x.Value.Processes.Values);
+            IEnumerable<ISNMPProcessStrategy> processes = SNMPDeviceSettings.SelectMany(x => x.Value.Processes.Values);
 
             foreach (ISNMPProcessStrategy alg in processes)
             {
@@ -155,7 +171,7 @@ namespace SNMPDiscovery.Model.Services
 
         #region Private Methods
 
-        private void SNMPWalkByIP(ISNMPSettingDTO SNMPSettingEntry)
+        private void SNMPWalkByIP(ISNMPDeviceSettingDTO SNMPSettingEntry)
         {
             IList<IPAddress> IPinventory;
             OctetString Community;
@@ -177,14 +193,14 @@ namespace SNMPDiscovery.Model.Services
             {
                 foreach (IPAddress target in IPinventory)
                 {
-                    ISNMPDeviceDTO device = BuildSNMPDevice(target, SNMPSettingEntry.NetworkMask);
+                    ISNMPDeviceDataDTO device = BuildSNMPDevice(target, SNMPSettingEntry.NetworkMask);
                     UDPtarget.Address = device.TargetIP;
                     SNMPWalkByOIDSetting(UDPtarget, pdu, AgParam, SNMPSettingEntry, device);
                 }
             }
         }
 
-        private void SNMPWalkByOIDSetting(UdpTarget UDPtarget, Pdu pdu, AgentParameters param, ISNMPSettingDTO SNMPSettingEntry, ISNMPDeviceDTO SNMPDeviceData)
+        private void SNMPWalkByOIDSetting(UdpTarget UDPtarget, Pdu pdu, AgentParameters param, ISNMPDeviceSettingDTO SNMPSettingEntry, ISNMPDeviceDataDTO SNMPDeviceData)
         {
             //Get all OID requested for all processing algorithms
             IEnumerable<IOIDSettingDTO> OIDSettingCollection = SNMPSettingEntry.OIDSettings.Values;
@@ -197,7 +213,7 @@ namespace SNMPDiscovery.Model.Services
             }
         }
 
-        private void SNMPRunAgent(UdpTarget UDPtarget, Pdu pdu, AgentParameters param, IOIDSettingDTO OIDSetting, ISNMPDeviceDTO SNMPDeviceData)
+        private void SNMPRunAgent(UdpTarget UDPtarget, Pdu pdu, AgentParameters param, IOIDSettingDTO OIDSetting, ISNMPDeviceDataDTO SNMPDeviceData)
         {
             bool nextEntry = true;
             SnmpV2Packet Result;
@@ -225,7 +241,7 @@ namespace SNMPDiscovery.Model.Services
             }
         }
 
-        private bool SNMPDecodeData(SnmpV2Packet Result, Oid indexOid, Oid finalOid, bool InclusiveInterval, ISNMPDeviceDTO SNMPDeviceData)
+        private bool SNMPDecodeData(SnmpV2Packet Result, Oid indexOid, Oid finalOid, bool InclusiveInterval, ISNMPDeviceDataDTO SNMPDeviceData)
         {
             bool nextEntry = true;
 

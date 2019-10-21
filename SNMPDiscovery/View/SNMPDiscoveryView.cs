@@ -272,7 +272,7 @@ namespace SNMPDiscovery.View
             Console.WriteLine();
             Console.WriteLine("Select settings to apply this processing:");
 
-            IList<ISNMPSettingDTO> settingList = (List<ISNMPSettingDTO>) (_controller.PullDataList(typeof(ISNMPSettingDTO)));
+            IList<ISNMPDeviceSettingDTO> settingList = (List<ISNMPDeviceSettingDTO>) (_controller.PullDataList(typeof(ISNMPDeviceSettingDTO)));
             SettingDefinitions = settingList.Select(x => x.ID).ToArray();
 
             for(int i = 0; i < SettingDefinitions.Length; i++)
@@ -350,13 +350,13 @@ namespace SNMPDiscovery.View
         {
             RedirectToFile(true);
 
-            if (datatype.Equals(typeof(ISNMPDeviceDTO)))
+            if (datatype.Equals(typeof(ISNMPDeviceDataDTO)))
             {
-                ShowData((ISNMPDeviceDTO)data);
+                ShowData((ISNMPDeviceDataDTO)data);
             }
-            else if (datatype.Equals(typeof(ISNMPSettingDTO)))
+            else if (datatype.Equals(typeof(ISNMPDeviceSettingDTO)))
             {
-                ShowData((ISNMPSettingDTO)data);
+                ShowData((ISNMPDeviceSettingDTO)data);
             }
             else if (datatype.Equals(typeof(ISNMPProcessStrategy)))
             {
@@ -381,12 +381,12 @@ namespace SNMPDiscovery.View
             RedirectToFile(false);
         }
 
-        private void ShowData(ISNMPDeviceDTO data)
+        private void ShowData(ISNMPDeviceDataDTO data)
         {
             Console.WriteLine($"Added SNMP device {data.TargetIP}.\n");
         }
 
-        private void ShowData(ISNMPSettingDTO data)
+        private void ShowData(ISNMPDeviceSettingDTO data)
         {
             Console.WriteLine($"Added SNMP setting \"{data.ID}\" with this definition:\n" +
                               $"\t-Initial IP: {data.InitialIP}/{data.NetworkMask}\n" +
@@ -396,7 +396,7 @@ namespace SNMPDiscovery.View
 
         private void ShowData(ISNMPProcessStrategy data)
         {
-            Console.WriteLine($"Added process setting {data.ProcessID} related to {data.RegardingSetting}.\n");
+            Console.WriteLine($"Added process setting {data.ProcessID} related to {data.RegardingDeviceSetting}.\n");
         }
 
         private void ShowData(IOIDSettingDTO data)
@@ -425,14 +425,14 @@ namespace SNMPDiscovery.View
                               $"\t-OSI Implemented Layers: {BasicInfoObj.OSIImplementedLayers}\n");
 
             //PromptSpecificTypeInfo
-            if (data.DataType.Equals(typeof(ITopologyInfoDTO)))
+            if (data.DataType.Equals(typeof(IDeviceTopologyInfoDTO)))
             {
-                ITopologyInfoDTO DataObj = (ITopologyInfoDTO)data.Data;
+                IDeviceTopologyInfoDTO DataObj = (IDeviceTopologyInfoDTO)data.Data;
 
-                Console.WriteLine("\nPort inventory by internal ID :\n");
+                //Port inventory by internal ID
+                Console.WriteLine("\nPort inventory by internal ID:\n");
                 Console.WriteLine("{0,-40} {1,-40} {2,-40} {3,-40} {4,-40} {5,-40}", "Port ID", "Port Name", "MAC Address", "Port Type", "Port Referer", "VLAN");
 
-                //Further details of processing
                 foreach (KeyValuePair<string, string> MACPort in DataObj.PortMACAddress)
                 {
                     List<string> relVLANs;
@@ -442,26 +442,39 @@ namespace SNMPDiscovery.View
                     Console.WriteLine($"{MACPort.Key,-40} {DataObj.PortInventory[MACPort.Key],-40} {MACPort.Value,-40} {DataObj.PortSettings[MACPort.Key].First,-40} {DataObj.PortSettings[MACPort.Key].Second,-40} {VLANList,-40}");
                 }
 
+                //Volumetry MACs by port
                 Console.WriteLine("\nVolumetry MACs by port:\n");
                 Console.WriteLine("Port ID \t Quantity");
-
-                //Further details of processing
+                
                 foreach (KeyValuePair<string, IDictionary<string, string>> portlearned in DataObj.PortLearnedAddresses)
                 {
                     Console.WriteLine($"{portlearned.Key} \t {portlearned.Value.Count}");
                 }
 
-                Console.WriteLine("\nLearned MACs by port:\n");
+                //Learned MACs by port
+                //Console.WriteLine("\nLearned MACs by port:\n");
+                //Console.WriteLine("Port ID \t MAC Address \t IP Address");
+                //
+                //foreach (KeyValuePair<string, IDictionary<string,string>> portlearned in DataObj.PortLearnedAddresses)
+                //{
+                //    foreach (KeyValuePair<string,string> maclist in portlearned.Value)
+                //    {
+                //        Console.WriteLine($"{portlearned.Key} \t {maclist.Key} \t {maclist.Value}");
+                //    }
+                //}
+
+                //Direct Neighbours
+                Console.WriteLine("\nComputed direct neighbours:\n");
                 Console.WriteLine("Port ID \t MAC Address \t IP Address");
 
-                //Further details of processing
-                foreach (KeyValuePair<string, IDictionary<string,string>> portlearned in DataObj.PortLearnedAddresses)
+                foreach (KeyValuePair<string, IDictionary<string, string>> computedneigh in DataObj.DeviceDirectNeighbours)
                 {
-                    foreach (KeyValuePair<string,string> maclist in portlearned.Value)
+                    foreach (KeyValuePair<string, string> addrrlist in computedneigh.Value)
                     {
-                        Console.WriteLine($"{portlearned.Key} \t {maclist.Key} \t {maclist.Value}");
+                        Console.WriteLine($"{computedneigh.Key} \t {addrrlist.Key} \t {addrrlist.Value}");
                     }
                 }
+                Console.WriteLine();
             }
         }
 

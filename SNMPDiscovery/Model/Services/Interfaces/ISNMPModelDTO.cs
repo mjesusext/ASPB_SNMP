@@ -9,12 +9,14 @@ namespace SNMPDiscovery.Model.Services
 {
     public interface ISNMPModelDTO : IObservable<ISNMPModelDTO>, ITrackedObjectContainer
     {
-        IDictionary<string, ISNMPSettingDTO> SNMPSettings { get; set; }
-        IDictionary<string, ISNMPDeviceDTO> SNMPData { get; set; }
+        IDictionary<string, ISNMPDeviceSettingDTO> SNMPDeviceSettings { get; set; }
+        IDictionary<string, ISNMPDeviceDataDTO> SNMPDeviceData { get; set; }
+        IDictionary<string, ISNMPProcessedValueDTO> SNMPGlobalProcessedData { get; set; }
 
-        ISNMPSettingDTO BuildSNMPSetting(string ID, string initialIPAndMask, string finalIPAndMask, string SNMPUser);
-        ISNMPDeviceDTO BuildSNMPDevice(string targetIPAndMask);
-        ISNMPDeviceDTO BuildSNMPDevice(int targetIP, int targetMask);
+        ISNMPDeviceSettingDTO BuildSNMPSetting(string ID, string initialIPAndMask, string finalIPAndMask, string SNMPUser);
+        ISNMPDeviceDataDTO BuildSNMPDevice(string targetIPAndMask);
+        ISNMPDeviceDataDTO BuildSNMPDevice(int targetIP, int targetMask);
+        ISNMPProcessedValueDTO AttachSNMPProcessedValue(Type DataType, object Data);
 
         void StartDiscovery();
         void RunProcesses();

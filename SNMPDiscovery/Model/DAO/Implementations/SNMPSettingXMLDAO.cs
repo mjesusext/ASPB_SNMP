@@ -8,7 +8,7 @@ using SNMPDiscovery.Model.DTO;
 
 namespace SNMPDiscovery.Model.DAO
 {
-    public class SNMPSettingXMLDAO : ISNMPDataDAO<ISNMPSettingDTO, string>
+    public class SNMPSettingXMLDAO : ISNMPDataDAO<ISNMPDeviceSettingDTO, string>
     {
         //private bool _bulk;
         //Escritor XML
@@ -24,17 +24,17 @@ namespace SNMPDiscovery.Model.DAO
             throw new NotImplementedException();
         }
 
-        public void BulkCreate(IList<ISNMPSettingDTO> BulkData)
+        public void BulkCreate(IList<ISNMPDeviceSettingDTO> BulkData)
         {
             throw new NotImplementedException();
         }
 
-        public IList<ISNMPSettingDTO> BulkRetrieve()
+        public IList<ISNMPDeviceSettingDTO> BulkRetrieve()
         {
             throw new NotImplementedException();
         }
 
-        public bool Create(ISNMPSettingDTO Data)
+        public bool Create(ISNMPDeviceSettingDTO Data)
         {
             throw new NotImplementedException();
         }
@@ -44,12 +44,12 @@ namespace SNMPDiscovery.Model.DAO
             throw new NotImplementedException();
         }
 
-        public ISNMPSettingDTO Retrieve(string Key)
+        public ISNMPDeviceSettingDTO Retrieve(string Key)
         {
             throw new NotImplementedException();
         }
 
-        public bool Update(ISNMPSettingDTO Data)
+        public bool Update(ISNMPDeviceSettingDTO Data)
         {
             throw new NotImplementedException();
         }

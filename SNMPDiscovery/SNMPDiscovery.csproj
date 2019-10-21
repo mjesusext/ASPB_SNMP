@@ -46,7 +46,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>SNMPDiscovery.SNMPEjemplo</StartupObject>
+    <StartupObject>
+    </StartupObject>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="SnmpSharpNet">
@@ -70,7 +74,8 @@
     <Compile Include="Model\DTO\Enums\EnumSNMPOIDIndexType.cs" />
     <Compile Include="Model\DTO\Enums\EnumSNMPOIDType.cs" />
     <Compile Include="Model\DTO\Implementations\OIDSettingDTO.cs" />
-    <Compile Include="Model\DTO\Implementations\SNMPDeviceDTO.cs" />
+    <Compile Include="Model\DTO\Implementations\SNMPDeviceDataDTO.cs" />
+    <Compile Include="Model\DTO\Interfaces\IGlobalTopologyInfoDTO.cs" />
     <Compile Include="Model\DTO\Interfaces\ITrackeableObject.cs" />
     <Compile Include="Model\DTO\Interfaces\ITrackedObjectContainer.cs" />
     <Compile Include="Model\Helpers\ModelHelper.cs" />
@@ -82,14 +87,14 @@
     <Compile Include="Model\Helpers\CustomPair.cs" />
     <Compile Include="Model\Helpers\StrategyHelper.cs" />
     <Compile Include="Model\DTO\Implementations\SNMPRawEntryDTO.cs" />
-    <Compile Include="Model\DTO\Implementations\SNMPSettingDTO.cs" />
+    <Compile Include="Model\DTO\Implementations\SNMPDeviceSettingDTO.cs" />
     <Compile Include="Model\DTO\Implementations\TopologyInfoDTO.cs" />
     <Compile Include="Model\DTO\Interfaces\IOIDSettingDTO.cs" />
-    <Compile Include="Model\DTO\Interfaces\ISNMPDeviceDTO.cs" />
+    <Compile Include="Model\DTO\Interfaces\ISNMPDeviceDataDTO.cs" />
     <Compile Include="Model\Services\Interfaces\ISNMPModelDTO.cs" />
     <Compile Include="Model\DTO\Interfaces\ISNMPRawEntryDTO.cs" />
-    <Compile Include="Model\DTO\Interfaces\ISNMPSettingDTO.cs" />
-    <Compile Include="Model\DTO\Interfaces\ITopologyInfoDTO.cs" />
+    <Compile Include="Model\DTO\Interfaces\ISNMPDeviceSettingDTO.cs" />
+    <Compile Include="Model\DTO\Interfaces\IDeviceTopologyInfoDTO.cs" />
     <Compile Include="Controller\Implementations\SNMPDiscoveryController.cs" />
     <Compile Include="Model\Services\Implementations\TopologyBuilderStrategy.cs" />
     <Compile Include="Controller\Interfaces\ISNMPDiscoveryController.cs" />

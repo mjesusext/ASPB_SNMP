@@ -10,7 +10,7 @@ namespace SNMPDiscovery.Model.Services
     public interface ISNMPProcessStrategy : ITrackeableObject
     {
         string ProcessID { get; }
-        string RegardingSetting { get; set; }
+        string RegardingDeviceSetting { get; set; }
 
         IDictionary<string, IOIDSettingDTO> BuildOIDSetting(string regardingSetting, IDictionary<string, IOIDSettingDTO> OIDSettings);
         void ValidateInput(ISNMPModelDTO Model);

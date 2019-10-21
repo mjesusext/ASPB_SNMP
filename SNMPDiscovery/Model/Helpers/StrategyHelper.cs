@@ -32,7 +32,7 @@ namespace SNMPDiscovery.Model.Helpers
             return 0;
         }
 
-        public static IList<ISNMPRawEntryDTO> OIDDataSelector(ISNMPDeviceDTO Device, string currentRoot, string nextRoot)
+        public static IList<ISNMPRawEntryDTO> OIDDataSelector(ISNMPDeviceDataDTO Device, string currentRoot, string nextRoot)
         {
             if(Device.SNMPRawDataEntries == null)
             {
@@ -55,7 +55,7 @@ namespace SNMPDiscovery.Model.Helpers
             }
         }
 
-        public static void OIDEntryProcessor(ISNMPDeviceDTO Device, object StrategyDTOobject, IOIDSettingDTO SelectedSetting, IList<Action<IList<string>, string, object>> MappingHandler)
+        public static void OIDEntryProcessor(ISNMPDeviceDataDTO Device, object StrategyDTOobject, IOIDSettingDTO SelectedSetting, IList<Action<IList<string>, string, object>> MappingHandler)
         {
             string[] RootEntries = SelectedSetting.IndexedOIDSettings.Keys.ToArray();
 

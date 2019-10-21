@@ -10,7 +10,7 @@ using SNMPDiscovery.Model.Services;
 
 namespace SNMPDiscovery.Model.DTO
 {
-    public class SNMPSettingDTO : ISNMPSettingDTO
+    public class SNMPDeviceSettingDTO : ISNMPDeviceSettingDTO
     {
         public string ID { get; set; }
         public IPAddress InitialIP { get; set; }
@@ -81,7 +81,7 @@ namespace SNMPDiscovery.Model.DTO
 
         #region Constructors
 
-        public SNMPSettingDTO(string id, string initialIPAndMask, string finalIPAndMask, string SNMPUser, Action<object, Type> ChangeTrackerHandler)
+        public SNMPDeviceSettingDTO(string id, string initialIPAndMask, string finalIPAndMask, string SNMPUser, Action<object, Type> ChangeTrackerHandler)
         {
             ID = id;
             InitialIP = ModelHelper.ExtractIPAddress(initialIPAndMask);
@@ -91,7 +91,7 @@ namespace SNMPDiscovery.Model.DTO
 
             OnChange += ChangeTrackerHandler;
 
-            OnChange?.Invoke(this, typeof(ISNMPSettingDTO));
+            OnChange?.Invoke(this, typeof(ISNMPDeviceSettingDTO));
         }
 
         #endregion

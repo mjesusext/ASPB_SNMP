@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SNMPDiscovery.Model.DTO
 {
-    public interface ITopologyInfoDTO : IDiscoveredBasicInfo
+    public interface IDeviceTopologyInfoDTO : IDiscoveredBasicInfo
     {
         //Key: Port ID, Value: Port Description (text id)
         IDictionary<string, string> PortInventory { get; set; }
@@ -21,7 +21,9 @@ namespace SNMPDiscovery.Model.DTO
         IDictionary<string, List<string>> PortVLANMapping { get; set; }
         //Key: Port ID, Value: Dictionary of MAC Address - IP Address
         IDictionary<string, IDictionary<string,string>> PortLearnedAddresses { get; set; }
+        //Key: Port ID (Aggregate - Inferred trunk) , Value: Tuple of destination SWITCH CPU MAC - Port index of destination SWITCH
+        IDictionary<string, CustomPair<string, string>> PortAggregateDestinations { get; set; }
         //Key: Port ID, Value: Tuple of MAC Address - IP Address
-        IDictionary<string, CustomPair<string, string>> DeviceDirectNeighbours { get; set; }
+        IDictionary<string, IDictionary<string, string>> DeviceDirectNeighbours { get; set; }
     }
 }

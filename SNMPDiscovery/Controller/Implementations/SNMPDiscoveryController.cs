@@ -68,7 +68,7 @@ namespace SNMPDiscovery.Controller
 
         public void DefineProcesses(string settingID, EnumProcessingType processType)
         {
-            Model.SNMPSettings[settingID].BuildProcess(processType);
+            Model.SNMPDeviceSettings[settingID].BuildProcess(processType);
         }
 
         public void RunDiscovery()
@@ -78,7 +78,7 @@ namespace SNMPDiscovery.Controller
 
         public void RunProcesses()
         {
-            foreach (ISNMPProcessStrategy proccess in Model.SNMPSettings.Values.SelectMany(x => x.Processes.Values))
+            foreach (ISNMPProcessStrategy proccess in Model.SNMPDeviceSettings.Values.SelectMany(x => x.Processes.Values))
             {
                 proccess.ValidateInput(Model);
                 proccess.Run(Model);
@@ -87,41 +87,41 @@ namespace SNMPDiscovery.Controller
 
         public object PullDataList(Type dataType, string key = null)
         {
-            if (dataType.Equals(typeof(ISNMPDeviceDTO)))
+            if (dataType.Equals(typeof(ISNMPDeviceDataDTO)))
             {
                 return string.IsNullOrWhiteSpace(key) ? 
-                            Model.SNMPData.Values.ToList() : 
-                            new List<ISNMPDeviceDTO>(new[] { Model.SNMPData[key] });
+                            Model.SNMPDeviceData.Values.ToList() : 
+                            new List<ISNMPDeviceDataDTO>(new[] { Model.SNMPDeviceData[key] });
             }
-            else if (dataType.Equals(typeof(ISNMPSettingDTO)))
+            else if (dataType.Equals(typeof(ISNMPDeviceSettingDTO)))
             {
                 return string.IsNullOrWhiteSpace(key) ? 
-                            Model.SNMPSettings.Values.ToList() : 
-                            new List<ISNMPSettingDTO>(new[] { Model.SNMPSettings[key] });
+                            Model.SNMPDeviceSettings.Values.ToList() : 
+                            new List<ISNMPDeviceSettingDTO>(new[] { Model.SNMPDeviceSettings[key] });
             }
             else if (dataType.Equals(typeof(ISNMPProcessStrategy)))
             {
                 return string.IsNullOrWhiteSpace(key) ? 
-                                Model.SNMPSettings.Values.SelectMany(x => x.Processes.Values).ToList() :
-                                new List<ISNMPProcessStrategy>(Model.SNMPSettings.Values.Select(x => x.Processes[key]));
+                                Model.SNMPDeviceSettings.Values.SelectMany(x => x.Processes.Values).ToList() :
+                                new List<ISNMPProcessStrategy>(Model.SNMPDeviceSettings.Values.Select(x => x.Processes[key]));
             }
             else if (dataType.Equals(typeof(IOIDSettingDTO)))
             {
                 return string.IsNullOrWhiteSpace(key) ? 
-                                Model.SNMPSettings.Values.SelectMany(x => x.OIDSettings.Values).ToList() :
-                                new List<IOIDSettingDTO>(Model.SNMPSettings.Values.Select(x => x.OIDSettings[key]));
+                                Model.SNMPDeviceSettings.Values.SelectMany(x => x.OIDSettings.Values).ToList() :
+                                new List<IOIDSettingDTO>(Model.SNMPDeviceSettings.Values.Select(x => x.OIDSettings[key]));
             }
             else if (dataType.Equals(typeof(ISNMPRawEntryDTO)))
             {
                 return string.IsNullOrWhiteSpace(key) ? 
-                                Model.SNMPData.Values.SelectMany(x => x.SNMPRawDataEntries.Values).ToList() : 
-                                new List<ISNMPRawEntryDTO>(Model.SNMPData.Values.Select(x => x.SNMPRawDataEntries[key]));
+                                Model.SNMPDeviceData.Values.SelectMany(x => x.SNMPRawDataEntries.Values).ToList() : 
+                                new List<ISNMPRawEntryDTO>(Model.SNMPDeviceData.Values.Select(x => x.SNMPRawDataEntries[key]));
             }
             else if (dataType.Equals(typeof(ISNMPProcessedValueDTO)))
             {
                 return string.IsNullOrWhiteSpace(key) ?
-                                Model.SNMPData.Values.SelectMany(x => x.SNMPProcessedData.Values).ToList() :
-                                new List<ISNMPProcessedValueDTO>(Model.SNMPData.Values.Select(x => x.SNMPProcessedData[key]));
+                                Model.SNMPDeviceData.Values.SelectMany(x => x.SNMPProcessedData.Values).ToList() :
+                                new List<ISNMPProcessedValueDTO>(Model.SNMPDeviceData.Values.Select(x => x.SNMPProcessedData[key]));
             }
             else
             {
