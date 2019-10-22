@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,6 +12,8 @@ namespace SNMPDiscovery.Model.Helpers
 {
     public static class ModelHelper
     {
+        #region IP Computations
+
         public static bool ValidateIPAndMask(string IPAndMask)
         {
             bool result = false;
@@ -72,15 +77,17 @@ namespace SNMPDiscovery.Model.Helpers
 
             //Decompose inputs
             maskpos = initialIPAndMask.IndexOf('/');
-            initialIPAddress = IPAddress.HostToNetworkOrder(BitConverter.ToInt32(IPAddress.Parse(initialIPAndMask.Substring(0, maskpos - 1)).GetAddressBytes(), 0));
+            //initialIPAddress = IPAddress.HostToNetworkOrder(BitConverter.ToInt32(IPAddress.Parse(initialIPAndMask.Substring(0, maskpos - 1)).GetAddressBytes(), 0));
+            initialIPAddress = IPAddress.HostToNetworkOrder(BitConverter.ToInt32(IPAddress.Parse(initialIPAndMask.Substring(0, maskpos)).GetAddressBytes(), 0));
             initialMask = int.Parse(initialIPAndMask.Substring(maskpos + 1));
 
             maskpos = finalIPAndMask.IndexOf('/');
-            finalIPAddress = IPAddress.HostToNetworkOrder(BitConverter.ToInt32(IPAddress.Parse(finalIPAndMask.Substring(0, maskpos - 1)).GetAddressBytes(), 0));
+            //finalIPAddress = IPAddress.HostToNetworkOrder(BitConverter.ToInt32(IPAddress.Parse(finalIPAndMask.Substring(0, maskpos - 1)).GetAddressBytes(), 0));
+            finalIPAddress = IPAddress.HostToNetworkOrder(BitConverter.ToInt32(IPAddress.Parse(finalIPAndMask.Substring(0, maskpos)).GetAddressBytes(), 0));
             finalMask = int.Parse(finalIPAndMask.Substring(maskpos + 1));
 
             //Previous validation
-            if(initialIPAddress <= finalIPAddress && finalMask == initialMask)
+            if (initialIPAddress <= finalIPAddress && finalMask == initialMask)
             {
                 result = true;
             }
@@ -91,7 +98,7 @@ namespace SNMPDiscovery.Model.Helpers
         public static IPAddress ExtractIPAddress(string targetIPAndMask)
         {
             int maskpos;
-            
+
             maskpos = targetIPAndMask.IndexOf('/');
             return IPAddress.Parse(targetIPAndMask.Substring(0, maskpos));
         }
@@ -116,14 +123,35 @@ namespace SNMPDiscovery.Model.Helpers
 
             for (int i = LowerIPboundSNMP; i <= UpperIPboundSNMP; i++)
             {
-                IPAddress currentIP = new IPAddress(IPAddress.NetworkToHostOrder(i));
+                IPAddress currentIP = new IPAddress(BitConverter.GetBytes(IPAddress.NetworkToHostOrder(i)));
                 IPAddress broadcastIP = GetBroadcastAddress(currentIP, netMask);
                 IPAddress networkIP = GetNetworkAddress(currentIP, netMask);
 
-                if(!currentIP.Equals(broadcastIP) && !currentIP.Equals(networkIP))
+                if (!currentIP.Equals(broadcastIP) && !currentIP.Equals(networkIP))
                 {
                     res.Add(currentIP);
                 }
+            }
+
+            return res;
+        }
+
+        public static IList<IPAddress> GenerateFullHostList(IPAddress IP, int NetworkMask)
+        {
+            IList<IPAddress> res = new List<IPAddress>();
+            IPAddress networkIP, broadcastIP, netMask;
+
+            netMask = CreateMaskByNetBitLength(NetworkMask);
+            broadcastIP = GetBroadcastAddress(IP, netMask);
+            networkIP = GetNetworkAddress(IP, netMask);
+
+            //Get host limits
+            int LowerIPboundSNMP = IPAddress.HostToNetworkOrder(BitConverter.ToInt32(networkIP.GetAddressBytes(), 0)) + 1;
+            int UpperIPboundSNMP = IPAddress.HostToNetworkOrder(BitConverter.ToInt32(broadcastIP.GetAddressBytes(), 0)) - 1;
+            
+            for (int i = LowerIPboundSNMP; i <= UpperIPboundSNMP; i++)
+            {
+                res.Add(new IPAddress(BitConverter.GetBytes(IPAddress.NetworkToHostOrder(i))));
             }
 
             return res;
@@ -135,7 +163,9 @@ namespace SNMPDiscovery.Model.Helpers
             byte[] subnetMaskBytes = subnetMask.GetAddressBytes();
 
             if (ipAdressBytes.Length != subnetMaskBytes.Length)
+            {
                 throw new ArgumentException("Lengths of IP address and subnet mask do not match.");
+            }
 
             byte[] broadcastAddress = new byte[ipAdressBytes.Length];
             for (int i = 0; i < broadcastAddress.Length; i++)
@@ -151,7 +181,9 @@ namespace SNMPDiscovery.Model.Helpers
             byte[] subnetMaskBytes = subnetMask.GetAddressBytes();
 
             if (ipAdressBytes.Length != subnetMaskBytes.Length)
+            {
                 throw new ArgumentException("Lengths of IP address and subnet mask do not match.");
+            }
 
             byte[] broadcastAddress = new byte[ipAdressBytes.Length];
             for (int i = 0; i < broadcastAddress.Length; i++)
@@ -182,14 +214,17 @@ namespace SNMPDiscovery.Model.Helpers
             for (int i = 0; i < 4; i++)
             {
                 if (i * 8 + 8 <= netPartLength)
+                {
                     binaryMask[i] = (byte)255;
+                }
                 else if (i * 8 > netPartLength)
+                {
                     binaryMask[i] = (byte)0;
+                }
                 else
                 {
                     int oneLength = netPartLength - i * 8;
-                    string binaryDigit =
-                        String.Empty.PadLeft(oneLength, '1').PadRight(8, '0');
+                    string binaryDigit = string.Empty.PadLeft(oneLength, '1').PadRight(8, '0');
                     binaryMask[i] = Convert.ToByte(binaryDigit, 2);
                 }
             }
@@ -210,5 +245,31 @@ namespace SNMPDiscovery.Model.Helpers
 
             return CreateMaskByHostBitLength(b.Length);
         }
+
+        #endregion
+
+        #region ARP - RARP
+
+        [DllImport("iphlpapi.dll", ExactSpelling = true, EntryPoint = "SendARP")]
+        public static extern int SendARP(int DestIP, int SrcIP, [Out] byte[] pMacAddr, ref int PhyAddrLen);
+
+        public static string GetMACAddress(string IPaddress)
+        {
+            int MAClenght = 6;
+            byte[] MACAddress = new byte[MAClenght];
+            //Host order is assumed
+            int formattedtip = BitConverter.ToInt32(IPAddress.Parse(IPaddress).GetAddressBytes(), 0);
+
+            if(SendARP(formattedtip, 0, MACAddress, ref MAClenght) == 0)
+            {
+                return string.Join(" ", MACAddress.Select(x => string.Format("{0:x2}", x).ToUpper()));
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        #endregion
     }
 }

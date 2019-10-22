@@ -58,6 +58,7 @@ namespace SNMPDiscovery.Model.DTO
                 {
                     OIDSettings = ProcessProfile.BuildOIDSetting(ID, OIDSettings);
                     Processes.Add(ProcessProfile.ProcessID, ProcessProfile);
+                    OnChange?.Invoke(ProcessProfile, typeof(ISNMPProcessStrategy));
 
                     return ProcessProfile;
                 }

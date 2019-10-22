@@ -33,7 +33,7 @@ namespace SNMPDiscovery.Model.DTO
             SNMPRawDataEntries.Add(OID, RawEntry);
 
             //We know data is fully ready
-            OnChange?.Invoke(RawEntry, typeof(ISNMPRawEntryDTO));
+            //OnChange?.Invoke(RawEntry, typeof(ISNMPRawEntryDTO));
 
             return RawEntry;
         }
@@ -50,7 +50,7 @@ namespace SNMPDiscovery.Model.DTO
             SNMPRawDataEntries.Add(OID, RawEntry);
 
             //We know data is fully ready
-            OnChange?.Invoke(RawEntry, typeof(ISNMPRawEntryDTO));
+            //OnChange?.Invoke(RawEntry, typeof(ISNMPRawEntryDTO));
 
             return RawEntry;
         }

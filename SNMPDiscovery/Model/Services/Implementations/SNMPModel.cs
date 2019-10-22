@@ -23,6 +23,7 @@ namespace SNMPDiscovery.Model.Services
         public IDictionary<string, ISNMPDeviceSettingDTO> SNMPDeviceSettings { get; set; }
         public IDictionary<string, ISNMPDeviceDataDTO> SNMPDeviceData { get; set; }
         public IDictionary<string, ISNMPProcessedValueDTO> SNMPGlobalProcessedData { get; set; }
+        
         public CustomPair<Type, object> ChangedObject { get; set; }
 
         #region Interface Implementations
@@ -178,7 +179,10 @@ namespace SNMPDiscovery.Model.Services
             AgentParameters AgParam;
             Pdu pdu;
 
+            //Compute full list of devices
             IPinventory = ModelHelper.GenerateHostList(SNMPSettingEntry.InitialIP, SNMPSettingEntry.FinalIP, SNMPSettingEntry.NetworkMask);
+            //Discard unavailable devices for SNMP
+
             Community = new OctetString(SNMPSettingEntry.CommunityString);
 
             AgParam = new AgentParameters(Community);
