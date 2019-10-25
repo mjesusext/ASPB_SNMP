@@ -240,7 +240,11 @@ namespace SNMPDiscovery.Model.Services
 
             foreach (string iptarget in IPinventory.Select(x=> x.ToString()))
             {
-                MACAddrMapper.Add(ModelHelper.GetMACAddress(iptarget), iptarget);
+                string MACaddr = ModelHelper.GetMACAddress(iptarget);
+                if (!string.IsNullOrWhiteSpace(MACaddr) && !MACAddrMapper.ContainsKey(MACaddr))
+                {
+                    MACAddrMapper.Add(MACaddr, iptarget);
+                }
             }
         }
 
@@ -292,22 +296,38 @@ namespace SNMPDiscovery.Model.Services
 
                     if (MACAddrMapper.TryGetValue(aggports.Value.First, out deviceip))
                     {
-                        string PortMACAddr;
-                        IDeviceTopologyInfoDTO targdevice = (IDeviceTopologyInfoDTO) Model.SNMPDeviceData[deviceip].SNMPProcessedData[nameof(IDeviceTopologyInfoDTO)].Data;
-
+                        string PortMACAddr = null;
+                        IDeviceTopologyInfoDTO targdevice = null;
                         Dictionary<string, string> aggres = new Dictionary<string, string>();
 
-                        //Try search by index first, otherwise by port description
-                        if(targdevice.PortMACAddress.TryGetValue(aggports.Value.Second, out PortMACAddr))
+                        if (Model.SNMPDeviceData.ContainsKey(deviceip))
                         {
-                            aggres.Add(PortMACAddr, MACAddrMapper[aggports.Value.First]);
-                        }
-                        else if (targdevice.PortInventory.TryGetValue(aggports.Value.Second, out PortMACAddr))
-                        {
-                            aggres.Add(PortMACAddr, MACAddrMapper[aggports.Value.First]);
+                            targdevice = (IDeviceTopologyInfoDTO)Model.SNMPDeviceData[deviceip].SNMPProcessedData[nameof(IDeviceTopologyInfoDTO)].Data;
                         }
 
-                        DeviceTopology.DeviceDirectNeighbours.Add(aggports.Key, aggres);
+                        if(targdevice != null)
+                        {
+                            //Try search by index first, otherwise by port description
+                            if (targdevice.PortMACAddress.TryGetValue(aggports.Value.Second, out PortMACAddr))
+                            {
+                                aggres.Add(PortMACAddr, MACAddrMapper[aggports.Value.First]);
+                            }
+                            else if (targdevice.PortInventory.TryGetValue(aggports.Value.Second, out PortMACAddr))
+                            {
+                                aggres.Add(PortMACAddr, MACAddrMapper[aggports.Value.First]);
+                            }
+                        }
+                        else
+                        {
+                            aggres.Add("Not available", "Not available");
+                        }
+
+
+                        //MJE - Revisar porque duplica clave a veces...
+                        if(!DeviceTopology.DeviceDirectNeighbours.ContainsKey(aggports.Key))
+                        {
+                            DeviceTopology.DeviceDirectNeighbours.Add(aggports.Key, aggres);
+                        }
                     }
                 }
             }
@@ -431,9 +451,12 @@ namespace SNMPDiscovery.Model.Services
             if (PortHierarchyResults.Count != 0)
             {
                 //Virtual ports
-                foreach (string vlanport in PortHierarchyResults["0"])
+                if (PortHierarchyResults.ContainsKey("0"))
                 {
-                    TopologyInfo.PortSettings[vlanport].First = EnumPhysPortType.VirtualPort;
+                    foreach (string vlanport in PortHierarchyResults["0"])
+                    {
+                        TopologyInfo.PortSettings[vlanport].First = EnumPhysPortType.VirtualPort;
+                    }
                 }
 
                 //Trunk ports (any protocol)
@@ -574,12 +597,12 @@ namespace SNMPDiscovery.Model.Services
             {
                 if (!LearnedAddress[Value].ContainsKey(IndexValues[1]))
                 {
-                    LearnedAddress[Value].Add(IndexValues[1], null);
+                    LearnedAddress[Value].Add(IndexValues[1], MACAddrMapper.ContainsKey(IndexValues[1]) ? MACAddrMapper[IndexValues[1]] : null);
                 }
             }
             else
             {
-                LearnedAddress.Add(Value, new Dictionary<string, string>() { { IndexValues[1], null } });
+                LearnedAddress.Add(Value, new Dictionary<string, string>() { { IndexValues[1], MACAddrMapper.ContainsKey(IndexValues[1]) ? MACAddrMapper[IndexValues[1]] : null } });
             }
         }
 

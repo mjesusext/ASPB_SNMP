@@ -388,6 +388,10 @@ namespace SNMPDiscovery.View
 
         private void ShowData(ISNMPDeviceSettingDTO data)
         {
+            //MJE TEST
+            Console.WriteLine($"Timestamp {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:ffff")}");
+            Console.WriteLine();
+
             Console.WriteLine($"Added SNMP setting \"{data.ID}\" with this definition:\n" +
                               $"\t-Initial IP: {data.InitialIP}/{data.NetworkMask}\n" +
                               $"\t-Final IP: {data.FinalIP}/{data.NetworkMask}\n" +
@@ -474,6 +478,10 @@ namespace SNMPDiscovery.View
                         Console.WriteLine($"{computedneigh.Key} \t {addrrlist.Key} \t {addrrlist.Value}");
                     }
                 }
+                Console.WriteLine();
+
+                //MJE TEST
+                Console.WriteLine($"Timestamp {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:ffff")}");
                 Console.WriteLine();
             }
         }
