@@ -15,6 +15,6 @@ namespace SNMPDiscovery.Model.Services
         IDictionary<string, IOIDSettingDTO> OIDSettings { get; set; }
 
         void BuildOIDSetting();
-        void Run(ISNMPModelDTO Model);
+        void Run();
     }
 }

@@ -111,7 +111,7 @@ namespace SNMPDiscovery.Model.Helpers
             return int.Parse(targetIPAndMask.Substring(maskpos + 1));
         }
 
-        public static IList<IPAddress> GenerateHostList(IPAddress initialIP, IPAddress finalIP, int NetworkMask)
+        public static IList<IPAddress> GenerateHostList(IPAddress initialIP, IPAddress finalIP, int NetworkMask, List<string> ARPIPList = null)
         {
             IList<IPAddress> res = new List<IPAddress>();
             IPAddress netMask;
@@ -129,6 +129,11 @@ namespace SNMPDiscovery.Model.Helpers
 
                 if (!currentIP.Equals(broadcastIP) && !currentIP.Equals(networkIP))
                 {
+                    if(ARPIPList != null && !ARPIPList.Contains(currentIP.ToString()))
+                    {
+                        continue;
+                    }
+
                     res.Add(currentIP);
                 }
             }
@@ -136,7 +141,7 @@ namespace SNMPDiscovery.Model.Helpers
             return res;
         }
 
-        public static IList<IPAddress> GenerateFullHostList(IPAddress IP, int NetworkMask)
+        public static IList<IPAddress> GenerateFullHostList(IPAddress IP, int NetworkMask, List<string> ARPIPList = null)
         {
             IList<IPAddress> res = new List<IPAddress>();
             IPAddress networkIP, broadcastIP, netMask;
@@ -151,7 +156,14 @@ namespace SNMPDiscovery.Model.Helpers
             
             for (int i = LowerIPboundSNMP; i <= UpperIPboundSNMP; i++)
             {
-                res.Add(new IPAddress(BitConverter.GetBytes(IPAddress.NetworkToHostOrder(i))));
+                IPAddress currentIP = new IPAddress(BitConverter.GetBytes(IPAddress.NetworkToHostOrder(i)));
+
+                if (ARPIPList != null && ARPIPList.Contains(currentIP.ToString()))
+                {
+                    continue;
+                }
+
+                res.Add(currentIP);
             }
 
             return res;

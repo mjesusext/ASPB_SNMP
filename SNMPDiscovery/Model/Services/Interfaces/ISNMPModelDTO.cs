@@ -13,6 +13,7 @@ namespace SNMPDiscovery.Model.Services
         IDictionary<string, ISNMPProcessStrategy> Processes { get; set; }
         IDictionary<string, ISNMPDeviceDataDTO> DeviceData { get; set; }
         IDictionary<string, ISNMPProcessedValueDTO> GlobalProcessedData { get; set; }
+        IDictionary<string, string> ARPTable { get; set; }
 
         ISNMPDeviceSettingDTO BuildSNMPSetting(string ID, string initialIPAndMask, string finalIPAndMask, string SNMPUser);
         ISNMPProcessStrategy BuildProcess(string SettingID, EnumProcessingType ProcessType);

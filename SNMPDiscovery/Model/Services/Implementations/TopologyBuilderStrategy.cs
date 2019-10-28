@@ -12,7 +12,6 @@ namespace SNMPDiscovery.Model.Services
     public class TopologyBuilderStrategy : ISNMPProcessStrategy
     {
         private const int LearnedMACThreshold = 1;
-        private IDictionary<string, string> MACAddrMapper { get; set; }
 
         public string ProcessID { get; }
         public ISNMPModelDTO RegardingObject { get; set; }
@@ -187,16 +186,15 @@ namespace SNMPDiscovery.Model.Services
             //}
         }
 
-        public void Run(ISNMPModelDTO Model)
+        public void Run()
         {
-            GetMACAddressMappings(Model);
-            TransformRawData(Model);
-            ComputeDirectNeighbours(Model);
-            BuildTopology(Model);
+            TransformRawData();
+            ComputeDirectNeighbours();
+            BuildTopology();
 
             //MJE Pending of moving to other place
             //We know data is fully ready
-            foreach (var procres in Model.DeviceData.Values.SelectMany(x => x.SNMPProcessedData.Values))
+            foreach (var procres in RegardingObject.DeviceData.Values.SelectMany(x => x.SNMPProcessedData.Values))
             { 
                 OnChange?.Invoke(procres, typeof(ISNMPProcessedValueDTO));
             }
@@ -206,30 +204,9 @@ namespace SNMPDiscovery.Model.Services
 
         #region Private Methods
 
-        private void GetMACAddressMappings(ISNMPModelDTO Model)
+        private void TransformRawData()
         {
-            List<IPAddress> IPinventory = new List<IPAddress>();
-
-            foreach (ISNMPDeviceSettingDTO DeviceSett in TargetDevices)
-            {
-                IPinventory.AddRange(ModelHelper.GenerateFullHostList(DeviceSett.InitialIP, DeviceSett.NetworkMask));
-            }
-
-            MACAddrMapper = new Dictionary<string, string>();
-
-            foreach (string iptarget in IPinventory.Select(x=> x.ToString()))
-            {
-                string MACaddr = ModelHelper.GetMACAddress(iptarget);
-                if (!string.IsNullOrWhiteSpace(MACaddr) && !MACAddrMapper.ContainsKey(MACaddr))
-                {
-                    MACAddrMapper.Add(MACaddr, iptarget);
-                }
-            }
-        }
-
-        private void TransformRawData(ISNMPModelDTO Model)
-        {
-            foreach (ISNMPDeviceDataDTO Device in Model.DeviceData.Values)
+            foreach (ISNMPDeviceDataDTO Device in RegardingObject.DeviceData.Values)
             {
                 //Create DTO and attach to device
                 IDeviceTopologyInfoDTO TopologyInfo = new TopologyInfoDTO();
@@ -244,9 +221,9 @@ namespace SNMPDiscovery.Model.Services
             }
         }
 
-        private void ComputeDirectNeighbours(ISNMPModelDTO Model)
+        private void ComputeDirectNeighbours()
         {
-            foreach (ISNMPDeviceDataDTO Device in Model.DeviceData.Values)
+            foreach (ISNMPDeviceDataDTO Device in RegardingObject.DeviceData.Values)
             {
                 IDeviceTopologyInfoDTO DeviceTopology = (IDeviceTopologyInfoDTO)Device.SNMPProcessedData[nameof(IDeviceTopologyInfoDTO)].Data;
                 DeviceTopology.DeviceDirectNeighbours = new Dictionary<string, IDictionary<string, string>>();
@@ -271,15 +248,15 @@ namespace SNMPDiscovery.Model.Services
                 {
                     string deviceip; 
 
-                    if (MACAddrMapper.TryGetValue(aggports.Value.First, out deviceip))
+                    if (RegardingObject.ARPTable.TryGetValue(aggports.Value.First, out deviceip))
                     {
                         string PortMACAddr = null;
                         IDeviceTopologyInfoDTO targdevice = null;
                         Dictionary<string, string> aggres = new Dictionary<string, string>();
 
-                        if (Model.DeviceData.ContainsKey(deviceip))
+                        if (RegardingObject.DeviceData.ContainsKey(deviceip))
                         {
-                            targdevice = (IDeviceTopologyInfoDTO)Model.DeviceData[deviceip].SNMPProcessedData[nameof(IDeviceTopologyInfoDTO)].Data;
+                            targdevice = (IDeviceTopologyInfoDTO)RegardingObject.DeviceData[deviceip].SNMPProcessedData[nameof(IDeviceTopologyInfoDTO)].Data;
                         }
 
                         if(targdevice != null)
@@ -287,11 +264,11 @@ namespace SNMPDiscovery.Model.Services
                             //Try search by index first, otherwise by port description
                             if (targdevice.PortMACAddress.TryGetValue(aggports.Value.Second, out PortMACAddr))
                             {
-                                aggres.Add(PortMACAddr, MACAddrMapper[aggports.Value.First]);
+                                aggres.Add(PortMACAddr, RegardingObject.ARPTable[aggports.Value.First]);
                             }
                             else if (targdevice.PortInventory.TryGetValue(aggports.Value.Second, out PortMACAddr))
                             {
-                                aggres.Add(PortMACAddr, MACAddrMapper[aggports.Value.First]);
+                                aggres.Add(PortMACAddr, RegardingObject.ARPTable[aggports.Value.First]);
                             }
                         }
                         else
@@ -310,7 +287,7 @@ namespace SNMPDiscovery.Model.Services
             }
         }
 
-        private void BuildTopology(ISNMPModelDTO Model)
+        private void BuildTopology()
         {
         }
 
@@ -574,12 +551,12 @@ namespace SNMPDiscovery.Model.Services
             {
                 if (!LearnedAddress[Value].ContainsKey(IndexValues[1]))
                 {
-                    LearnedAddress[Value].Add(IndexValues[1], MACAddrMapper.ContainsKey(IndexValues[1]) ? MACAddrMapper[IndexValues[1]] : null);
+                    LearnedAddress[Value].Add(IndexValues[1], RegardingObject.ARPTable.ContainsKey(IndexValues[1]) ? RegardingObject.ARPTable[IndexValues[1]] : null);
                 }
             }
             else
             {
-                LearnedAddress.Add(Value, new Dictionary<string, string>() { { IndexValues[1], MACAddrMapper.ContainsKey(IndexValues[1]) ? MACAddrMapper[IndexValues[1]] : null } });
+                LearnedAddress.Add(Value, new Dictionary<string, string>() { { IndexValues[1], RegardingObject.ARPTable.ContainsKey(IndexValues[1]) ? RegardingObject.ARPTable[IndexValues[1]] : null } });
             }
         }
 

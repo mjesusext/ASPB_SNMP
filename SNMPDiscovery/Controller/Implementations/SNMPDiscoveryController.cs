@@ -80,7 +80,7 @@ namespace SNMPDiscovery.Controller
         {
             foreach (ISNMPProcessStrategy proccess in Model.Processes.Values)
             {
-                proccess.Run(Model);
+                proccess.Run();
             }
         }
 

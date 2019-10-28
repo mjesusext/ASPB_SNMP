@@ -8,6 +8,7 @@ using System.IO;
 using System.Net;
 using SnmpSharpNet;
 using SNMPDiscovery.Model.Helpers;
+using System.Collections.Concurrent;
 
 namespace SNMPDiscovery.Model.Services
 {
@@ -28,8 +29,9 @@ namespace SNMPDiscovery.Model.Services
         public IDictionary<string, ISNMPProcessStrategy> Processes { get; set; }
         public IDictionary<string, ISNMPDeviceDataDTO> DeviceData { get; set; }
         public IDictionary<string, ISNMPProcessedValueDTO> GlobalProcessedData { get; set; }
+        public IDictionary<string, string> ARPTable { get; set; }
         public CustomPair<Type, object> ChangedObject { get; set; }
-
+        
         #endregion
 
         #region Nested Object Change Handlers
@@ -172,6 +174,9 @@ namespace SNMPDiscovery.Model.Services
 
         public void StartDiscovery()
         {
+            //Feed ARP table previous to discovery and processing
+            GetMACAddressMappings();
+
             //Iterate on all settings
             foreach (ISNMPDeviceSettingDTO SNMPSettingEntry in DeviceSettings.Values)
             {
@@ -183,7 +188,7 @@ namespace SNMPDiscovery.Model.Services
         {
             foreach (ISNMPProcessStrategy alg in Processes.Values)
             {
-                alg.Run(this);
+                alg.Run();
             }
         }
 
@@ -205,9 +210,8 @@ namespace SNMPDiscovery.Model.Services
             AgentParameters AgParam;
             Pdu pdu;
 
-            //Compute full list of devices
-            IPinventory = ModelHelper.GenerateHostList(SNMPSettingEntry.InitialIP, SNMPSettingEntry.FinalIP, SNMPSettingEntry.NetworkMask);
-            //Discard unavailable devices for SNMP
+            //Compute full list of devices that have responded to ARP request
+            IPinventory = ModelHelper.GenerateHostList(SNMPSettingEntry.InitialIP, SNMPSettingEntry.FinalIP, SNMPSettingEntry.NetworkMask, ARPTable.Values.ToList());
 
             Community = new OctetString(SNMPSettingEntry.CommunityString);
 
@@ -225,7 +229,19 @@ namespace SNMPDiscovery.Model.Services
                 {
                     ISNMPDeviceDataDTO device = BuildSNMPDevice(target, SNMPSettingEntry.NetworkMask);
                     UDPtarget.Address = device.TargetIP;
-                    SNMPWalkByOIDSetting(UDPtarget, pdu, AgParam, SNMPSettingEntry, device);
+
+                    try
+                    {
+                        SNMPWalkByOIDSetting(UDPtarget, pdu, AgParam, SNMPSettingEntry, device);
+                    }
+                    catch (SnmpException e)
+                    {
+                        NotifyError(e);
+
+                        //Device entry not containing full info for processing
+                        DeviceData.Remove(target.ToString());
+                        continue;
+                    }
                 }
             }
         }
@@ -239,7 +255,14 @@ namespace SNMPDiscovery.Model.Services
 
             foreach (IOIDSettingDTO OIDSetting in OIDSettingCollection)
             {
-                SNMPRunAgent(UDPtarget, pdu, param, OIDSetting, SNMPDeviceData);
+                try
+                {
+                    SNMPRunAgent(UDPtarget, pdu, param, OIDSetting, SNMPDeviceData);
+                }
+                catch(SnmpException e)
+                {
+                    throw;
+                }
             }
         }
 
@@ -259,15 +282,16 @@ namespace SNMPDiscovery.Model.Services
                     Result = (SnmpV2Packet)UDPtarget.Request(pdu, param);
                     nextEntry = SNMPDecodeData(Result, indexOid, finalOid, OIDSetting.InclusiveInterval, SNMPDeviceData);
                 }
-                catch (Exception e)
+                catch (SnmpException e)
                 {
-                    NotifyError(e);
-                    nextEntry = false;
+                    throw;
                 }
-
-                //Prepare PDU object for iteration. Otherwise, wipe contents of pdu
-                pdu.RequestId++;
-                pdu.VbList.Clear();
+                finally
+                {
+                    //Prepare PDU object for iteration. Otherwise, wipe contents of pdu
+                    pdu.RequestId++;
+                    pdu.VbList.Clear();
+                }
             }
         }
 
@@ -305,6 +329,36 @@ namespace SNMPDiscovery.Model.Services
             }
 
             return nextEntry;
+        }
+
+        #endregion
+
+        #region ARP Table Management
+
+        private void GetMACAddressMappings()
+        {
+            ARPTable = new Dictionary<string, string>();
+            List<IPAddress> IPinventory = new List<IPAddress>();
+
+            foreach (ISNMPDeviceSettingDTO DeviceDef in DeviceSettings.Values)
+            {
+                IPinventory.AddRange(ModelHelper.GenerateFullHostList(DeviceDef.InitialIP, DeviceDef.NetworkMask));
+            }
+
+            Parallel.ForEach(IPinventory.Select(x => x.ToString()), MACGetterHandler);
+        }
+
+        private void MACGetterHandler(string iptarget)
+        {
+            string MACaddr = ModelHelper.GetMACAddress(iptarget);
+
+            lock (ARPTable)
+            {
+                if (!string.IsNullOrWhiteSpace(MACaddr) && !ARPTable.ContainsKey(MACaddr))
+                {
+                    ARPTable.Add(MACaddr, iptarget);
+                }
+            }
         }
 
         #endregion
