@@ -23,7 +23,7 @@ namespace SNMPDiscovery.Model.Services
 
         #region Interfaces implementations
 
-        public void BuildOIDSetting(IDictionary<string, IOIDSettingDTO> OIDSettings)
+        public void BuildOIDSetting()
         {
             IOIDSettingDTO MockOIDSetting;
 
@@ -200,29 +200,6 @@ namespace SNMPDiscovery.Model.Services
             { 
                 OnChange?.Invoke(procres, typeof(ISNMPProcessedValueDTO));
             }
-        }
-
-        public void ValidateInput(ISNMPModelDTO Model)
-        {
-            //bool[] valResults = new bool[5];
-            ////Check if the exists entries of specified OID ranges for every Device
-            //
-            //foreach (ISNMPDeviceDTO Device in Model.SNMPData.Values)
-            //{
-            //    //Example...
-            //    valResults[0] = Device.SNMPRawDataEntries.Any(x => x.Key.StartsWith("1.3.6.1.2.1.1.1")); //Basic info
-            //    
-            //    if (valResults.All(x => x == true))
-            //    {
-            //        //Test
-            //        Console.WriteLine($"Device with IP {Device.TargetIP.ToString()} contains requiered OIDs");
-            //    }
-            //    else
-            //    {
-            //        //Test
-            //        Console.WriteLine($"Device with IP {Device.TargetIP.ToString()} does not contains requiered OIDs");
-            //    }
-            //}
         }
 
         #endregion
@@ -649,10 +626,14 @@ namespace SNMPDiscovery.Model.Services
 
         #region Constructor
 
-        public TopologyBuilderStrategy(Action<object, Type> ChangeTrackerHandler)
+        public TopologyBuilderStrategy(ISNMPModelDTO Model, Action<object, Type> ChangeTrackerHandler)
         {
-            ProcessID = "TopologyBuilder";
+            ProcessID = nameof(TopologyBuilderStrategy);
+            RegardingObject = Model;
+            TargetDevices = new List<ISNMPDeviceSettingDTO>();
             OnChange += ChangeTrackerHandler;
+
+            BuildOIDSetting();
         }
 
         #endregion

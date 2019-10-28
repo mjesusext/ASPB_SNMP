@@ -14,8 +14,7 @@ namespace SNMPDiscovery.Model.Services
         IList<ISNMPDeviceSettingDTO> TargetDevices { get; set; }
         IDictionary<string, IOIDSettingDTO> OIDSettings { get; set; }
 
-        void BuildOIDSetting(IDictionary<string, IOIDSettingDTO> OIDSettings);
-        void ValidateInput(ISNMPModelDTO Model);
+        void BuildOIDSetting();
         void Run(ISNMPModelDTO Model);
     }
 }

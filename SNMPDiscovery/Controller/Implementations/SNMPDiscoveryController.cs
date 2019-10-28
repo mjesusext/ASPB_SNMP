@@ -80,7 +80,6 @@ namespace SNMPDiscovery.Controller
         {
             foreach (ISNMPProcessStrategy proccess in Model.Processes.Values)
             {
-                proccess.ValidateInput(Model);
                 proccess.Run(Model);
             }
         }
