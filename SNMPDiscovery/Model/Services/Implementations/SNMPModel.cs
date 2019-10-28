@@ -108,6 +108,7 @@ namespace SNMPDiscovery.Model.Services
         public ISNMPProcessStrategy BuildProcess(string SettingID, EnumProcessingType ProcessType)
         {
             ISNMPProcessStrategy ProcessProfile = null;
+            ISNMPDeviceSettingDTO DeviceProfile = DeviceSettings?[SettingID];
 
             //Lazy initialization
             if (Processes == null)
@@ -115,13 +116,31 @@ namespace SNMPDiscovery.Model.Services
                 Processes = new Dictionary<string, ISNMPProcessStrategy>();
             }
 
-
             switch (ProcessType)
             {
                 case EnumProcessingType.None:
                     break;
                 case EnumProcessingType.TopologyDiscovery:
-                    ProcessProfile = new TopologyBuilderStrategy(ChangeTrackerHandler);
+
+                    //Get existing strategy
+                    if (!Processes.ContainsKey(nameof(TopologyBuilderStrategy)))
+                    {
+                        ProcessProfile = new TopologyBuilderStrategy(this, ChangeTrackerHandler);
+                        Processes.Add(ProcessProfile.ProcessID, ProcessProfile);
+                    }
+                    else
+                    {
+                        ProcessProfile = Processes[nameof(TopologyBuilderStrategy)];
+                    }
+
+                    //Add device setting if found
+                    if(DeviceProfile != null)
+                    {
+                        ProcessProfile.TargetDevices.Add(DeviceProfile);
+                    }
+
+                    ChangeTrackerHandler(ProcessProfile, typeof(ISNMPProcessStrategy));
+
                     break;
                 case EnumProcessingType.PrinterConsumption:
                     break;
@@ -129,25 +148,7 @@ namespace SNMPDiscovery.Model.Services
                     break;
             }
 
-            if (ProcessProfile != null)
-            {
-                //If profile exists, retrive the existing one
-                if (Processes.ContainsKey(ProcessProfile.ProcessID))
-                {
-                    return Processes[ProcessProfile.ProcessID];
-                }
-                else
-                {
-                    Processes.Add(ProcessProfile.ProcessID, ProcessProfile);
-                    ChangeTrackerHandler(ProcessProfile, typeof(ISNMPProcessStrategy));
-
-                    return ProcessProfile;
-                }
-            }
-            else
-            {
-                return ProcessProfile;
-            }
+            return ProcessProfile;
         }
 
         public ISNMPProcessedValueDTO AttachSNMPProcessedValue(Type DataType, object Data)
@@ -182,12 +183,7 @@ namespace SNMPDiscovery.Model.Services
         {
             foreach (ISNMPProcessStrategy alg in Processes.Values)
             {
-                //Validate proper inputs
-                alg.ValidateInput(this);
-                //Run process
-
                 alg.Run(this);
-                //Notify alg done
             }
         }
 
