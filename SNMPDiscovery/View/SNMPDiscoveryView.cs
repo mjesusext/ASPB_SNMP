@@ -400,7 +400,7 @@ namespace SNMPDiscovery.View
 
         private void ShowData(ISNMPProcessStrategy data)
         {
-            Console.WriteLine($"Added process setting {data.ProcessID} related to {data.RegardingDeviceSetting}.\n");
+            Console.WriteLine($"Added process setting {data.ProcessID} related to following Device Settings: {string.Join(", ", data.TargetDevices.Select(x => x.ID))}.\n");
         }
 
         private void ShowData(IOIDSettingDTO data)

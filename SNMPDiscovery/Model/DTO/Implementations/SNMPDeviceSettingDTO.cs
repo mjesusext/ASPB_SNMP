@@ -13,63 +13,13 @@ namespace SNMPDiscovery.Model.DTO
     public class SNMPDeviceSettingDTO : ISNMPDeviceSettingDTO
     {
         public string ID { get; set; }
+        public ISNMPModelDTO RegardingObject { get; set; }
+
         public IPAddress InitialIP { get; set; }
         public IPAddress FinalIP { get; set; }
         public int NetworkMask { get; set; }
         public string CommunityString { get; set; }
-        public IDictionary<string, ISNMPProcessStrategy> Processes { get; set; }
-        public IDictionary<string, IOIDSettingDTO> OIDSettings { get; set; }
-
         public event Action<object, Type> OnChange;
-
-        #region Interface implementations
-
-        public ISNMPProcessStrategy BuildProcess(EnumProcessingType ProcessType)
-        {
-            ISNMPProcessStrategy ProcessProfile = null;
-
-            //Lazy initialization
-            if (Processes == null)
-            {
-                Processes = new Dictionary<string, ISNMPProcessStrategy>();
-            }
-
-            switch (ProcessType)
-            {
-                case EnumProcessingType.None:
-                    break;
-                case EnumProcessingType.TopologyDiscovery:
-                    ProcessProfile = new TopologyBuilderStrategy(ChangeTrackerHandler);
-                    break;
-                case EnumProcessingType.PrinterConsumption:
-                    break;
-                default:
-                    break;
-            }
-            
-            if(ProcessProfile != null)
-            {
-                //If profile exists, retrive the existing one
-                if (Processes.ContainsKey(ProcessProfile.ProcessID))
-                {
-                    return Processes[ProcessProfile.ProcessID];
-                }
-                else
-                {
-                    OIDSettings = ProcessProfile.BuildOIDSetting(ID, OIDSettings);
-                    Processes.Add(ProcessProfile.ProcessID, ProcessProfile);
-                    OnChange?.Invoke(ProcessProfile, typeof(ISNMPProcessStrategy));
-
-                    return ProcessProfile;
-                }
-            }
-            else
-            {
-                return ProcessProfile;
-            }
-        }
-
-        #endregion
 
         #region Nested Object Change Handlers
 

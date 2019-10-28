@@ -11,32 +11,16 @@ namespace SNMPDiscovery.Model.DTO
 {
     public class SNMPDeviceDataDTO : ISNMPDeviceDataDTO
     {
+        public ISNMPModelDTO RegardingObject { get; set; }
         public IPAddress TargetIP { get; set; }
         public string MACAddress { get; set; }
         public int NetworkMask { get; set; }
         public IDictionary<string, ISNMPRawEntryDTO> SNMPRawDataEntries { get; set; }
         public IDictionary<string, ISNMPProcessedValueDTO> SNMPProcessedData { get; set; }
-
+        
         public event Action<object, Type> OnChange;
 
         #region Interface Implementations
-
-        public ISNMPRawEntryDTO BuildSNMPRawEntry(string OID)
-        {
-            //Lazy initialization
-            if (SNMPRawDataEntries == null)
-            {
-                SNMPRawDataEntries = new Dictionary<string, ISNMPRawEntryDTO>();
-            }
-
-            ISNMPRawEntryDTO RawEntry = new SNMPRawEntryDTO(OID);
-            SNMPRawDataEntries.Add(OID, RawEntry);
-
-            //We know data is fully ready
-            //OnChange?.Invoke(RawEntry, typeof(ISNMPRawEntryDTO));
-
-            return RawEntry;
-        }
 
         public ISNMPRawEntryDTO BuildSNMPRawEntry(string OID, string RawValue, EnumSNMPOIDType DataType)
         {
@@ -54,10 +38,6 @@ namespace SNMPDiscovery.Model.DTO
 
             return RawEntry;
         }
-
-        #endregion
-
-        #region Helpful methods
 
         public ISNMPProcessedValueDTO AttachSNMPProcessedValue(Type DataType, object Data)
         {
@@ -81,26 +61,6 @@ namespace SNMPDiscovery.Model.DTO
         public SNMPDeviceDataDTO(IPAddress targetIP, int networkMask, Action<object, Type> ChangeTrackerHandler)
         {
             TargetIP = targetIP;
-            NetworkMask = networkMask;
-            OnChange += ChangeTrackerHandler;
-
-            //We know data is fully ready
-            OnChange?.Invoke(this, typeof(ISNMPDeviceDataDTO));
-        }
-
-        public SNMPDeviceDataDTO(string targetIP, int networkMask, Action<object, Type> ChangeTrackerHandler)
-        {
-            TargetIP = IPAddress.Parse(targetIP);
-            NetworkMask = networkMask;
-            OnChange += ChangeTrackerHandler;
-
-            //We know data is fully ready
-            OnChange?.Invoke(this, typeof(ISNMPDeviceDataDTO));
-        }
-
-        public SNMPDeviceDataDTO(int targetIP, int networkMask, Action<object, Type> ChangeTrackerHandler)
-        {
-            TargetIP = new IPAddress(targetIP);
             NetworkMask = networkMask;
             OnChange += ChangeTrackerHandler;
 

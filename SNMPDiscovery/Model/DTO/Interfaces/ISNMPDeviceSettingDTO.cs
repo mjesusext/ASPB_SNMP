@@ -11,13 +11,11 @@ namespace SNMPDiscovery.Model.DTO
     public interface ISNMPDeviceSettingDTO : ITrackeableObject
     {
         string ID { get; set;}
+        ISNMPModelDTO RegardingObject { get; set; }
+
         IPAddress InitialIP { get; set; }
         IPAddress FinalIP { get; set; }
         int NetworkMask { get; set; }
         string CommunityString { get; set; }
-        IDictionary<string, ISNMPProcessStrategy> Processes { get; set; }
-        IDictionary<string, IOIDSettingDTO> OIDSettings { get; set; }
-        
-        ISNMPProcessStrategy BuildProcess(EnumProcessingType Process);
     }
 }

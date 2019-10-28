@@ -8,12 +8,12 @@ namespace SNMPDiscovery.Model.DAO
 {
     interface ISNMPDataDAO <TData, TKey>
     {
-        bool Create(TData Data);
+        int Create(TData Data);
         TData Retrieve(TKey Key);
-        bool Update(TData Data);
-        bool Delete(TKey Key);
+        int Update(TData Data);
+        int Delete(TKey Key);
         IList<TData> BulkRetrieve();
-        void BulkCreate(IList<TData> BulkData);
+        int BulkCreate(IList<TData> BulkData);
         bool BulkAvailable();
     }
 }

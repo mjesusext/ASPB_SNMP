@@ -9,6 +9,7 @@ namespace SNMPDiscovery.Model.DTO
 {
     public class SNMPProcessedValueDTO : ISNMPProcessedValueDTO
     {
+        public ISNMPDeviceDataDTO RegardingObject { get; set; }
         public Type DataType { get; set; }
         public object Data { get; set; }
 

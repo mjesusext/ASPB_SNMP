@@ -15,15 +15,17 @@ namespace SNMPDiscovery.Model.Services
         private IDictionary<string, string> MACAddrMapper { get; set; }
 
         public string ProcessID { get; }
-        public string RegardingDeviceSetting { get; set; }
+        public ISNMPModelDTO RegardingObject { get; set; }
+        public IList<ISNMPDeviceSettingDTO> TargetDevices { get; set; }
+        public IDictionary<string, IOIDSettingDTO> OIDSettings { get; set; }
+
         public event Action<object, Type> OnChange;
 
         #region Interfaces implementations
 
-        public IDictionary<string, IOIDSettingDTO> BuildOIDSetting(string regardingSetting, IDictionary<string, IOIDSettingDTO> OIDSettings)
+        public void BuildOIDSetting(IDictionary<string, IOIDSettingDTO> OIDSettings)
         {
             IOIDSettingDTO MockOIDSetting;
-            RegardingDeviceSetting = regardingSetting;
 
             //Lazy initialization
             if (OIDSettings == null)
@@ -183,8 +185,6 @@ namespace SNMPDiscovery.Model.Services
             //{
             //    OnChange?.Invoke(OIDdefs, typeof(IOIDSettingDTO));
             //}
-
-            return OIDSettings;
         }
 
         public void Run(ISNMPModelDTO Model)
@@ -194,8 +194,9 @@ namespace SNMPDiscovery.Model.Services
             ComputeDirectNeighbours(Model);
             BuildTopology(Model);
 
+            //MJE Pending of moving to other place
             //We know data is fully ready
-            foreach (var procres in Model.SNMPDeviceData.Values.SelectMany(x => x.SNMPProcessedData.Values))
+            foreach (var procres in Model.DeviceData.Values.SelectMany(x => x.SNMPProcessedData.Values))
             { 
                 OnChange?.Invoke(procres, typeof(ISNMPProcessedValueDTO));
             }
@@ -230,11 +231,12 @@ namespace SNMPDiscovery.Model.Services
 
         private void GetMACAddressMappings(ISNMPModelDTO Model)
         {
-            ISNMPDeviceSettingDTO DeviceSett;
-            IList<IPAddress> IPinventory;
+            List<IPAddress> IPinventory = new List<IPAddress>();
 
-            DeviceSett = Model.SNMPDeviceSettings[RegardingDeviceSetting];
-            IPinventory = ModelHelper.GenerateFullHostList(DeviceSett.InitialIP, DeviceSett.NetworkMask);
+            foreach (ISNMPDeviceSettingDTO DeviceSett in TargetDevices)
+            {
+                IPinventory.AddRange(ModelHelper.GenerateFullHostList(DeviceSett.InitialIP, DeviceSett.NetworkMask));
+            }
 
             MACAddrMapper = new Dictionary<string, string>();
 
@@ -250,9 +252,7 @@ namespace SNMPDiscovery.Model.Services
 
         private void TransformRawData(ISNMPModelDTO Model)
         {
-            IDictionary<string, IOIDSettingDTO> OIDSettings = Model.SNMPDeviceSettings[RegardingDeviceSetting].OIDSettings;
-
-            foreach (ISNMPDeviceDataDTO Device in Model.SNMPDeviceData.Values)
+            foreach (ISNMPDeviceDataDTO Device in Model.DeviceData.Values)
             {
                 //Create DTO and attach to device
                 IDeviceTopologyInfoDTO TopologyInfo = new TopologyInfoDTO();
@@ -269,7 +269,7 @@ namespace SNMPDiscovery.Model.Services
 
         private void ComputeDirectNeighbours(ISNMPModelDTO Model)
         {
-            foreach (ISNMPDeviceDataDTO Device in Model.SNMPDeviceData.Values)
+            foreach (ISNMPDeviceDataDTO Device in Model.DeviceData.Values)
             {
                 IDeviceTopologyInfoDTO DeviceTopology = (IDeviceTopologyInfoDTO)Device.SNMPProcessedData[nameof(IDeviceTopologyInfoDTO)].Data;
                 DeviceTopology.DeviceDirectNeighbours = new Dictionary<string, IDictionary<string, string>>();
@@ -300,9 +300,9 @@ namespace SNMPDiscovery.Model.Services
                         IDeviceTopologyInfoDTO targdevice = null;
                         Dictionary<string, string> aggres = new Dictionary<string, string>();
 
-                        if (Model.SNMPDeviceData.ContainsKey(deviceip))
+                        if (Model.DeviceData.ContainsKey(deviceip))
                         {
-                            targdevice = (IDeviceTopologyInfoDTO)Model.SNMPDeviceData[deviceip].SNMPProcessedData[nameof(IDeviceTopologyInfoDTO)].Data;
+                            targdevice = (IDeviceTopologyInfoDTO)Model.DeviceData[deviceip].SNMPProcessedData[nameof(IDeviceTopologyInfoDTO)].Data;
                         }
 
                         if(targdevice != null)
@@ -638,6 +638,11 @@ namespace SNMPDiscovery.Model.Services
             
             HierarchyMapping[IndexValues[0]].Add(IndexValues[1]);
 
+        }
+
+        public IDictionary<string, IOIDSettingDTO> BuildOIDSetting(IDictionary<string, ISNMPDeviceSettingDTO> TargetDevices, IDictionary<string, IOIDSettingDTO> OIDSettings)
+        {
+            throw new NotImplementedException();
         }
 
         #endregion

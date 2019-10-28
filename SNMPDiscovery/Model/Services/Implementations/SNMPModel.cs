@@ -4,29 +4,47 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SNMPDiscovery.Model.DTO;
-using SNMPDiscovery.Model.DAO;
 using System.IO;
 using System.Net;
 using SnmpSharpNet;
-using System.Collections;
 using SNMPDiscovery.Model.Helpers;
 
 namespace SNMPDiscovery.Model.Services
 {
     public class SNMPModel : ISNMPModelDTO
     {
+        #region Private fields
+
         private const int DefaultPort = 161;
         private const int DefaultTimeout = 1000;
         private const int DefaultRetries = 1;
         private IList<IObserver<ISNMPModelDTO>> _snmpModelObservers;
 
-        public IDictionary<string, ISNMPDeviceSettingDTO> SNMPDeviceSettings { get; set; }
-        public IDictionary<string, ISNMPDeviceDataDTO> SNMPDeviceData { get; set; }
-        public IDictionary<string, ISNMPProcessedValueDTO> SNMPGlobalProcessedData { get; set; }
-        
+        #endregion
+
+        #region Public properties
+
+        public IDictionary<string, ISNMPDeviceSettingDTO> DeviceSettings { get; set; }
+        public IDictionary<string, ISNMPProcessStrategy> Processes { get; set; }
+        public IDictionary<string, ISNMPDeviceDataDTO> DeviceData { get; set; }
+        public IDictionary<string, ISNMPProcessedValueDTO> GlobalProcessedData { get; set; }
         public CustomPair<Type, object> ChangedObject { get; set; }
 
-        #region Interface Implementations
+        #endregion
+
+        #region Nested Object Change Handlers
+
+        private void ChangeTrackerHandler(object obj, Type type)
+        {
+            ChangedObject.First = type;
+            ChangedObject.Second = obj;
+
+            NotifyChanges();
+        }
+
+        #endregion
+
+        #region Observer Implementations
 
         public void NotifyError(Exception error)
         {
@@ -54,81 +72,107 @@ namespace SNMPDiscovery.Model.Services
             return new SNMPObservableUnsubscriber<ISNMPModelDTO>(_snmpModelObservers, observer);
         }
 
+        #endregion
+
+        #region Builders
+
         public ISNMPDeviceSettingDTO BuildSNMPSetting(string ID, string initialIPAndMask, string finalIPAndMask, string SNMPUser)
         {
             //Lazy initialization
-            if (SNMPDeviceSettings == null)
+            if (DeviceSettings == null)
             {
-                SNMPDeviceSettings = new Dictionary<string, ISNMPDeviceSettingDTO>();
+                DeviceSettings = new Dictionary<string, ISNMPDeviceSettingDTO>();
             }
 
             ISNMPDeviceSettingDTO setting = new SNMPDeviceSettingDTO(ID, initialIPAndMask, finalIPAndMask, SNMPUser, ChangeTrackerHandler);
-            SNMPDeviceSettings.Add(ID, setting);
+            DeviceSettings.Add(ID, setting);
 
             return setting;
-        }
-
-        public ISNMPDeviceDataDTO BuildSNMPDevice(string targetIPAndMask)
-        {
-            //Lazy initialization
-            if (SNMPDeviceData == null)
-            {
-                SNMPDeviceData = new Dictionary<string, ISNMPDeviceDataDTO>();
-            }
-
-            ISNMPDeviceDataDTO device = new SNMPDeviceDataDTO(ModelHelper.ExtractIPAddress(targetIPAndMask), ModelHelper.ExtractNetworkMask(targetIPAndMask), ChangeTrackerHandler);
-            SNMPDeviceData.Add(targetIPAndMask, device);
-
-            return device;
-        }
-
-        public ISNMPDeviceDataDTO BuildSNMPDevice(int targetIP, int targetMask)
-        {
-            //Lazy initialization
-            if (SNMPDeviceData == null)
-            {
-                SNMPDeviceData = new Dictionary<string, ISNMPDeviceDataDTO>();
-            }
-
-            ISNMPDeviceDataDTO device = new SNMPDeviceDataDTO(targetIP, targetMask, ChangeTrackerHandler);
-            SNMPDeviceData.Add(new IPAddress(targetIP).ToString(), device);
-
-            return device;
         }
 
         public ISNMPDeviceDataDTO BuildSNMPDevice(IPAddress targetIP, int targetMask)
         {
             //Lazy initialization
-            if (SNMPDeviceData == null)
+            if (DeviceData == null)
             {
-                SNMPDeviceData = new Dictionary<string, ISNMPDeviceDataDTO>();
+                DeviceData = new Dictionary<string, ISNMPDeviceDataDTO>();
             }
 
             ISNMPDeviceDataDTO device = new SNMPDeviceDataDTO(targetIP, targetMask, ChangeTrackerHandler);
-            SNMPDeviceData.Add(targetIP.ToString(), device);
+            DeviceData.Add(targetIP.ToString(), device);
 
             return device;
+        }
+
+        //MJE - Pendiente de revisar buscando el setting por ID
+        public ISNMPProcessStrategy BuildProcess(string SettingID, EnumProcessingType ProcessType)
+        {
+            ISNMPProcessStrategy ProcessProfile = null;
+
+            //Lazy initialization
+            if (Processes == null)
+            {
+                Processes = new Dictionary<string, ISNMPProcessStrategy>();
+            }
+
+
+            switch (ProcessType)
+            {
+                case EnumProcessingType.None:
+                    break;
+                case EnumProcessingType.TopologyDiscovery:
+                    ProcessProfile = new TopologyBuilderStrategy(ChangeTrackerHandler);
+                    break;
+                case EnumProcessingType.PrinterConsumption:
+                    break;
+                default:
+                    break;
+            }
+
+            if (ProcessProfile != null)
+            {
+                //If profile exists, retrive the existing one
+                if (Processes.ContainsKey(ProcessProfile.ProcessID))
+                {
+                    return Processes[ProcessProfile.ProcessID];
+                }
+                else
+                {
+                    Processes.Add(ProcessProfile.ProcessID, ProcessProfile);
+                    ChangeTrackerHandler(ProcessProfile, typeof(ISNMPProcessStrategy));
+
+                    return ProcessProfile;
+                }
+            }
+            else
+            {
+                return ProcessProfile;
+            }
         }
 
         public ISNMPProcessedValueDTO AttachSNMPProcessedValue(Type DataType, object Data)
         {
             //Lazy initialization
-            if (SNMPGlobalProcessedData == null)
+            if (GlobalProcessedData == null)
             {
-                SNMPGlobalProcessedData = new Dictionary<string, ISNMPProcessedValueDTO>();
+                GlobalProcessedData = new Dictionary<string, ISNMPProcessedValueDTO>();
             }
 
             ISNMPProcessedValueDTO ProcessedValue = new SNMPProcessedValueDTO(DataType, Data);
-            SNMPGlobalProcessedData.Add(DataType.Name, ProcessedValue);
+            GlobalProcessedData.Add(DataType.Name, ProcessedValue);
             //We don't trigger OnChange because we only set the poiner, information is still not filled.
 
             return ProcessedValue;
         }
 
+        #endregion
+
+        #region Commands
+
         public void StartDiscovery()
         {
             //Iterate on all settings
-            foreach (ISNMPDeviceSettingDTO SNMPSettingEntry in SNMPDeviceSettings.Values)
+            foreach (ISNMPDeviceSettingDTO SNMPSettingEntry in DeviceSettings.Values)
             {
                 SNMPWalkByIP(SNMPSettingEntry);
             }
@@ -136,9 +180,7 @@ namespace SNMPDiscovery.Model.Services
 
         public void RunProcesses()
         {
-            IEnumerable<ISNMPProcessStrategy> processes = SNMPDeviceSettings.SelectMany(x => x.Value.Processes.Values);
-
-            foreach (ISNMPProcessStrategy alg in processes)
+            foreach (ISNMPProcessStrategy alg in Processes.Values)
             {
                 //Validate proper inputs
                 alg.ValidateInput(this);
@@ -158,19 +200,7 @@ namespace SNMPDiscovery.Model.Services
 
         #endregion
 
-        #region Nested Object Change Handlers
-
-        public void ChangeTrackerHandler(object obj, Type type)
-        {
-            ChangedObject.First = type;
-            ChangedObject.Second = obj;
-
-            NotifyChanges();
-        }
-
-        #endregion
-
-        #region Private Methods
+        #region SNMP Client Methods
 
         private void SNMPWalkByIP(ISNMPDeviceSettingDTO SNMPSettingEntry)
         {
@@ -207,7 +237,7 @@ namespace SNMPDiscovery.Model.Services
         private void SNMPWalkByOIDSetting(UdpTarget UDPtarget, Pdu pdu, AgentParameters param, ISNMPDeviceSettingDTO SNMPSettingEntry, ISNMPDeviceDataDTO SNMPDeviceData)
         {
             //Get all OID requested for all processing algorithms
-            IEnumerable<IOIDSettingDTO> OIDSettingCollection = SNMPSettingEntry.OIDSettings.Values;
+            IEnumerable<IOIDSettingDTO> OIDSettingCollection = Processes.Values.SelectMany(x => x.OIDSettings.Values);
             Oid indexOid = new Oid();
             Oid finalOid = new Oid();
 
