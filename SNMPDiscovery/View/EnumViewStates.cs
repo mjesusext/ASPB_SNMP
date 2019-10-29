@@ -9,14 +9,20 @@ namespace SNMPDiscovery.View
     public enum EnumViewStates : uint
     {
         Main = 0,
-        DeviceDefinition = 1,
-        LoadDiscoveryData = 2,
-        ProcessSelection = 3,
-        ProcessExecution = 4,
-        PullData = 5,
-        SaveDiscoveryData = 6,
-        SaveProcessedData = 7,
-        BackAction = 8,
-        Exit = 9
+        AddDeviceDefinition = 1,
+        LoadDiscoveryProfile = 2,
+        AddProcessDefinition = 3,
+        ShowDeviceDefinitions = 4,
+        EditDeviceDefinition = 5,
+        DeleteDeviceDefinition = 6,
+        ShowProcessDefinitions = 7,
+        EditProcessDefinition = 8,
+        DeleteProcessDefinition = 9,
+        RunProcess = 10,
+        DataSearch = 11,
+        SaveDiscoveryData = 12,
+        SaveProcessedData = 13,
+        BackAction = 14,
+        Exit = 15
     }
 }

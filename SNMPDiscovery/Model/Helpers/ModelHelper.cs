@@ -140,35 +140,7 @@ namespace SNMPDiscovery.Model.Helpers
 
             return res;
         }
-
-        public static IList<IPAddress> GenerateFullHostList(IPAddress IP, int NetworkMask, List<string> ARPIPList = null)
-        {
-            IList<IPAddress> res = new List<IPAddress>();
-            IPAddress networkIP, broadcastIP, netMask;
-
-            netMask = CreateMaskByNetBitLength(NetworkMask);
-            broadcastIP = GetBroadcastAddress(IP, netMask);
-            networkIP = GetNetworkAddress(IP, netMask);
-
-            //Get host limits
-            int LowerIPboundSNMP = IPAddress.HostToNetworkOrder(BitConverter.ToInt32(networkIP.GetAddressBytes(), 0)) + 1;
-            int UpperIPboundSNMP = IPAddress.HostToNetworkOrder(BitConverter.ToInt32(broadcastIP.GetAddressBytes(), 0)) - 1;
-            
-            for (int i = LowerIPboundSNMP; i <= UpperIPboundSNMP; i++)
-            {
-                IPAddress currentIP = new IPAddress(BitConverter.GetBytes(IPAddress.NetworkToHostOrder(i)));
-
-                if (ARPIPList != null && ARPIPList.Contains(currentIP.ToString()))
-                {
-                    continue;
-                }
-
-                res.Add(currentIP);
-            }
-
-            return res;
-        }
-
+        
         public static IPAddress GetBroadcastAddress(IPAddress address, IPAddress subnetMask)
         {
             byte[] ipAdressBytes = address.GetAddressBytes();

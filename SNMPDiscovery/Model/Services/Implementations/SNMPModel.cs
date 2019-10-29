@@ -342,7 +342,7 @@ namespace SNMPDiscovery.Model.Services
 
             foreach (ISNMPDeviceSettingDTO DeviceDef in DeviceSettings.Values)
             {
-                IPinventory.AddRange(ModelHelper.GenerateFullHostList(DeviceDef.InitialIP, DeviceDef.NetworkMask));
+                IPinventory.AddRange(ModelHelper.GenerateHostList(DeviceDef.InitialIP, DeviceDef.FinalIP, DeviceDef.NetworkMask));
             }
 
             Parallel.ForEach(IPinventory.Select(x => x.ToString()), MACGetterHandler);

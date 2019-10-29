@@ -14,61 +14,23 @@ namespace SNMPDiscovery.View
 {
     public class SNMPDiscoveryView : IObserver<ISNMPModelDTO>
     {
+        #region Private properties
+
         private ISNMPDiscoveryController _controller { get; set; }
         private IDisposable _observeableSubscription { get; set; }
-        private bool _currentactionOK;
-        private Stack<EnumViewStates> StateHistory;
+        private bool _currentactionOK { get; set; }
+        private Stack<EnumViewStates> StateHistory { get; set; }
 
-        private Dictionary<EnumViewStates, Action> StateHandlers;
-        private Dictionary<EnumViewStates, string> CommandLabels;
-        private Dictionary<EnumViewStates, EnumViewStates[]> StateMachine;
-
-        //Mock for redirecting console to file
-        private FileStream ostrm;
-        private StreamWriter writer;
-        private TextWriter oldOut;
-
-        public SNMPDiscoveryView(ISNMPModelDTO Model, ISNMPDiscoveryController Controller)
-        {
-            _controller = Controller;
-            _observeableSubscription = Model.Subscribe(this);
-            _controller.OnInvalidInputs += ControllerErrorMessageHandler;
-
-            Initialize();
-        }
-
-        //Mock for disposing redirection to file
-        ~SNMPDiscoveryView()
-        {
-            //RedirectToFile(false);
-        }
+        private Dictionary<EnumViewStates, Action> StateHandlers { get; set; }
+        private Dictionary<EnumViewStates, string> CommandLabels { get; set; }
+        private Dictionary<EnumViewStates, EnumViewStates[]> StateMachine { get; set; }
 
         //Mock for redirecting console to file
-        private void RedirectToFile(bool activate)
-        {
-            if (activate)
-            {
-                oldOut = Console.Out;
-                try
-                {
-                    ostrm = new FileStream("./Redirect.txt", FileMode.Append, FileAccess.Write);
-                    writer = new StreamWriter(ostrm);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Cannot open Redirect.txt for writing");
-                    Console.WriteLine(e.Message);
-                    return;
-                }
-                Console.SetOut(writer);
-            }
-            else
-            {
-                Console.SetOut(oldOut);
-                writer.Close();
-                ostrm.Close();
-            }
-        }
+        private FileStream ostrm { get; set; }
+        private StreamWriter writer { get; set; }
+        private TextWriter oldOut { get; set; }
+
+        #endregion
 
         #region Observer Implementation
 
@@ -105,7 +67,7 @@ namespace SNMPDiscovery.View
 
         #endregion
 
-        #region Private Methods
+        #region Control Flow Methods
 
         private void Initialize()
         {
@@ -115,41 +77,63 @@ namespace SNMPDiscovery.View
             StateHandlers = new Dictionary<EnumViewStates, Action>()
             {
                 { EnumViewStates.Main, NextActionHandle },
-                { EnumViewStates.DeviceDefinition, DefineDevice },
-                { EnumViewStates.LoadDiscoveryData, LoadDataMenu },
-                { EnumViewStates.ProcessSelection, ProcessingMenu },
-                { EnumViewStates.ProcessExecution, RunProcessMenu },
-                { EnumViewStates.PullData, PromptDataMenu },
+                { EnumViewStates.LoadDiscoveryProfile, LoadDataMenu },
+                { EnumViewStates.AddDeviceDefinition, DefineDevice },
+                { EnumViewStates.ShowDeviceDefinitions, null},
+                { EnumViewStates.EditDeviceDefinition, null},
+                { EnumViewStates.DeleteDeviceDefinition, null },
+                { EnumViewStates.AddProcessDefinition, ProcessingMenu },
+                { EnumViewStates.ShowProcessDefinitions, null },
+                { EnumViewStates.EditProcessDefinition, null },
+                { EnumViewStates.DeleteProcessDefinition, null },
+                { EnumViewStates.RunProcess, RunProcessMenu },
+                { EnumViewStates.DataSearch, PromptDataMenu },
                 { EnumViewStates.SaveDiscoveryData, SaveDiscoveryDataMenu},
                 { EnumViewStates.SaveProcessedData, SaveProcessedDataMenu},
                 { EnumViewStates.BackAction, null},
-                { EnumViewStates.Exit, ExitMenu}
+                { EnumViewStates.Exit, ExitMenu }
             };
 
             CommandLabels = new Dictionary<EnumViewStates, string>()
             {
                 { EnumViewStates.Main, "Main" },
-                { EnumViewStates.DeviceDefinition, "Define devices" },
-                { EnumViewStates.LoadDiscoveryData, "Load existing SNMP data discovery" },
-                { EnumViewStates.ProcessSelection, "Select processing functions" },
-                { EnumViewStates.ProcessExecution, "Run processes" },
-                { EnumViewStates.PullData, "Prompt data" },
+                { EnumViewStates.LoadDiscoveryProfile, "Load existing devices and process profile" },
+                { EnumViewStates.AddDeviceDefinition, "Add device settings" },
+                { EnumViewStates.ShowDeviceDefinitions, "Show device settings" },
+                { EnumViewStates.EditDeviceDefinition, "Edit device setting" },
+                { EnumViewStates.DeleteDeviceDefinition, "Delete device setting" },
+                { EnumViewStates.AddProcessDefinition, "Add processing functions" },
+                { EnumViewStates.ShowProcessDefinitions, "Show processing functions" },
+                { EnumViewStates.EditProcessDefinition, "Edit processing function" },
+                { EnumViewStates.DeleteProcessDefinition, "Delete processing function" },
+                { EnumViewStates.RunProcess, "Run processes" },
+                { EnumViewStates.DataSearch, "Data search functions" },
                 { EnumViewStates.SaveDiscoveryData, "Save discovery data"},
                 { EnumViewStates.SaveProcessedData, "Save processed data"},
                 { EnumViewStates.BackAction, "Back to previous action"},
                 { EnumViewStates.Exit, "Exit application" }
             };
 
+            EnumViewStates[] CommonDefsOptionSet = new EnumViewStates[] { EnumViewStates.AddDeviceDefinition, EnumViewStates.ShowDeviceDefinitions, EnumViewStates.EditDeviceDefinition, EnumViewStates.DeleteDeviceDefinition, EnumViewStates.AddProcessDefinition, EnumViewStates.ShowProcessDefinitions, EnumViewStates.EditProcessDefinition, EnumViewStates.DeleteProcessDefinition, EnumViewStates.RunProcess, EnumViewStates.BackAction };
+            EnumViewStates[] PostProcessingOptionSet = new EnumViewStates[] { EnumViewStates.DataSearch, EnumViewStates.SaveDiscoveryData, EnumViewStates.SaveProcessedData, EnumViewStates.BackAction };
+
             StateMachine = new Dictionary<EnumViewStates, EnumViewStates[]>
             {
-                { EnumViewStates.Main, new EnumViewStates[]{ EnumViewStates.DeviceDefinition, EnumViewStates.LoadDiscoveryData, EnumViewStates.Exit } },
-                { EnumViewStates.DeviceDefinition, new EnumViewStates[]{ EnumViewStates.DeviceDefinition, EnumViewStates.ProcessSelection , EnumViewStates.BackAction} },
-                { EnumViewStates.LoadDiscoveryData, new EnumViewStates[]{ EnumViewStates.ProcessSelection, EnumViewStates.BackAction } },
-                { EnumViewStates.ProcessSelection, new EnumViewStates[]{ EnumViewStates.ProcessSelection, EnumViewStates.ProcessExecution, EnumViewStates.BackAction } },
-                { EnumViewStates.ProcessExecution, new EnumViewStates[]{ EnumViewStates.PullData, EnumViewStates.BackAction } },
-                { EnumViewStates.PullData, new EnumViewStates[]{ EnumViewStates.PullData, EnumViewStates.SaveDiscoveryData, EnumViewStates.SaveProcessedData, EnumViewStates.BackAction } },
-                { EnumViewStates.SaveDiscoveryData, new EnumViewStates[]{ EnumViewStates.PullData, EnumViewStates.SaveDiscoveryData, EnumViewStates.SaveProcessedData, EnumViewStates.BackAction }},
-                { EnumViewStates.SaveProcessedData, new EnumViewStates[]{ EnumViewStates.PullData, EnumViewStates.SaveDiscoveryData, EnumViewStates.SaveProcessedData, EnumViewStates.BackAction }},
+                { EnumViewStates.Main, new EnumViewStates[]{ EnumViewStates.AddDeviceDefinition, EnumViewStates.LoadDiscoveryProfile, EnumViewStates.Exit } },
+                { EnumViewStates.AddDeviceDefinition, CommonDefsOptionSet},
+                { EnumViewStates.ShowDeviceDefinitions, CommonDefsOptionSet},
+                { EnumViewStates.EditDeviceDefinition, CommonDefsOptionSet},
+                { EnumViewStates.DeleteDeviceDefinition, CommonDefsOptionSet},
+                { EnumViewStates.AddProcessDefinition, CommonDefsOptionSet},
+                { EnumViewStates.ShowProcessDefinitions, CommonDefsOptionSet},
+                { EnumViewStates.EditProcessDefinition, CommonDefsOptionSet},
+                { EnumViewStates.DeleteProcessDefinition, CommonDefsOptionSet},
+                //MJE - Pending of final definition
+                { EnumViewStates.LoadDiscoveryProfile, CommonDefsOptionSet },
+                { EnumViewStates.RunProcess, PostProcessingOptionSet },
+                { EnumViewStates.DataSearch, PostProcessingOptionSet },
+                { EnumViewStates.SaveDiscoveryData, PostProcessingOptionSet },
+                { EnumViewStates.SaveProcessedData, PostProcessingOptionSet },
                 { EnumViewStates.BackAction, null},
                 { EnumViewStates.Exit, null}
             };
@@ -217,6 +201,10 @@ namespace SNMPDiscovery.View
             GetStateCommand();
             StateHandlers[StateHistory.Peek()].Invoke();
         }
+
+        #endregion
+
+        #region State Handlers
 
         private void DefineDevice()
         {
@@ -345,6 +333,10 @@ namespace SNMPDiscovery.View
             Console.WriteLine("Exiting of application\n");
             Environment.Exit(0);
         }
+
+        #endregion
+
+        #region Data Visualization
 
         private void PromptDTOInfo(Type datatype, object data)
         {
@@ -487,5 +479,51 @@ namespace SNMPDiscovery.View
         }
 
         #endregion
+
+        #region Constructor and destructor
+
+        public SNMPDiscoveryView(ISNMPModelDTO Model, ISNMPDiscoveryController Controller)
+        {
+            _controller = Controller;
+            _observeableSubscription = Model.Subscribe(this);
+            _controller.OnInvalidInputs += ControllerErrorMessageHandler;
+
+            Initialize();
+        }
+
+        //Mock for disposing redirection to file
+        ~SNMPDiscoveryView()
+        {
+            //RedirectToFile(false);
+        }
+
+        #endregion
+
+        //Mock for redirecting console to file
+        private void RedirectToFile(bool activate)
+        {
+            if (activate)
+            {
+                oldOut = Console.Out;
+                try
+                {
+                    ostrm = new FileStream("./Redirect.txt", FileMode.Append, FileAccess.Write);
+                    writer = new StreamWriter(ostrm);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Cannot open Redirect.txt for writing");
+                    Console.WriteLine(e.Message);
+                    return;
+                }
+                Console.SetOut(writer);
+            }
+            else
+            {
+                Console.SetOut(oldOut);
+                writer.Close();
+                ostrm.Close();
+            }
+        }
     }
 }
