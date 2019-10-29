@@ -79,13 +79,13 @@ namespace SNMPDiscovery.View
                 { EnumViewStates.Main, NextActionHandle },
                 { EnumViewStates.LoadDiscoveryProfile, LoadDataMenu },
                 { EnumViewStates.AddDeviceDefinition, DefineDevice },
-                { EnumViewStates.ShowDeviceDefinitions, null},
-                { EnumViewStates.EditDeviceDefinition, null},
-                { EnumViewStates.DeleteDeviceDefinition, null },
-                { EnumViewStates.AddProcessDefinition, ProcessingMenu },
-                { EnumViewStates.ShowProcessDefinitions, null },
-                { EnumViewStates.EditProcessDefinition, null },
-                { EnumViewStates.DeleteProcessDefinition, null },
+                { EnumViewStates.ShowDeviceDefinitions, ShowDevices},
+                { EnumViewStates.EditDeviceDefinition, EditDevice},
+                { EnumViewStates.DeleteDeviceDefinition, DeleteProcess },
+                { EnumViewStates.AddProcessDefinition, DefineProcess },
+                { EnumViewStates.ShowProcessDefinitions, ShowProcesses },
+                { EnumViewStates.EditProcessDefinition, EditProcess },
+                { EnumViewStates.DeleteProcessDefinition, DeleteProcess },
                 { EnumViewStates.RunProcess, RunProcessMenu },
                 { EnumViewStates.DataSearch, PromptDataMenu },
                 { EnumViewStates.SaveDiscoveryData, SaveDiscoveryDataMenu},
@@ -97,7 +97,7 @@ namespace SNMPDiscovery.View
             CommandLabels = new Dictionary<EnumViewStates, string>()
             {
                 { EnumViewStates.Main, "Main" },
-                { EnumViewStates.LoadDiscoveryProfile, "Load existing devices and process profile" },
+                { EnumViewStates.LoadDiscoveryProfile, "Load devices and process profile" },
                 { EnumViewStates.AddDeviceDefinition, "Add device settings" },
                 { EnumViewStates.ShowDeviceDefinitions, "Show device settings" },
                 { EnumViewStates.EditDeviceDefinition, "Edit device setting" },
@@ -139,6 +139,19 @@ namespace SNMPDiscovery.View
             };
 
             Console.WriteLine("Welcome to ASPB network documentation tool.\n");
+            StateHandlers[StateHistory.Peek()].Invoke();
+        }
+
+        private void NextActionHandle()
+        {
+            if (!_currentactionOK)
+            {
+                StateHistory.Pop();
+                _currentactionOK = true;
+            }
+
+            ShowStateCommands();
+            GetStateCommand();
             StateHandlers[StateHistory.Peek()].Invoke();
         }
 
@@ -189,22 +202,16 @@ namespace SNMPDiscovery.View
             }
         }
 
-        private void NextActionHandle()
-        {
-            if (!_currentactionOK)
-            {
-                StateHistory.Pop();
-                _currentactionOK = true;
-            }
-
-            ShowStateCommands();
-            GetStateCommand();
-            StateHandlers[StateHistory.Peek()].Invoke();
-        }
-
         #endregion
 
         #region State Handlers
+
+        private void LoadDataMenu()
+        {
+            //Posible acitons
+
+            NextActionHandle();
+        }
 
         private void DefineDevice()
         {
@@ -226,14 +233,13 @@ namespace SNMPDiscovery.View
             NextActionHandle();
         }
 
-        private void LoadDataMenu()
-        {
-            //Posible acitons
+        private void ShowDevices() { }
 
-            NextActionHandle();
-        }
+        private void EditDevice() { }
 
-        private void ProcessingMenu()
+        private void DeleteDevice() { }
+
+        private void DefineProcess()
         {
             string[] ProcessingOptions, SettingDefinitions;
             int optionInput;
@@ -293,6 +299,12 @@ namespace SNMPDiscovery.View
 
             NextActionHandle();
         }
+
+        private void ShowProcesses() { }
+
+        private void EditProcess() { }
+
+        private void DeleteProcess() { }
 
         private void RunProcessMenu()
         {
