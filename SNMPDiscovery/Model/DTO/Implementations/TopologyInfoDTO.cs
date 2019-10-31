@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,6 +10,8 @@ namespace SNMPDiscovery.Model.DTO
 {
     public class TopologyInfoDTO : IDeviceTopologyInfoDTO
     {
+        public string DeviceIPAndMask { get; set; }
+        public string DeviceMAC { get; set; }
         public string DeviceName { get; set; }
         public string Description { get; set; }
         public string Location { get; set; }
@@ -24,5 +27,6 @@ namespace SNMPDiscovery.Model.DTO
         public IDictionary<string, IDictionary<string, string>> PortLearnedAddresses { get; set; }
         public IDictionary<string, CustomPair<string, string>> PortAggregateDestinations { get; set; }
         public IDictionary<string, IDictionary<string, string>> DeviceDirectNeighbours { get; set; }
+
     }
 }
