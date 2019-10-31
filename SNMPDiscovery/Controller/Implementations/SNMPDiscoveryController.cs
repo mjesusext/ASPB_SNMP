@@ -13,52 +13,89 @@ namespace SNMPDiscovery.Controller
 {
     public class SNMPDiscoveryController : ISNMPDiscoveryController
     {
+        #region Public properties
+
         public IObserver<ISNMPModelDTO> View { get; set; }
         public ISNMPModelDTO Model { get; set; }
         public event Action<List<string>> OnInvalidInputs;
 
-        private List<string> _valMsgs;
+        #endregion
 
-        public SNMPDiscoveryController(ISNMPModelDTO ModelService)
-        {
-            _valMsgs = new List<string>();
-            Model = ModelService;
-            View = new SNMPDiscoveryView(ModelService, this);
-        }
+        #region Private properties
+
+        private List<string> _ErrMsgs { get; set; }
+        private Dictionary<EnumControllerStates, EnumControllerStates[]> _StateMachine { get; set; }
+        private Stack<EnumControllerStates> _StateHistory { get; set; }
+
+        #endregion
 
         #region Controller Implementation
+
+        public EnumControllerStates GetCurrentState()
+        {
+            return _StateHistory.Peek();
+        }
+
+        public EnumControllerStates[] GetStateCommands()
+        {
+            return _StateMachine[_StateHistory.Peek()];
+        }
+
+        public bool ChangeState(int stateindex)
+        {
+            bool res = false;
+
+            if (stateindex >= _StateMachine[_StateHistory.Peek()].Length)
+            {
+                return res;
+            }
+            else
+            {
+                res = true;
+            }
+
+            if (_StateMachine[_StateHistory.Peek()][stateindex] == EnumControllerStates.BackAction)
+            {
+                _StateHistory.Pop();
+            }
+            else
+            {
+                _StateHistory.Push(_StateMachine[_StateHistory.Peek()][stateindex]);
+            }
+
+            return res;
+        }
 
         public void DefineDevices(string settingID, string initialIPAndMask, string finalIPAndMask, string SNMPUser)
         {
             if (string.IsNullOrWhiteSpace(settingID))
             {
-                _valMsgs.Add("Null or empty setting ID");
+                _ErrMsgs.Add("Null or empty setting ID");
             }
 
             if (!ModelHelper.ValidateIPAndMask(initialIPAndMask))
             {
-                _valMsgs.Add("Invalid initial IP");
+                _ErrMsgs.Add("Invalid initial IP");
             }
 
             if (!ModelHelper.ValidateIPAndMask(finalIPAndMask))
             {
-                _valMsgs.Add("Invalid final IP");
+                _ErrMsgs.Add("Invalid final IP");
             }
 
             if(!ModelHelper.ValidateIPandMaskRange(initialIPAndMask, finalIPAndMask))
             {
-                _valMsgs.Add("Invalid IP range");
+                _ErrMsgs.Add("Invalid IP range");
             }
 
-            if (_valMsgs.Count == 0)
+            if (_ErrMsgs.Count == 0)
             {
                 //Consume data
                 Model.BuildSNMPSetting(settingID, initialIPAndMask, finalIPAndMask, SNMPUser);
             }
             else
             {
-                OnInvalidInputs(_valMsgs);
-                _valMsgs.Clear();
+                NotifyControllerError();
             }
         }
 
@@ -156,5 +193,56 @@ namespace SNMPDiscovery.Controller
 
         #endregion
 
+        #region Private methods
+
+        private void NotifyControllerError()
+        {
+            OnInvalidInputs?.Invoke(_ErrMsgs);
+            _ErrMsgs.Clear();
+            _StateHistory.Pop();
+        }
+
+        #endregion
+
+        #region Initializers - Finalizers
+
+        public SNMPDiscoveryController(ISNMPModelDTO ModelService)
+        {
+            InitController();
+            Model = ModelService;
+            View = new SNMPDiscoveryView(ModelService, this);
+        }
+
+        private void InitController()
+        {
+            _ErrMsgs = new List<string>();
+            _StateHistory = new Stack<EnumControllerStates>(new EnumControllerStates[] { EnumControllerStates.Main });
+
+            EnumControllerStates[] CommonDefsOptionSet = new EnumControllerStates[] { EnumControllerStates.AddDeviceDefinition, EnumControllerStates.ShowDeviceDefinitions, EnumControllerStates.EditDeviceDefinition, EnumControllerStates.DeleteDeviceDefinition, EnumControllerStates.AddProcessDefinition, EnumControllerStates.ShowProcessDefinitions, EnumControllerStates.EditProcessDefinition, EnumControllerStates.DeleteProcessDefinition, EnumControllerStates.RunProcess, EnumControllerStates.BackAction };
+            EnumControllerStates[] PostProcessingOptionSet = new EnumControllerStates[] { EnumControllerStates.DataSearch, EnumControllerStates.SaveDiscoveryData, EnumControllerStates.SaveProcessedData, EnumControllerStates.BackAction };
+
+            _StateMachine = new Dictionary<EnumControllerStates, EnumControllerStates[]>
+            {
+                { EnumControllerStates.Main, new EnumControllerStates[]{ EnumControllerStates.AddDeviceDefinition, EnumControllerStates.LoadDiscoveryProfile, EnumControllerStates.Exit } },
+                { EnumControllerStates.AddDeviceDefinition, CommonDefsOptionSet},
+                { EnumControllerStates.ShowDeviceDefinitions, CommonDefsOptionSet},
+                { EnumControllerStates.EditDeviceDefinition, CommonDefsOptionSet},
+                { EnumControllerStates.DeleteDeviceDefinition, CommonDefsOptionSet},
+                { EnumControllerStates.AddProcessDefinition, CommonDefsOptionSet},
+                { EnumControllerStates.ShowProcessDefinitions, CommonDefsOptionSet},
+                { EnumControllerStates.EditProcessDefinition, CommonDefsOptionSet},
+                { EnumControllerStates.DeleteProcessDefinition, CommonDefsOptionSet},
+                //MJE - Pending of final definition
+                { EnumControllerStates.LoadDiscoveryProfile, CommonDefsOptionSet },
+                { EnumControllerStates.RunProcess, PostProcessingOptionSet },
+                { EnumControllerStates.DataSearch, PostProcessingOptionSet },
+                { EnumControllerStates.SaveDiscoveryData, PostProcessingOptionSet },
+                { EnumControllerStates.SaveProcessedData, PostProcessingOptionSet },
+                { EnumControllerStates.BackAction, null},
+                { EnumControllerStates.Exit, null}
+            };
+        }
+
+        #endregion
     }
 }

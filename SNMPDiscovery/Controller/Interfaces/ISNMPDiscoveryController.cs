@@ -13,7 +13,13 @@ namespace SNMPDiscovery.Controller
         IObserver<ISNMPModelDTO> View { get; set; }
         ISNMPModelDTO Model { get; set; }
         event Action<List<string>> OnInvalidInputs;
-        
+
+        //Get current state of state machine
+        EnumControllerStates GetCurrentState();
+        //Send view possible actions
+        EnumControllerStates[] GetStateCommands();
+        //Transition on state machine
+        bool ChangeState(int stateindex);
         //Define Devices To Discover
         void DefineDevices(string settingID, string initialIP, string finalIP, string SNMPUser);
         //Load Devices Definition

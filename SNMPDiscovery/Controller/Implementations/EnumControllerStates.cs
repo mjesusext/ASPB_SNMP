@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SNMPDiscovery.View
+namespace SNMPDiscovery.Controller
 {
-    public enum EnumViewStates : uint
+    public enum EnumControllerStates : uint
     {
         Main = 0,
         AddDeviceDefinition = 1,

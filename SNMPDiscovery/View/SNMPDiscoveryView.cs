@@ -18,12 +18,9 @@ namespace SNMPDiscovery.View
 
         private ISNMPDiscoveryController _controller { get; set; }
         private IDisposable _observeableSubscription { get; set; }
-        private bool _currentactionOK { get; set; }
-        private Stack<EnumViewStates> StateHistory { get; set; }
 
-        private Dictionary<EnumViewStates, Action> StateHandlers { get; set; }
-        private Dictionary<EnumViewStates, string> CommandLabels { get; set; }
-        private Dictionary<EnumViewStates, EnumViewStates[]> StateMachine { get; set; }
+        private Dictionary<EnumControllerStates, Action> StateHandlers { get; set; }
+        private Dictionary<EnumControllerStates, string> StateLabels { get; set; }
 
         //Mock for redirecting console to file
         private FileStream ostrm { get; set; }
@@ -61,107 +58,28 @@ namespace SNMPDiscovery.View
             {
                 Console.WriteLine($"\t - {msg}");
             }
-
-            _currentactionOK = false;
         }
 
         #endregion
 
         #region Control Flow Methods
 
-        private void Initialize()
-        {
-            _currentactionOK = true;
-            StateHistory = new Stack<EnumViewStates>(new EnumViewStates[]{ EnumViewStates.Main });
-
-            StateHandlers = new Dictionary<EnumViewStates, Action>()
-            {
-                { EnumViewStates.Main, NextActionHandle },
-                { EnumViewStates.LoadDiscoveryProfile, LoadDataMenu },
-                { EnumViewStates.AddDeviceDefinition, DefineDevice },
-                { EnumViewStates.ShowDeviceDefinitions, ShowDevices},
-                { EnumViewStates.EditDeviceDefinition, EditDevice},
-                { EnumViewStates.DeleteDeviceDefinition, DeleteProcess },
-                { EnumViewStates.AddProcessDefinition, DefineProcess },
-                { EnumViewStates.ShowProcessDefinitions, ShowProcesses },
-                { EnumViewStates.EditProcessDefinition, EditProcess },
-                { EnumViewStates.DeleteProcessDefinition, DeleteProcess },
-                { EnumViewStates.RunProcess, RunProcessMenu },
-                { EnumViewStates.DataSearch, PromptDataMenu },
-                { EnumViewStates.SaveDiscoveryData, SaveDiscoveryDataMenu},
-                { EnumViewStates.SaveProcessedData, SaveProcessedDataMenu},
-                { EnumViewStates.BackAction, null},
-                { EnumViewStates.Exit, ExitMenu }
-            };
-
-            CommandLabels = new Dictionary<EnumViewStates, string>()
-            {
-                { EnumViewStates.Main, "Main" },
-                { EnumViewStates.LoadDiscoveryProfile, "Load devices and process profile" },
-                { EnumViewStates.AddDeviceDefinition, "Add device settings" },
-                { EnumViewStates.ShowDeviceDefinitions, "Show device settings" },
-                { EnumViewStates.EditDeviceDefinition, "Edit device setting" },
-                { EnumViewStates.DeleteDeviceDefinition, "Delete device setting" },
-                { EnumViewStates.AddProcessDefinition, "Add processing functions" },
-                { EnumViewStates.ShowProcessDefinitions, "Show processing functions" },
-                { EnumViewStates.EditProcessDefinition, "Edit processing function" },
-                { EnumViewStates.DeleteProcessDefinition, "Delete processing function" },
-                { EnumViewStates.RunProcess, "Run processes" },
-                { EnumViewStates.DataSearch, "Data search functions" },
-                { EnumViewStates.SaveDiscoveryData, "Save discovery data"},
-                { EnumViewStates.SaveProcessedData, "Save processed data"},
-                { EnumViewStates.BackAction, "Back to previous action"},
-                { EnumViewStates.Exit, "Exit application" }
-            };
-
-            EnumViewStates[] CommonDefsOptionSet = new EnumViewStates[] { EnumViewStates.AddDeviceDefinition, EnumViewStates.ShowDeviceDefinitions, EnumViewStates.EditDeviceDefinition, EnumViewStates.DeleteDeviceDefinition, EnumViewStates.AddProcessDefinition, EnumViewStates.ShowProcessDefinitions, EnumViewStates.EditProcessDefinition, EnumViewStates.DeleteProcessDefinition, EnumViewStates.RunProcess, EnumViewStates.BackAction };
-            EnumViewStates[] PostProcessingOptionSet = new EnumViewStates[] { EnumViewStates.DataSearch, EnumViewStates.SaveDiscoveryData, EnumViewStates.SaveProcessedData, EnumViewStates.BackAction };
-
-            StateMachine = new Dictionary<EnumViewStates, EnumViewStates[]>
-            {
-                { EnumViewStates.Main, new EnumViewStates[]{ EnumViewStates.AddDeviceDefinition, EnumViewStates.LoadDiscoveryProfile, EnumViewStates.Exit } },
-                { EnumViewStates.AddDeviceDefinition, CommonDefsOptionSet},
-                { EnumViewStates.ShowDeviceDefinitions, CommonDefsOptionSet},
-                { EnumViewStates.EditDeviceDefinition, CommonDefsOptionSet},
-                { EnumViewStates.DeleteDeviceDefinition, CommonDefsOptionSet},
-                { EnumViewStates.AddProcessDefinition, CommonDefsOptionSet},
-                { EnumViewStates.ShowProcessDefinitions, CommonDefsOptionSet},
-                { EnumViewStates.EditProcessDefinition, CommonDefsOptionSet},
-                { EnumViewStates.DeleteProcessDefinition, CommonDefsOptionSet},
-                //MJE - Pending of final definition
-                { EnumViewStates.LoadDiscoveryProfile, CommonDefsOptionSet },
-                { EnumViewStates.RunProcess, PostProcessingOptionSet },
-                { EnumViewStates.DataSearch, PostProcessingOptionSet },
-                { EnumViewStates.SaveDiscoveryData, PostProcessingOptionSet },
-                { EnumViewStates.SaveProcessedData, PostProcessingOptionSet },
-                { EnumViewStates.BackAction, null},
-                { EnumViewStates.Exit, null}
-            };
-
-            Console.WriteLine("Welcome to ASPB network documentation tool.\n");
-            StateHandlers[StateHistory.Peek()].Invoke();
-        }
-
         private void NextActionHandle()
         {
-            if (!_currentactionOK)
-            {
-                StateHistory.Pop();
-                _currentactionOK = true;
-            }
-
             ShowStateCommands();
             GetStateCommand();
-            StateHandlers[StateHistory.Peek()].Invoke();
+            StateHandlers[_controller.GetCurrentState()].Invoke();
         }
 
         private void ShowStateCommands()
         {
             Console.WriteLine("----- Available commands -----\n");
 
-            for (int i = 0; i < StateMachine[StateHistory.Peek()].Length; i++)
+            EnumControllerStates[] Cmds = _controller.GetStateCommands();
+
+            for (int i = 0; i < Cmds.Length; i++)
             {
-                Console.WriteLine($"{i} - {CommandLabels[StateMachine[StateHistory.Peek()][i]]}");
+                Console.WriteLine($"{i} - {StateLabels[Cmds[i]]}");
             }
 
             Console.WriteLine();
@@ -169,20 +87,20 @@ namespace SNMPDiscovery.View
 
         private void GetStateCommand()
         {
-            int GoingState;
+            int OnGoingState;
             bool wrongInput = false;
 
             do
             {
                 Console.Write("Select option: ");
                                 
-                wrongInput = !int.TryParse(Console.ReadLine(), out GoingState);
+                wrongInput = !int.TryParse(Console.ReadLine(), out OnGoingState);
 
                 if (wrongInput)
                 {
                     Console.WriteLine("ERROR: Input values are not a number.");
                 }
-                else if (GoingState >= StateMachine[StateHistory.Peek()].Length)
+                else if (!_controller.ChangeState(OnGoingState))
                 {
                     Console.WriteLine("ERROR: Selected option not available");
                     wrongInput = true;
@@ -190,16 +108,6 @@ namespace SNMPDiscovery.View
             } while (wrongInput);
 
             Console.WriteLine();
-
-            if(StateMachine[StateHistory.Peek()][GoingState] == EnumViewStates.BackAction)
-            {
-                StateHistory.Pop();
-                NextActionHandle();
-            }
-            else
-            {
-                StateHistory.Push(StateMachine[StateHistory.Peek()][GoingState]);
-            }
         }
 
         #endregion
@@ -228,7 +136,6 @@ namespace SNMPDiscovery.View
             Console.WriteLine();
 
             _controller.DefineDevices(settingname, initialIP, finalIP, SNMPuser);
-            //_controller.DefineDevice("ColecciónSwitches", "192.168.1.42", "192.168.1.51", "public");
 
             NextActionHandle();
         }
@@ -492,7 +399,7 @@ namespace SNMPDiscovery.View
 
         #endregion
 
-        #region Constructor and destructor
+        #region Initializers - Finalizers
 
         public SNMPDiscoveryView(ISNMPModelDTO Model, ISNMPDiscoveryController Controller)
         {
@@ -500,7 +407,53 @@ namespace SNMPDiscovery.View
             _observeableSubscription = Model.Subscribe(this);
             _controller.OnInvalidInputs += ControllerErrorMessageHandler;
 
-            Initialize();
+            InitView();
+        }
+
+        private void InitView()
+        {
+            StateHandlers = new Dictionary<EnumControllerStates, Action>()
+            {
+                { EnumControllerStates.Main, NextActionHandle },
+                { EnumControllerStates.LoadDiscoveryProfile, LoadDataMenu },
+                { EnumControllerStates.AddDeviceDefinition, DefineDevice },
+                { EnumControllerStates.ShowDeviceDefinitions, ShowDevices},
+                { EnumControllerStates.EditDeviceDefinition, EditDevice},
+                { EnumControllerStates.DeleteDeviceDefinition, DeleteProcess },
+                { EnumControllerStates.AddProcessDefinition, DefineProcess },
+                { EnumControllerStates.ShowProcessDefinitions, ShowProcesses },
+                { EnumControllerStates.EditProcessDefinition, EditProcess },
+                { EnumControllerStates.DeleteProcessDefinition, DeleteProcess },
+                { EnumControllerStates.RunProcess, RunProcessMenu },
+                { EnumControllerStates.DataSearch, PromptDataMenu },
+                { EnumControllerStates.SaveDiscoveryData, SaveDiscoveryDataMenu},
+                { EnumControllerStates.SaveProcessedData, SaveProcessedDataMenu},
+                { EnumControllerStates.BackAction, null},
+                { EnumControllerStates.Exit, ExitMenu }
+            };
+
+            StateLabels = new Dictionary<EnumControllerStates, string>()
+            {
+                { EnumControllerStates.Main, "Main" },
+                { EnumControllerStates.LoadDiscoveryProfile, "Load devices and process profile" },
+                { EnumControllerStates.AddDeviceDefinition, "Add device settings" },
+                { EnumControllerStates.ShowDeviceDefinitions, "Show device settings" },
+                { EnumControllerStates.EditDeviceDefinition, "Edit device setting" },
+                { EnumControllerStates.DeleteDeviceDefinition, "Delete device setting" },
+                { EnumControllerStates.AddProcessDefinition, "Add processing functions" },
+                { EnumControllerStates.ShowProcessDefinitions, "Show processing functions" },
+                { EnumControllerStates.EditProcessDefinition, "Edit processing function" },
+                { EnumControllerStates.DeleteProcessDefinition, "Delete processing function" },
+                { EnumControllerStates.RunProcess, "Run processes" },
+                { EnumControllerStates.DataSearch, "Data search functions" },
+                { EnumControllerStates.SaveDiscoveryData, "Save discovery data"},
+                { EnumControllerStates.SaveProcessedData, "Save processed data"},
+                { EnumControllerStates.BackAction, "Back to previous action"},
+                { EnumControllerStates.Exit, "Exit application" }
+            };
+
+            Console.WriteLine("Welcome to ASPB network documentation tool.\n");
+            StateHandlers[_controller.GetCurrentState()].Invoke();
         }
 
         //Mock for disposing redirection to file
