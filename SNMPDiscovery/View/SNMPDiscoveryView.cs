@@ -33,7 +33,7 @@ namespace SNMPDiscovery.View
 
         public void OnNext(ISNMPModelDTO value)
         {
-            PromptDTOInfo(value.ChangedObject.First, value.ChangedObject.Second);
+            PromptModelDTO(value.ChangedObject.First, value.ChangedObject.Second);
         }
 
         public void OnError(Exception error)
@@ -136,11 +136,87 @@ namespace SNMPDiscovery.View
             NextActionHandle();
         }
 
-        private void ShowDevices() { }
+        private void ShowDeviceSettings()
+        {
+            string skey = null;
+            IList<ISNMPDeviceSettingDTO> sresult = null;
 
-        private void EditDevice() { }
+            //Ask for key
+            Console.Write("Insert device definition name. If blank, full list will be retrieved: ");
+            skey = Console.ReadLine();
+            Console.WriteLine();
 
-        private void DeleteDevice() { }
+            //Pull data and prompt
+            sresult = (List<ISNMPDeviceSettingDTO>)_controller.PullDataList(typeof(ISNMPDeviceSettingDTO), string.IsNullOrWhiteSpace(skey) ? null : skey);
+            Console.WriteLine($"{sresult.Count} results found.");
+
+            foreach (ISNMPDeviceSettingDTO DeviceSetItem in sresult)
+            {
+                ShowData(DeviceSetItem);
+            }
+
+            NextActionHandle();
+        }
+
+        private void EditDeviceSetting()
+        {
+            bool wrongInput = true;
+            string skey = null;
+            ISNMPDeviceSettingDTO sresult = null;
+            string settingname, initialIP, finalIP, SNMPuser;
+
+            //Ask for key
+            do
+            {
+                Console.Write("Insert device definition name: ");
+                skey = Console.ReadLine();
+
+                wrongInput = string.IsNullOrWhiteSpace(skey);
+                if (wrongInput)
+                {
+                    Console.WriteLine("Insert non-empty value.");
+                }
+            }
+            while (wrongInput);
+
+            Console.WriteLine();
+
+            //Pull existing data and editing
+            sresult = ((List<ISNMPDeviceSettingDTO>)_controller.PullDataList(typeof(ISNMPDeviceSettingDTO), skey))?[0];
+            ShowData(sresult);
+
+            //Redefine values
+            //MJE - Pending rencapsule methods of each getting step of processes
+            Console.WriteLine("Insert values to be editted. Insert null-values for keeping previous ones");
+
+            Console.Write("Device definition name: ");
+            settingname = Console.ReadLine();
+            settingname = string.IsNullOrWhiteSpace(settingname) ? sresult.ID : settingname;
+
+            Console.Write("Initial IP/mask: ");
+            initialIP = Console.ReadLine();
+            initialIP = string.IsNullOrWhiteSpace(initialIP) ? sresult.InitialIP.ToString() : initialIP;
+
+            Console.Write("Final IP/mask: ");
+            finalIP = Console.ReadLine();
+            finalIP = string.IsNullOrWhiteSpace(finalIP) ? sresult.FinalIP.ToString() : finalIP;
+
+            Console.Write("SNMP community user (V2): ");
+            SNMPuser = Console.ReadLine();
+            SNMPuser = string.IsNullOrWhiteSpace(SNMPuser) ? sresult.CommunityString : SNMPuser;
+
+            Console.WriteLine();
+
+            //_controller.DefineDevices(settingname, initialIP, finalIP, SNMPuser, sresult.ID);
+
+            NextActionHandle();
+        }
+
+        private void DeleteDevice()
+        {
+            //Ask for key
+            //Delete command
+        }
 
         private void DefineProcess()
         {
@@ -203,11 +279,67 @@ namespace SNMPDiscovery.View
             NextActionHandle();
         }
 
-        private void ShowProcesses() { }
+        private void ShowProcesses()
+        {
+            string skey = null;
+            IList<ISNMPProcessStrategy> sresult = null;
 
-        private void EditProcess() { }
+            //Ask for key
+            Console.Write("Insert process name. If blank, full list will be retrieved: ");
+            skey = Console.ReadLine();
+            Console.WriteLine();
 
-        private void DeleteProcess() { }
+            //Pull data and prompt
+            sresult = (List<ISNMPProcessStrategy>)_controller.PullDataList(typeof(ISNMPProcessStrategy), string.IsNullOrWhiteSpace(skey) ? null : skey);
+            Console.WriteLine($"{sresult.Count} results found.");
+
+            foreach (ISNMPProcessStrategy DeviceSetItem in sresult)
+            {
+                ShowData(DeviceSetItem);
+            }
+
+            NextActionHandle();
+        }
+
+        private void EditProcess()
+        {
+            bool wrongInput = true;
+            string skey = null;
+            ISNMPProcessStrategy sresult = null;
+
+            //Ask for key
+            do
+            {
+                Console.Write("Insert process definition name: ");
+                skey = Console.ReadLine();
+
+                wrongInput = string.IsNullOrWhiteSpace(skey);
+                if (wrongInput)
+                {
+                    Console.WriteLine("Insert non-empty value.");
+                }
+            }
+            while (wrongInput);
+
+            Console.WriteLine();
+
+            //Pull exiting data and editing
+            sresult = ((List<ISNMPProcessStrategy>)_controller.PullDataList(typeof(ISNMPProcessStrategy), skey))?[0];
+            ShowData(sresult);
+
+            //Redefine values
+            Console.WriteLine("Insert values to be editted. Insert null-values for keeping previous ones");
+
+            //MJE - Pending rencapsule methods of each getting step of processes
+            
+            //Save data
+        }
+
+        private void DeleteProcess()
+        {
+            //Ask for key
+            //Delete command
+        }
 
         private void RunProcessMenu()
         {
@@ -253,7 +385,7 @@ namespace SNMPDiscovery.View
 
         #region Data Visualization
 
-        private void PromptDTOInfo(Type datatype, object data)
+        private void PromptModelDTO(Type datatype, object data)
         {
             RedirectToFile(true);
 
@@ -414,8 +546,8 @@ namespace SNMPDiscovery.View
                 { EnumControllerStates.Main, NextActionHandle },
                 { EnumControllerStates.LoadDiscoveryProfile, LoadDataMenu },
                 { EnumControllerStates.AddDeviceDefinition, DefineDevice },
-                { EnumControllerStates.ShowDeviceDefinitions, ShowDevices},
-                { EnumControllerStates.EditDeviceDefinition, EditDevice},
+                { EnumControllerStates.ShowDeviceDefinitions, ShowDeviceSettings},
+                { EnumControllerStates.EditDeviceDefinition, EditDeviceSetting},
                 { EnumControllerStates.DeleteDeviceDefinition, DeleteProcess },
                 { EnumControllerStates.AddProcessDefinition, DefineProcess },
                 { EnumControllerStates.ShowProcessDefinitions, ShowProcesses },
