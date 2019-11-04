@@ -99,6 +99,39 @@ namespace SNMPDiscovery.Controller
             }
         }
 
+        public void EditDevice(string oldSettingID, string settingID, string initialIPAndMask, string finalIPAndMask, string SNMPUser)
+        {
+            if (string.IsNullOrWhiteSpace(settingID))
+            {
+                _ErrMsgs.Add("Null or empty setting ID");
+            }
+
+            if (!ModelHelper.ValidateIPAndMask(initialIPAndMask))
+            {
+                _ErrMsgs.Add("Invalid initial IP");
+            }
+
+            if (!ModelHelper.ValidateIPAndMask(finalIPAndMask))
+            {
+                _ErrMsgs.Add("Invalid final IP");
+            }
+
+            if(!ModelHelper.ValidateIPandMaskRange(initialIPAndMask, finalIPAndMask))
+            {
+                _ErrMsgs.Add("Invalid IP range");
+            }
+
+            if (_ErrMsgs.Count == 0)
+            {
+                //Consume data
+                Model.EditSNMPSetting(oldSettingID, settingID, initialIPAndMask, finalIPAndMask, SNMPUser);
+            }
+            else
+            {
+                NotifyControllerError();
+            }
+        }
+
         public void LoadDiscoveryData() { }
 
         public void LoadDeviceDefinitions() { }
@@ -106,6 +139,11 @@ namespace SNMPDiscovery.Controller
         public void DefineProcesses(string settingID, EnumProcessingType processType)
         {
             Model.BuildProcess(settingID, processType);
+        }
+
+        public void EditProcess(EnumProcessingType previousProcessType, EnumProcessingType processType)
+        {
+
         }
 
         public void RunDiscovery()
@@ -158,27 +196,45 @@ namespace SNMPDiscovery.Controller
             {
                 if (dataType.Equals(typeof(ISNMPDeviceDataDTO)))
                 {
-                    return new List<ISNMPDeviceDataDTO>(new[] { Model.DeviceData[key] });
+                    ISNMPDeviceDataDTO res = null;
+                    Model.DeviceData.TryGetValue(key, out res);
+
+                    return res == null ? new List<ISNMPDeviceDataDTO>() : new List<ISNMPDeviceDataDTO>(new[] { res });
                 }
                 else if (dataType.Equals(typeof(ISNMPDeviceSettingDTO)))
                 {
-                    return new List<ISNMPDeviceSettingDTO>(new[] { Model.DeviceSettings[key] });
+                    ISNMPDeviceSettingDTO res = null;
+                    Model.DeviceSettings.TryGetValue(key, out res);
+
+                    return res == null ? new List<ISNMPDeviceSettingDTO>() : new List<ISNMPDeviceSettingDTO>(new[] { res });
                 }
                 else if (dataType.Equals(typeof(ISNMPProcessStrategy)))
                 {
-                    return new List<ISNMPProcessStrategy>(new[] { Model.Processes[key] });
+                    ISNMPProcessStrategy res = null;
+
+                    EnumProcessingType skey = EnumProcessingType.None;
+                    Enum.TryParse<EnumProcessingType>(key, out skey);
+                    Model.Processes.TryGetValue(skey, out res);
+
+                    return res == null ? new List<ISNMPProcessStrategy>() : new List<ISNMPProcessStrategy>(new[] { res });
                 }
                 else if (dataType.Equals(typeof(IOIDSettingDTO)))
                 {
-                    return new List<IOIDSettingDTO>(Model.Processes.Values.Select(x => x.OIDSettings[key]));
+                    IEnumerable<IOIDSettingDTO> res = Model.Processes.Values.Select(x => x.OIDSettings.ContainsKey(key) ? x.OIDSettings[key] : null);
+                    
+                    return res.Count() == 0 ? new List<IOIDSettingDTO>() : new List<IOIDSettingDTO>(res);
                 }
                 else if (dataType.Equals(typeof(ISNMPRawEntryDTO)))
                 {
-                    return new List<ISNMPRawEntryDTO>(Model.DeviceData.Values.Select(x => x.SNMPRawDataEntries[key]));
+                    IEnumerable<ISNMPRawEntryDTO> res = Model.DeviceData.Values.Select(x => x.SNMPRawDataEntries.ContainsKey(key) ? x.SNMPRawDataEntries[key] : null);
+
+                    return res.Count() == 0 ? new List<ISNMPRawEntryDTO>() : new List<ISNMPRawEntryDTO>(res);
                 }
                 else if (dataType.Equals(typeof(ISNMPProcessedValueDTO)))
                 {
-                    return new List<ISNMPProcessedValueDTO>(Model.DeviceData.Values.Select(x => x.SNMPProcessedData[key]));
+                    IEnumerable<ISNMPProcessedValueDTO> res = Model.DeviceData.Values.Select(x => x.SNMPProcessedData.ContainsKey(key) ? x.SNMPProcessedData[key] : null);
+
+                    return res.Count() == 0 ? new List<ISNMPProcessedValueDTO>() : new List<ISNMPProcessedValueDTO>(res);
                 }
                 else
                 {

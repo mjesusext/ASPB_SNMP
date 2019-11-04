@@ -22,12 +22,16 @@ namespace SNMPDiscovery.Controller
         bool ChangeState(int stateindex);
         //Define Devices To Discover
         void DefineDevices(string settingID, string initialIP, string finalIP, string SNMPUser);
+        //Define Device To Discover
+        void EditDevice(string oldSettingID, string settingID, string initialIPAndMask, string finalIPAndMask, string SNMPUser);
         //Load Devices Definition
         void LoadDeviceDefinitions();
         //Load Discovered data
         void LoadDiscoveryData();
         //Define processes to execute
         void DefineProcesses(string settingID, EnumProcessingType processType);
+        //Edit processes to execute
+        void EditProcess(EnumProcessingType previousProcessType, EnumProcessingType processType);
         //Start discovery
         void RunDiscovery();
         //Start processes

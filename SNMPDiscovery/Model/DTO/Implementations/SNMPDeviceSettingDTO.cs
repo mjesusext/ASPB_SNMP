@@ -46,5 +46,20 @@ namespace SNMPDiscovery.Model.DTO
         }
 
         #endregion
+
+        #region Data editors
+
+        public void EditDeviceSetting(string newid, string initialIPAndMask, string finalIPAndMask, string SNMPUser)
+        {
+            ID = newid;
+            InitialIP = ModelHelper.ExtractIPAddress(initialIPAndMask);
+            FinalIP = finalIPAndMask == null ? InitialIP : ModelHelper.ExtractIPAddress(finalIPAndMask);
+            NetworkMask = ModelHelper.ExtractNetworkMask(initialIPAndMask);
+            CommunityString = SNMPUser;
+
+            OnChange?.Invoke(this, typeof(ISNMPDeviceSettingDTO));
+        }
+
+        #endregion
     }
 }

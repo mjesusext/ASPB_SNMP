@@ -17,5 +17,7 @@ namespace SNMPDiscovery.Model.DTO
         IPAddress FinalIP { get; set; }
         int NetworkMask { get; set; }
         string CommunityString { get; set; }
+
+        void EditDeviceSetting(string newid, string initialIPAndMask, string finalIPAndMask, string SNMPUser);
     }
 }

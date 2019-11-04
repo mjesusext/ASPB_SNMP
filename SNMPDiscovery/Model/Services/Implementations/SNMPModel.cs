@@ -26,7 +26,7 @@ namespace SNMPDiscovery.Model.Services
         #region Public properties
 
         public IDictionary<string, ISNMPDeviceSettingDTO> DeviceSettings { get; set; }
-        public IDictionary<string, ISNMPProcessStrategy> Processes { get; set; }
+        public IDictionary<EnumProcessingType, ISNMPProcessStrategy> Processes { get; set; }
         public IDictionary<string, ISNMPDeviceDataDTO> DeviceData { get; set; }
         public IDictionary<string, ISNMPProcessedValueDTO> GlobalProcessedData { get; set; }
         public IDictionary<string, string> ARPTable { get; set; }
@@ -92,6 +92,29 @@ namespace SNMPDiscovery.Model.Services
             return setting;
         }
 
+        public ISNMPDeviceSettingDTO EditSNMPSetting(string oldID, string ID, string initialIPAndMask, string finalIPAndMask, string SNMPUser)
+        {
+            ISNMPDeviceSettingDTO setting;
+
+            //Validation
+            if (DeviceSettings == null || !DeviceSettings.ContainsKey(oldID))
+            {
+                return null;
+            }
+
+            //Changing values of reference does not interfere on process targets. They keep the track of objects
+            setting = DeviceSettings[oldID];
+            setting.EditDeviceSetting(ID, initialIPAndMask, finalIPAndMask, SNMPUser);
+            
+            if(oldID != ID)
+            {
+                DeviceSettings.Remove(oldID);
+                DeviceSettings.Add(ID, setting);
+            }
+
+            return setting;
+        }
+
         public ISNMPDeviceDataDTO BuildSNMPDevice(IPAddress targetIP, int targetMask)
         {
             //Lazy initialization
@@ -106,7 +129,6 @@ namespace SNMPDiscovery.Model.Services
             return device;
         }
 
-        //MJE - Pendiente de revisar buscando el setting por ID
         public ISNMPProcessStrategy BuildProcess(string SettingID, EnumProcessingType ProcessType)
         {
             ISNMPProcessStrategy ProcessProfile = null;
@@ -115,7 +137,7 @@ namespace SNMPDiscovery.Model.Services
             //Lazy initialization
             if (Processes == null)
             {
-                Processes = new Dictionary<string, ISNMPProcessStrategy>();
+                Processes = new Dictionary<EnumProcessingType, ISNMPProcessStrategy>();
             }
 
             switch (ProcessType)
@@ -125,14 +147,14 @@ namespace SNMPDiscovery.Model.Services
                 case EnumProcessingType.TopologyDiscovery:
 
                     //Get existing strategy
-                    if (!Processes.ContainsKey(nameof(TopologyBuilderStrategy)))
+                    if (!Processes.ContainsKey(ProcessType))
                     {
                         ProcessProfile = new TopologyBuilderStrategy(this, ChangeTrackerHandler);
-                        Processes.Add(ProcessProfile.ProcessID, ProcessProfile);
+                        Processes.Add(ProcessType, ProcessProfile);
                     }
                     else
                     {
-                        ProcessProfile = Processes[nameof(TopologyBuilderStrategy)];
+                        ProcessProfile = Processes[ProcessType];
                     }
 
                     //Add device setting if found
@@ -142,6 +164,50 @@ namespace SNMPDiscovery.Model.Services
                     }
 
                     ChangeTrackerHandler(ProcessProfile, typeof(ISNMPProcessStrategy));
+
+                    break;
+                case EnumProcessingType.PrinterConsumption:
+                    break;
+                default:
+                    break;
+            }
+
+            return ProcessProfile;
+        }
+
+        public ISNMPProcessStrategy EditProcess(EnumProcessingType PreviousProcessType, EnumProcessingType NewProcessType)
+        {
+            ISNMPProcessStrategy ProcessProfile = null;
+
+            //Validation
+            if (Processes == null && NewProcessType == EnumProcessingType.None)
+            {
+                return null;
+            }
+
+            switch (NewProcessType)
+            {
+                case EnumProcessingType.None:
+                    break;
+                case EnumProcessingType.TopologyDiscovery:
+              
+                    if (!Processes.ContainsKey(NewProcessType))
+                    {
+                        ProcessProfile = new TopologyBuilderStrategy(this, ChangeTrackerHandler);
+                        ProcessProfile.TargetDevices = Processes[PreviousProcessType].TargetDevices;
+
+                        Processes.Add(NewProcessType, ProcessProfile);
+                    }
+                    else
+                    {
+                        ProcessProfile = Processes[NewProcessType];
+
+                        //MJE - Pending of double-checking
+                        ((List<ISNMPDeviceSettingDTO>)ProcessProfile.TargetDevices).AddRange(Processes[PreviousProcessType].TargetDevices);
+                        ProcessProfile.TargetDevices = ProcessProfile.TargetDevices.Distinct().ToList();
+                    }
+
+                    Processes.Remove(PreviousProcessType);
 
                     break;
                 case EnumProcessingType.PrinterConsumption:

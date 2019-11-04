@@ -148,7 +148,7 @@ namespace SNMPDiscovery.View
 
             //Pull data and prompt
             sresult = (List<ISNMPDeviceSettingDTO>)_controller.PullDataList(typeof(ISNMPDeviceSettingDTO), string.IsNullOrWhiteSpace(skey) ? null : skey);
-            Console.WriteLine($"{sresult.Count} results found.");
+            Console.WriteLine($"****** {sresult.Count} results found. ******");
 
             foreach (ISNMPDeviceSettingDTO DeviceSetItem in sresult)
             {
@@ -163,7 +163,7 @@ namespace SNMPDiscovery.View
             bool wrongInput = true;
             string skey = null;
             ISNMPDeviceSettingDTO sresult = null;
-            string settingname, initialIP, finalIP, SNMPuser;
+            string settingname, initialIPAndMask, finalIPAndMask, SNMPuser;
 
             //Ask for key
             do
@@ -194,12 +194,12 @@ namespace SNMPDiscovery.View
             settingname = string.IsNullOrWhiteSpace(settingname) ? sresult.ID : settingname;
 
             Console.Write("Initial IP/mask: ");
-            initialIP = Console.ReadLine();
-            initialIP = string.IsNullOrWhiteSpace(initialIP) ? sresult.InitialIP.ToString() : initialIP;
+            initialIPAndMask = Console.ReadLine();
+            initialIPAndMask = string.IsNullOrWhiteSpace(initialIPAndMask) ? $"{sresult.InitialIP}/{sresult.NetworkMask}" : initialIPAndMask;
 
             Console.Write("Final IP/mask: ");
-            finalIP = Console.ReadLine();
-            finalIP = string.IsNullOrWhiteSpace(finalIP) ? sresult.FinalIP.ToString() : finalIP;
+            finalIPAndMask = Console.ReadLine();
+            finalIPAndMask = string.IsNullOrWhiteSpace(finalIPAndMask) ? $"{sresult.FinalIP}/{sresult.NetworkMask}" : finalIPAndMask;
 
             Console.Write("SNMP community user (V2): ");
             SNMPuser = Console.ReadLine();
@@ -207,7 +207,7 @@ namespace SNMPDiscovery.View
 
             Console.WriteLine();
 
-            //_controller.DefineDevices(settingname, initialIP, finalIP, SNMPuser, sresult.ID);
+            _controller.EditDevice(settingname, sresult.ID, initialIPAndMask, finalIPAndMask, SNMPuser);
 
             NextActionHandle();
         }
@@ -291,7 +291,7 @@ namespace SNMPDiscovery.View
 
             //Pull data and prompt
             sresult = (List<ISNMPProcessStrategy>)_controller.PullDataList(typeof(ISNMPProcessStrategy), string.IsNullOrWhiteSpace(skey) ? null : skey);
-            Console.WriteLine($"{sresult.Count} results found.");
+            Console.WriteLine($"****** {sresult.Count} results found. ******");
 
             foreach (ISNMPProcessStrategy DeviceSetItem in sresult)
             {
@@ -422,107 +422,118 @@ namespace SNMPDiscovery.View
 
         private void ShowData(ISNMPDeviceDataDTO data)
         {
-            Console.WriteLine($"SNMP device {data.TargetIP}.\n");
+            if (data != null)
+            {
+                Console.WriteLine($"SNMP device {data.TargetIP}.\n");
+            }
+            
         }
 
         private void ShowData(ISNMPDeviceSettingDTO data)
         {
-            //MJE TEST
-            Console.WriteLine($"Timestamp {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:ffff")}");
-            Console.WriteLine();
-
-            Console.WriteLine($"SNMP setting \"{data.ID}\" with this definition:\n" +
-                              $"\t-Initial IP: {data.InitialIP}/{data.NetworkMask}\n" +
-                              $"\t-Final IP: {data.FinalIP}/{data.NetworkMask}\n" +
-                              $"\t-Community string: {data.CommunityString}\n");
+            if (data != null)
+            {
+                Console.WriteLine($"SNMP setting \"{data.ID}\" with this definition:\n" +
+                                  $"\t-Initial IP: {data.InitialIP}/{data.NetworkMask}\n" +
+                                  $"\t-Final IP: {data.FinalIP}/{data.NetworkMask}\n" +
+                                  $"\t-Community string: {data.CommunityString}\n");
+            }
         }
 
         private void ShowData(ISNMPProcessStrategy data)
         {
-            Console.WriteLine($"Process setting {data.ProcessID} related to following Device Settings:\n" +
+            if (data != null)
+            {
+                Console.WriteLine($"Process setting {data.ProcessID} related to following Device Settings:\n" +
                               $"\t-{string.Join("\n\t-", data.TargetDevices.Select(x => x.ID))}.\n");
+            }
         }
 
         private void ShowData(IOIDSettingDTO data)
         {
-            Console.WriteLine($"OID setting {data.ID} with this definition:\n" +
+            if(data != null)
+            {
+                Console.WriteLine($"OID setting {data.ID} with this definition:\n" +
                               $"\t-Initial OID: {data.InitialOID}\n" +
                               $"\t-Final OID: {data.FinalOID}\n" +
                               $"\t-Inclusive: {data.InclusiveInterval}\n");
+            }
         }
 
         private void ShowData(ISNMPRawEntryDTO data)
         {
-            Console.WriteLine($"OID entry. Identifier: {data.OID}. DataType: {data.DataType}. Value: {data.ValueData}.\n");
+            if(data != null)
+            {
+                Console.WriteLine($"OID entry. Identifier: {data.OID}. DataType: {data.DataType}. Value: {data.ValueData}.\n");
+            }
         }
 
         private void ShowData(ISNMPProcessedValueDTO data)
         {
-            //PromptBasicInfo
-            IDiscoveredBasicInfo BasicInfoObj = (IDiscoveredBasicInfo)data.Data;
-
-            Console.WriteLine($"Processed device basic data:\n" +
-                              $"\t-Device name: {BasicInfoObj.DeviceName}\n" +
-                              $"\t-Device Type: {BasicInfoObj.DeviceType}\n" +
-                              $"\t-Location: {BasicInfoObj.Location}\n" +
-                              $"\t-Description: {BasicInfoObj.Description}\n" +
-                              $"\t-OSI Implemented Layers: {BasicInfoObj.OSIImplementedLayers}\n");
-
-            //PromptSpecificTypeInfo
-            if (data.DataType.Equals(typeof(IDeviceTopologyInfoDTO)))
+            if(data != null)
             {
-                IDeviceTopologyInfoDTO DataObj = (IDeviceTopologyInfoDTO)data.Data;
+                //PromptBasicInfo
+                IDiscoveredBasicInfo BasicInfoObj = (IDiscoveredBasicInfo)data.Data;
 
-                //Port inventory by internal ID
-                Console.WriteLine("\nPort inventory by internal ID:\n");
-                Console.WriteLine("{0,-40} {1,-40} {2,-40} {3,-40} {4,-40} {5,-40}", "Port ID", "Port Name", "MAC Address", "Port Type", "Port Referer", "VLAN");
+                Console.WriteLine($"Processed device basic data:\n" +
+                                  $"\t-Device name: {BasicInfoObj.DeviceName}\n" +
+                                  $"\t-Device Type: {BasicInfoObj.DeviceType}\n" +
+                                  $"\t-Location: {BasicInfoObj.Location}\n" +
+                                  $"\t-Description: {BasicInfoObj.Description}\n" +
+                                  $"\t-OSI Implemented Layers: {BasicInfoObj.OSIImplementedLayers}\n");
 
-                foreach (KeyValuePair<string, string> MACPort in DataObj.PortMACAddress)
+                //PromptSpecificTypeInfo
+                if (data.DataType.Equals(typeof(IDeviceTopologyInfoDTO)))
                 {
-                    List<string> relVLANs;
-                    bool existVLAN = DataObj.PortVLANMapping.TryGetValue(MACPort.Key, out relVLANs);
-                    string VLANList = existVLAN ? string.Join(",", relVLANs.Select(x => DataObj.VLANInventory[x])) : string.Empty;
+                    IDeviceTopologyInfoDTO DataObj = (IDeviceTopologyInfoDTO)data.Data;
 
-                    Console.WriteLine($"{MACPort.Key,-40} {DataObj.PortInventory[MACPort.Key],-40} {MACPort.Value,-40} {DataObj.PortSettings[MACPort.Key].First,-40} {DataObj.PortSettings[MACPort.Key].Second,-40} {VLANList,-40}");
-                }
+                    //Port inventory by internal ID
+                    Console.WriteLine("\nPort inventory by internal ID:\n");
+                    Console.WriteLine("{0,-40} {1,-40} {2,-40} {3,-40} {4,-40} {5,-40}", "Port ID", "Port Name", "MAC Address", "Port Type", "Port Referer", "VLAN");
 
-                //Volumetry MACs by port
-                Console.WriteLine("\nVolumetry MACs by port:\n");
-                Console.WriteLine("Port ID \t Quantity");
-                
-                foreach (KeyValuePair<string, IDictionary<string, string>> portlearned in DataObj.PortLearnedAddresses)
-                {
-                    Console.WriteLine($"{portlearned.Key} \t {portlearned.Value.Count}");
-                }
-
-                //Learned MACs by port
-                //Console.WriteLine("\nLearned MACs by port:\n");
-                //Console.WriteLine("Port ID \t MAC Address \t IP Address");
-                //
-                //foreach (KeyValuePair<string, IDictionary<string,string>> portlearned in DataObj.PortLearnedAddresses)
-                //{
-                //    foreach (KeyValuePair<string,string> maclist in portlearned.Value)
-                //    {
-                //        Console.WriteLine($"{portlearned.Key} \t {maclist.Key} \t {maclist.Value}");
-                //    }
-                //}
-
-                //Direct Neighbours
-                Console.WriteLine("\nComputed direct neighbours:\n");
-                Console.WriteLine("Port ID \t MAC Address \t IP Address");
-
-                foreach (KeyValuePair<string, IDictionary<string, string>> computedneigh in DataObj.DeviceDirectNeighbours)
-                {
-                    foreach (KeyValuePair<string, string> addrrlist in computedneigh.Value)
+                    foreach (KeyValuePair<string, string> MACPort in DataObj.PortMACAddress)
                     {
-                        Console.WriteLine($"{computedneigh.Key} \t {addrrlist.Key} \t {addrrlist.Value}");
-                    }
-                }
-                Console.WriteLine();
+                        List<string> relVLANs;
+                        bool existVLAN = DataObj.PortVLANMapping.TryGetValue(MACPort.Key, out relVLANs);
+                        string VLANList = existVLAN ? string.Join(",", relVLANs.Select(x => DataObj.VLANInventory[x])) : string.Empty;
 
-                //MJE TEST
-                Console.WriteLine($"Timestamp {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:ffff")}");
-                Console.WriteLine();
+                        Console.WriteLine($"{MACPort.Key,-40} {DataObj.PortInventory[MACPort.Key],-40} {MACPort.Value,-40} {DataObj.PortSettings[MACPort.Key].First,-40} {DataObj.PortSettings[MACPort.Key].Second,-40} {VLANList,-40}");
+                    }
+
+                    //Volumetry MACs by port
+                    Console.WriteLine("\nVolumetry MACs by port:\n");
+                    Console.WriteLine("Port ID \t Quantity");
+
+                    foreach (KeyValuePair<string, IDictionary<string, string>> portlearned in DataObj.PortLearnedAddresses)
+                    {
+                        Console.WriteLine($"{portlearned.Key} \t {portlearned.Value.Count}");
+                    }
+
+                    //Learned MACs by port
+                    //Console.WriteLine("\nLearned MACs by port:\n");
+                    //Console.WriteLine("Port ID \t MAC Address \t IP Address");
+                    //
+                    //foreach (KeyValuePair<string, IDictionary<string,string>> portlearned in DataObj.PortLearnedAddresses)
+                    //{
+                    //    foreach (KeyValuePair<string,string> maclist in portlearned.Value)
+                    //    {
+                    //        Console.WriteLine($"{portlearned.Key} \t {maclist.Key} \t {maclist.Value}");
+                    //    }
+                    //}
+
+                    //Direct Neighbours
+                    Console.WriteLine("\nComputed direct neighbours:\n");
+                    Console.WriteLine("Port ID \t MAC Address \t IP Address");
+
+                    foreach (KeyValuePair<string, IDictionary<string, string>> computedneigh in DataObj.DeviceDirectNeighbours)
+                    {
+                        foreach (KeyValuePair<string, string> addrrlist in computedneigh.Value)
+                        {
+                            Console.WriteLine($"{computedneigh.Key} \t {addrrlist.Key} \t {addrrlist.Value}");
+                        }
+                    }
+                    Console.WriteLine();
+                }
             }
         }
 
