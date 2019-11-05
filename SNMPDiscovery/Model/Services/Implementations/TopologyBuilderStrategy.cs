@@ -13,7 +13,7 @@ namespace SNMPDiscovery.Model.Services
     {
         private const int LearnedMACThreshold = 1;
 
-        public string ProcessID { get; }
+        public EnumProcessingType ProcessID { get; }
         public ISNMPModelDTO RegardingObject { get; set; }
         public IList<ISNMPDeviceSettingDTO> TargetDevices { get; set; }
         public IDictionary<string, IOIDSettingDTO> OIDSettings { get; set; }
@@ -605,7 +605,7 @@ namespace SNMPDiscovery.Model.Services
 
         public TopologyBuilderStrategy(ISNMPModelDTO Model, Action<object, Type> ChangeTrackerHandler)
         {
-            ProcessID = nameof(TopologyBuilderStrategy);
+            ProcessID = EnumProcessingType.TopologyDiscovery;
             RegardingObject = Model;
             TargetDevices = new List<ISNMPDeviceSettingDTO>();
             OnChange += ChangeTrackerHandler;

@@ -58,6 +58,8 @@ namespace SNMPDiscovery.View
             {
                 Console.WriteLine($"\t - {msg}");
             }
+
+            Console.WriteLine();
         }
 
         #endregion
@@ -148,7 +150,7 @@ namespace SNMPDiscovery.View
 
             //Pull data and prompt
             sresult = (List<ISNMPDeviceSettingDTO>)_controller.PullDataList(typeof(ISNMPDeviceSettingDTO), string.IsNullOrWhiteSpace(skey) ? null : skey);
-            Console.WriteLine($"****** {sresult.Count} results found. ******");
+            Console.WriteLine($"****** {sresult.Count} results found. ******\n");
 
             foreach (ISNMPDeviceSettingDTO DeviceSetItem in sresult)
             {
@@ -182,40 +184,104 @@ namespace SNMPDiscovery.View
             Console.WriteLine();
 
             //Pull existing data and editing
-            sresult = ((List<ISNMPDeviceSettingDTO>)_controller.PullDataList(typeof(ISNMPDeviceSettingDTO), skey))?[0];
+            sresult = ((List<ISNMPDeviceSettingDTO>)_controller.PullDataList(typeof(ISNMPDeviceSettingDTO), skey)).FirstOrDefault();
+
             ShowData(sresult);
 
-            //Redefine values
-            //MJE - Pending rencapsule methods of each getting step of processes
-            Console.WriteLine("Insert values to be editted. Insert null-values for keeping previous ones");
+            if(sresult != null)
+            {
+                //Redefine values
+                //MJE - Pending rencapsule methods of each getting step of processes
+                Console.WriteLine("Insert values to be editted. Insert null-values for keeping previous ones.");
 
-            Console.Write("Device definition name: ");
-            settingname = Console.ReadLine();
-            settingname = string.IsNullOrWhiteSpace(settingname) ? sresult.ID : settingname;
+                Console.Write("Device definition name: ");
+                settingname = Console.ReadLine();
+                settingname = string.IsNullOrWhiteSpace(settingname) ? sresult.ID : settingname;
 
-            Console.Write("Initial IP/mask: ");
-            initialIPAndMask = Console.ReadLine();
-            initialIPAndMask = string.IsNullOrWhiteSpace(initialIPAndMask) ? $"{sresult.InitialIP}/{sresult.NetworkMask}" : initialIPAndMask;
+                Console.Write("Initial IP/mask: ");
+                initialIPAndMask = Console.ReadLine();
+                initialIPAndMask = string.IsNullOrWhiteSpace(initialIPAndMask) ? $"{sresult.InitialIP}/{sresult.NetworkMask}" : initialIPAndMask;
 
-            Console.Write("Final IP/mask: ");
-            finalIPAndMask = Console.ReadLine();
-            finalIPAndMask = string.IsNullOrWhiteSpace(finalIPAndMask) ? $"{sresult.FinalIP}/{sresult.NetworkMask}" : finalIPAndMask;
+                Console.Write("Final IP/mask: ");
+                finalIPAndMask = Console.ReadLine();
+                finalIPAndMask = string.IsNullOrWhiteSpace(finalIPAndMask) ? $"{sresult.FinalIP}/{sresult.NetworkMask}" : finalIPAndMask;
 
-            Console.Write("SNMP community user (V2): ");
-            SNMPuser = Console.ReadLine();
-            SNMPuser = string.IsNullOrWhiteSpace(SNMPuser) ? sresult.CommunityString : SNMPuser;
+                Console.Write("SNMP community user (V2): ");
+                SNMPuser = Console.ReadLine();
+                SNMPuser = string.IsNullOrWhiteSpace(SNMPuser) ? sresult.CommunityString : SNMPuser;
 
-            Console.WriteLine();
+                Console.WriteLine();
 
-            _controller.EditDevice(settingname, sresult.ID, initialIPAndMask, finalIPAndMask, SNMPuser);
+                _controller.EditDevice(settingname, sresult.ID, initialIPAndMask, finalIPAndMask, SNMPuser);
+            }
+            else
+            {
+                Console.WriteLine("Device Setting not found.\n");
+            }
 
             NextActionHandle();
         }
 
         private void DeleteDevice()
         {
+            bool wrongInput = true, confirmdeletion = false;
+            string skey = null, deletioncmd = null;
+            ISNMPDeviceSettingDTO sresult = null;
+
             //Ask for key
-            //Delete command
+            do
+            {
+                Console.Write("Insert device definition name: ");
+                skey = Console.ReadLine();
+
+                wrongInput = string.IsNullOrWhiteSpace(skey);
+                if (wrongInput)
+                {
+                    Console.WriteLine("Insert non-empty value.");
+                }
+            }
+            while (wrongInput);
+
+            wrongInput = true;
+            Console.WriteLine();
+
+            //Pull existing data and editing
+            sresult = ((List<ISNMPDeviceSettingDTO>)_controller.PullDataList(typeof(ISNMPDeviceSettingDTO), skey)).FirstOrDefault();
+            ShowData(sresult);
+
+            if(sresult != null)
+            {
+                //Ask for confirmation
+                do
+                {
+                    Console.Write("WARNING: Delete DeviceSetting implies wiping relationships with processing settings. Continue with deletion of this device setting? [Y/N] ");
+                    deletioncmd = Console.ReadLine().ToUpper();
+
+                    wrongInput = string.IsNullOrWhiteSpace(skey) || !(deletioncmd == "Y" || deletioncmd == "N");
+
+                    if (wrongInput)
+                    {
+                        Console.WriteLine("Insert valid value.");
+                    }
+                    else
+                    {
+                        confirmdeletion = deletioncmd == "Y";
+                    }
+                }
+                while (wrongInput);
+
+                //Delete command
+                if (confirmdeletion)
+                {
+                    _controller.DeleteDevice(skey);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Device Setting not found.\n");
+            }
+
+            NextActionHandle();
         }
 
         private void DefineProcess()
@@ -291,7 +357,7 @@ namespace SNMPDiscovery.View
 
             //Pull data and prompt
             sresult = (List<ISNMPProcessStrategy>)_controller.PullDataList(typeof(ISNMPProcessStrategy), string.IsNullOrWhiteSpace(skey) ? null : skey);
-            Console.WriteLine($"****** {sresult.Count} results found. ******");
+            Console.WriteLine($"****** {sresult.Count} results found. ******\n");
 
             foreach (ISNMPProcessStrategy DeviceSetItem in sresult)
             {
@@ -303,7 +369,10 @@ namespace SNMPDiscovery.View
 
         private void EditProcess()
         {
+            string[] ProcessingOptions;
             bool wrongInput = true;
+            int optionInput;
+            EnumProcessingType selectedOption;
             string skey = null;
             ISNMPProcessStrategy sresult = null;
 
@@ -324,21 +393,102 @@ namespace SNMPDiscovery.View
             Console.WriteLine();
 
             //Pull exiting data and editing
-            sresult = ((List<ISNMPProcessStrategy>)_controller.PullDataList(typeof(ISNMPProcessStrategy), skey))?[0];
+            sresult = ((List<ISNMPProcessStrategy>)_controller.PullDataList(typeof(ISNMPProcessStrategy), skey)).FirstOrDefault();
             ShowData(sresult);
 
-            //Redefine values
-            Console.WriteLine("Insert values to be editted. Insert null-values for keeping previous ones");
+            if(sresult != null)
+            {
+                //Redefine values
+                //MJE - Pending rencapsule methods of each getting step of processes
+                Console.WriteLine("Select processing option:");
 
-            //MJE - Pending rencapsule methods of each getting step of processes
-            
-            //Save data
+                ProcessingOptions = Enum.GetNames(typeof(EnumProcessingType));
+                for (int i = 0; i < ProcessingOptions.Length; i++)
+                {
+                    Console.WriteLine($"{i} - {ProcessingOptions[i]}");
+                }
+
+                do
+                {
+                    Console.Write("Select option: ");
+                    wrongInput = !int.TryParse(Console.ReadLine(), out optionInput);
+                    wrongInput = !Enum.TryParse<EnumProcessingType>(ProcessingOptions[optionInput], out selectedOption) & wrongInput;
+                }
+                while (wrongInput);
+
+                wrongInput = false;
+                Console.WriteLine();
+
+                //Save data
+                _controller.EditProcess(sresult.ProcessID, selectedOption);
+            }
+            else
+            {
+                Console.WriteLine("Process setting not found.\n");
+            }
+
+            NextActionHandle();
         }
 
         private void DeleteProcess()
         {
+            bool wrongInput = true, confirmdeletion = false;
+            string skey = null, deletioncmd = null;
+            ISNMPProcessStrategy sresult = null;
+
             //Ask for key
-            //Delete command
+            do
+            {
+                Console.Write("Insert process definition name: ");
+                skey = Console.ReadLine();
+
+                wrongInput = string.IsNullOrWhiteSpace(skey);
+                if (wrongInput)
+                {
+                    Console.WriteLine("Insert non-empty value.");
+                }
+            }
+            while (wrongInput);
+
+            Console.WriteLine();
+
+            //Pull exiting data and editing
+            sresult = ((List<ISNMPProcessStrategy>)_controller.PullDataList(typeof(ISNMPProcessStrategy), skey)).FirstOrDefault();
+            ShowData(sresult);
+
+            if (sresult != null)
+            {
+                //Ask for confirmation
+                do
+                {
+                    Console.Write("WARNING: Continue with deletion of this process setting? [Y/N]?");
+                    deletioncmd = Console.ReadLine().ToUpper();
+
+                    wrongInput = string.IsNullOrWhiteSpace(skey) && !(deletioncmd == "Y" || deletioncmd == "N");
+
+                    if (wrongInput)
+                    {
+                        Console.WriteLine("Insert valid value.");
+                    }
+                    else
+                    {
+                        confirmdeletion = deletioncmd == "Y";
+                    }
+                }
+                while (wrongInput);
+
+                //Delete command
+                if (confirmdeletion)
+                {
+                    _controller.DeleteProcess(sresult.ProcessID);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Process setting not found.\n");
+            }
+
+            NextActionHandle();
         }
 
         private void RunProcessMenu()
@@ -539,6 +689,39 @@ namespace SNMPDiscovery.View
 
         #endregion
 
+        #region Auxiliar Methods
+
+        //Mock for redirecting console to file
+        private void RedirectToFile(bool activate)
+        {
+            if (activate)
+            {
+                oldOut = Console.Out;
+                try
+                {
+                    ostrm = new FileStream("./Redirect.txt", FileMode.Append, FileAccess.Write);
+                    writer = new StreamWriter(ostrm);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Cannot open Redirect.txt for writing");
+                    Console.WriteLine(e.Message);
+                    return;
+                }
+                Console.SetOut(writer);
+            }
+            else
+            {
+                Console.SetOut(oldOut);
+                writer.Close();
+                ostrm.Close();
+            }
+        }
+
+        //Same processing steps for getting inputs or handling steps
+
+        #endregion
+
         #region Initializers - Finalizers
 
         public SNMPDiscoveryView(ISNMPModelDTO Model, ISNMPDiscoveryController Controller)
@@ -559,7 +742,7 @@ namespace SNMPDiscovery.View
                 { EnumControllerStates.AddDeviceDefinition, DefineDevice },
                 { EnumControllerStates.ShowDeviceDefinitions, ShowDeviceSettings},
                 { EnumControllerStates.EditDeviceDefinition, EditDeviceSetting},
-                { EnumControllerStates.DeleteDeviceDefinition, DeleteProcess },
+                { EnumControllerStates.DeleteDeviceDefinition, DeleteDevice },
                 { EnumControllerStates.AddProcessDefinition, DefineProcess },
                 { EnumControllerStates.ShowProcessDefinitions, ShowProcesses },
                 { EnumControllerStates.EditProcessDefinition, EditProcess },
@@ -604,31 +787,6 @@ namespace SNMPDiscovery.View
 
         #endregion
 
-        //Mock for redirecting console to file
-        private void RedirectToFile(bool activate)
-        {
-            if (activate)
-            {
-                oldOut = Console.Out;
-                try
-                {
-                    ostrm = new FileStream("./Redirect.txt", FileMode.Append, FileAccess.Write);
-                    writer = new StreamWriter(ostrm);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Cannot open Redirect.txt for writing");
-                    Console.WriteLine(e.Message);
-                    return;
-                }
-                Console.SetOut(writer);
-            }
-            else
-            {
-                Console.SetOut(oldOut);
-                writer.Close();
-                ostrm.Close();
-            }
-        }
+        
     }
 }

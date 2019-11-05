@@ -17,7 +17,10 @@ namespace SNMPDiscovery.Model.Services
 
         ISNMPDeviceSettingDTO BuildSNMPSetting(string ID, string initialIPAndMask, string finalIPAndMask, string SNMPUser);
         ISNMPDeviceSettingDTO EditSNMPSetting(string oldID, string ID, string initialIPAndMask, string finalIPAndMask, string SNMPUser);
+        void DeleteSNMPSetting(string ID);
         ISNMPProcessStrategy BuildProcess(string SettingID, EnumProcessingType ProcessType);
+        ISNMPProcessStrategy EditProcess(EnumProcessingType PreviousProcessType, EnumProcessingType NewProcessType);
+        void DeleteProcess(EnumProcessingType ProcessType);
         ISNMPProcessedValueDTO AttachSNMPProcessedValue(Type DataType, object Data);
 
         void StartDiscovery();

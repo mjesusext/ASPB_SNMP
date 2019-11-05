@@ -68,22 +68,27 @@ namespace SNMPDiscovery.Controller
 
         public void DefineDevices(string settingID, string initialIPAndMask, string finalIPAndMask, string SNMPUser)
         {
+            bool addrformatKO = false;
+
             if (string.IsNullOrWhiteSpace(settingID))
             {
+                addrformatKO = true;
                 _ErrMsgs.Add("Null or empty setting ID");
             }
 
             if (!ModelHelper.ValidateIPAndMask(initialIPAndMask))
             {
+                addrformatKO = true;
                 _ErrMsgs.Add("Invalid initial IP");
             }
 
             if (!ModelHelper.ValidateIPAndMask(finalIPAndMask))
             {
+                addrformatKO = true;
                 _ErrMsgs.Add("Invalid final IP");
             }
 
-            if(!ModelHelper.ValidateIPandMaskRange(initialIPAndMask, finalIPAndMask))
+            if(!addrformatKO && !ModelHelper.ValidateIPandMaskRange(initialIPAndMask, finalIPAndMask))
             {
                 _ErrMsgs.Add("Invalid IP range");
             }
@@ -132,6 +137,11 @@ namespace SNMPDiscovery.Controller
             }
         }
 
+        public void DeleteDevice(string settingID)
+        {
+            Model.DeleteSNMPSetting(settingID);
+        }
+
         public void LoadDiscoveryData() { }
 
         public void LoadDeviceDefinitions() { }
@@ -143,7 +153,12 @@ namespace SNMPDiscovery.Controller
 
         public void EditProcess(EnumProcessingType previousProcessType, EnumProcessingType processType)
         {
+            Model.EditProcess(previousProcessType, processType);
+        }
 
+        public void DeleteProcess(EnumProcessingType ProcessType)
+        {
+            Model.DeleteProcess(ProcessType);
         }
 
         public void RunDiscovery()
@@ -213,8 +228,10 @@ namespace SNMPDiscovery.Controller
                     ISNMPProcessStrategy res = null;
 
                     EnumProcessingType skey = EnumProcessingType.None;
-                    Enum.TryParse<EnumProcessingType>(key, out skey);
-                    Model.Processes.TryGetValue(skey, out res);
+                    if(Enum.TryParse<EnumProcessingType>(key, out skey))
+                    {
+                        Model.Processes.TryGetValue(skey, out res);
+                    }
 
                     return res == null ? new List<ISNMPProcessStrategy>() : new List<ISNMPProcessStrategy>(new[] { res });
                 }

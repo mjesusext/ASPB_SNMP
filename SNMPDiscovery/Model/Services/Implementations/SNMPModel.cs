@@ -115,6 +115,31 @@ namespace SNMPDiscovery.Model.Services
             return setting;
         }
 
+        public void DeleteSNMPSetting(string ID)
+        {
+            ISNMPDeviceSettingDTO setting;
+
+            //Validation
+            if (DeviceSettings == null || !DeviceSettings.ContainsKey(ID))
+            {
+                return;
+            }
+
+            setting = DeviceSettings[ID];
+
+            //Drop references on process if exists
+            if(Processes != null)
+            {
+                foreach (ISNMPProcessStrategy process in Processes.Values)
+                {
+                    process.TargetDevices.Remove(setting);
+                }
+            }
+
+            //Drop main container
+            DeviceSettings.Remove(ID);
+        }
+
         public ISNMPDeviceDataDTO BuildSNMPDevice(IPAddress targetIP, int targetMask)
         {
             //Lazy initialization
@@ -217,6 +242,17 @@ namespace SNMPDiscovery.Model.Services
             }
 
             return ProcessProfile;
+        }
+
+        public void DeleteProcess(EnumProcessingType ProcessType)
+        {
+            //Validation
+            if(ProcessType == EnumProcessingType.None || !Processes.ContainsKey(ProcessType))
+            {
+                return;
+            }
+
+            Processes.Remove(ProcessType);
         }
 
         public ISNMPProcessedValueDTO AttachSNMPProcessedValue(Type DataType, object Data)

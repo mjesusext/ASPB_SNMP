@@ -24,14 +24,18 @@ namespace SNMPDiscovery.Controller
         void DefineDevices(string settingID, string initialIP, string finalIP, string SNMPUser);
         //Define Device To Discover
         void EditDevice(string oldSettingID, string settingID, string initialIPAndMask, string finalIPAndMask, string SNMPUser);
+        //Delete device and related data
+        void DeleteDevice(string settingID);
         //Load Devices Definition
         void LoadDeviceDefinitions();
         //Load Discovered data
         void LoadDiscoveryData();
         //Define processes to execute
-        void DefineProcesses(string settingID, EnumProcessingType processType);
+        void DefineProcesses(string settingID, EnumProcessingType ProcessType);
         //Edit processes to execute
-        void EditProcess(EnumProcessingType previousProcessType, EnumProcessingType processType);
+        void EditProcess(EnumProcessingType previousProcessType, EnumProcessingType ProcessType);
+        //Delete process
+        void DeleteProcess(EnumProcessingType ProcessType);
         //Start discovery
         void RunDiscovery();
         //Start processes

@@ -9,7 +9,7 @@ namespace SNMPDiscovery.Model.Services
 {
     public interface ISNMPProcessStrategy : ITrackeableObject
     {
-        string ProcessID { get; }
+        EnumProcessingType ProcessID { get; }
         ISNMPModelDTO RegardingObject { get; set; }
         IList<ISNMPDeviceSettingDTO> TargetDevices { get; set; }
         IDictionary<string, IOIDSettingDTO> OIDSettings { get; set; }
