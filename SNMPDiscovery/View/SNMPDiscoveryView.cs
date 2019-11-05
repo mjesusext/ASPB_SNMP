@@ -329,6 +329,8 @@ namespace SNMPDiscovery.View
             }
             while (wrongOption);
 
+            Console.WriteLine();
+
             //Check if all settings options selected
             if(optionInput == SettingDefinitions.Length)
             {
