@@ -25,6 +25,7 @@ namespace SNMPDiscovery.Model.DTO
         ObjectId = 14,
         TimeTicks = 15,
         Gauge32 = 16,
-        Counter32 = 17
+        Counter32 = 17,
+        Unknown = 18
     }
 }

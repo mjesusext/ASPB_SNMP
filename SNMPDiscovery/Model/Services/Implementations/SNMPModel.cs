@@ -76,7 +76,7 @@ namespace SNMPDiscovery.Model.Services
 
         #endregion
 
-        #region Builders
+        #region Data methods
 
         public ISNMPDeviceSettingDTO BuildSNMPSetting(string ID, string initialIPAndMask, string finalIPAndMask, string SNMPUser)
         {
@@ -409,7 +409,14 @@ namespace SNMPDiscovery.Model.Services
                     // Check that retrieved Oid is higher than the limit or is the last block of leafs
                     if (ResBinding.Oid < finalOid || finalOid.IsRootOf(ResBinding.Oid) && InclusiveInterval)
                     {
-                        ISNMPRawEntryDTO SNMPRawData = SNMPDeviceData.BuildSNMPRawEntry(ResBinding.Oid.ToString(), ResBinding.Value.ToString(), (EnumSNMPOIDType)Enum.Parse(typeof(EnumSNMPOIDType), SnmpConstants.GetTypeName(ResBinding.Value.Type)));
+                        //Check OID Value Type
+                        EnumSNMPOIDType OIDType = (EnumSNMPOIDType)Enum.Parse(typeof(EnumSNMPOIDType), SnmpConstants.GetTypeName(ResBinding.Value.Type));
+
+                        //If unknown, we skip its storage
+                        if(OIDType != EnumSNMPOIDType.Unknown)
+                        {
+                            ISNMPRawEntryDTO SNMPRawData = SNMPDeviceData.BuildSNMPRawEntry(ResBinding.Oid.ToString(), ResBinding.Value.ToString(), OIDType);
+                        }
 
                         //Check if we have already drilled down all contents
                         if (ResBinding.Value.Type != SnmpConstants.SMI_ENDOFMIBVIEW)

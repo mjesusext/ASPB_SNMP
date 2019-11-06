@@ -539,8 +539,6 @@ namespace SNMPDiscovery.View
 
         private void PromptModelDTO(Type datatype, object data)
         {
-            RedirectToFile(true);
-
             if (datatype.Equals(typeof(ISNMPDeviceDataDTO)))
             {
                 ShowData((ISNMPDeviceDataDTO)data);
@@ -568,15 +566,15 @@ namespace SNMPDiscovery.View
             else
             {
             }
-
-            RedirectToFile(false);
         }
 
         private void ShowData(ISNMPDeviceDataDTO data)
         {
             if (data != null)
             {
+                RedirectToFile(true);
                 Console.WriteLine($"SNMP device {data.TargetIP}.\n");
+                RedirectToFile(false);
             }
             
         }
@@ -585,10 +583,12 @@ namespace SNMPDiscovery.View
         {
             if (data != null)
             {
+                RedirectToFile(true);
                 Console.WriteLine($"SNMP setting \"{data.ID}\" with this definition:\n" +
                                   $"\t-Initial IP: {data.InitialIP}/{data.NetworkMask}\n" +
                                   $"\t-Final IP: {data.FinalIP}/{data.NetworkMask}\n" +
                                   $"\t-Community string: {data.CommunityString}\n");
+                RedirectToFile(false);
             }
         }
 
@@ -596,8 +596,10 @@ namespace SNMPDiscovery.View
         {
             if (data != null)
             {
-                Console.WriteLine($"Process setting {data.ProcessID} related to following Device Settings:\n" +
+                RedirectToFile(true);
+                Console.WriteLine($"Process setting \"{data.ProcessID}\" related to following Device Settings:\n" +
                               $"\t-{string.Join("\n\t-", data.TargetDevices.Select(x => x.ID))}.\n");
+                RedirectToFile(false);
             }
         }
 
@@ -605,10 +607,12 @@ namespace SNMPDiscovery.View
         {
             if(data != null)
             {
+                RedirectToFile(true);
                 Console.WriteLine($"OID setting {data.ID} with this definition:\n" +
                               $"\t-Initial OID: {data.InitialOID}\n" +
                               $"\t-Final OID: {data.FinalOID}\n" +
                               $"\t-Inclusive: {data.InclusiveInterval}\n");
+                RedirectToFile(false);
             }
         }
 
@@ -616,7 +620,7 @@ namespace SNMPDiscovery.View
         {
             if(data != null)
             {
-                Console.WriteLine($"OID entry. Identifier: {data.OID}. DataType: {data.DataType}. Value: {data.ValueData}.\n");
+                //Console.WriteLine($"OID entry. Identifier: {data.OID}. DataType: {data.DataType}. Value: {data.ValueData}.\n");
             }
         }
 
@@ -624,69 +628,102 @@ namespace SNMPDiscovery.View
         {
             if(data != null)
             {
+                RedirectToFile(true);
                 //PromptBasicInfo
-                IDiscoveredBasicInfo BasicInfoObj = (IDiscoveredBasicInfo)data.Data;
-
-                Console.WriteLine($"Processed device basic data:\n" +
-                                  $"\t-Device name: {BasicInfoObj.DeviceName}\n" +
-                                  $"\t-Device Type: {BasicInfoObj.DeviceType}\n" +
-                                  $"\t-Location: {BasicInfoObj.Location}\n" +
-                                  $"\t-Description: {BasicInfoObj.Description}\n" +
-                                  $"\t-OSI Implemented Layers: {BasicInfoObj.OSIImplementedLayers}\n");
+                ShowData((IDiscoveredBasicInfo)data.Data);
 
                 //PromptSpecificTypeInfo
                 if (data.DataType.Equals(typeof(IDeviceTopologyInfoDTO)))
                 {
-                    IDeviceTopologyInfoDTO DataObj = (IDeviceTopologyInfoDTO)data.Data;
+                    ShowData((IDeviceTopologyInfoDTO)data.Data);
+                    
+                }
+                RedirectToFile(false);
+            }
+        }
 
-                    //Port inventory by internal ID
-                    Console.WriteLine("\nPort inventory by internal ID:\n");
-                    Console.WriteLine("{0,-40} {1,-40} {2,-40} {3,-40} {4,-40} {5,-40}", "Port ID", "Port Name", "MAC Address", "Port Type", "Port Referer", "VLAN");
+        private void ShowData(IDiscoveredBasicInfo data)
+        {
+            RedirectToFile(true);
+            Console.WriteLine($"Processed device basic data:\n" +
+                                $"\t-Device IP/mask: {data.DeviceIPAndMask}\n" +
+                                $"\t-Device MAC: {data.DeviceMAC}\n" +
+                                $"\t-Device name: {data.DeviceName}\n" +
+                                $"\t-Device Type: {data.DeviceType}\n" +
+                                $"\t-Location: {data.Location}\n" +
+                                $"\t-Description: {data.Description}\n" +
+                                $"\t-OSI Implemented Layers: {data.OSIImplementedLayers}\n");
+            RedirectToFile(false);
+        }
 
-                    foreach (KeyValuePair<string, string> MACPort in DataObj.PortMACAddress)
-                    {
-                        List<string> relVLANs;
-                        bool existVLAN = DataObj.PortVLANMapping.TryGetValue(MACPort.Key, out relVLANs);
-                        string VLANList = existVLAN ? string.Join(",", relVLANs.Select(x => DataObj.VLANInventory[x])) : string.Empty;
+        private void ShowData(IDeviceTopologyInfoDTO data)
+        {
+            RedirectToFile(true);
 
-                        Console.WriteLine($"{MACPort.Key,-40} {DataObj.PortInventory[MACPort.Key],-40} {MACPort.Value,-40} {DataObj.PortSettings[MACPort.Key].First,-40} {DataObj.PortSettings[MACPort.Key].Second,-40} {VLANList,-40}");
-                    }
+            #region Port Inventory
 
-                    //Volumetry MACs by port
-                    Console.WriteLine("\nVolumetry MACs by port:\n");
-                    Console.WriteLine("Port ID \t Quantity");
+            Console.WriteLine("\nPort inventory by internal ID:\n");
+            Console.WriteLine("{0,-40} {1,-40} {2,-40} {3,-40} {4,-40} {5,-40}", "Port ID", "Port Name", "MAC Address", "Port Type", "Port Referer", "VLAN");
 
-                    foreach (KeyValuePair<string, IDictionary<string, string>> portlearned in DataObj.PortLearnedAddresses)
-                    {
-                        Console.WriteLine($"{portlearned.Key} \t {portlearned.Value.Count}");
-                    }
+            foreach (KeyValuePair<string, string> MACPort in data.PortMACAddress)
+            {
+                List<string> relVLANs;
+                bool existVLAN = data.PortVLANMapping.TryGetValue(MACPort.Key, out relVLANs);
+                string VLANList = existVLAN ? string.Join(",", relVLANs.Select(x => data.VLANInventory[x])) : string.Empty;
 
-                    //Learned MACs by port
-                    //Console.WriteLine("\nLearned MACs by port:\n");
-                    //Console.WriteLine("Port ID \t MAC Address \t IP Address");
-                    //
-                    //foreach (KeyValuePair<string, IDictionary<string,string>> portlearned in DataObj.PortLearnedAddresses)
-                    //{
-                    //    foreach (KeyValuePair<string,string> maclist in portlearned.Value)
-                    //    {
-                    //        Console.WriteLine($"{portlearned.Key} \t {maclist.Key} \t {maclist.Value}");
-                    //    }
-                    //}
+                Console.WriteLine($"{MACPort.Key,-40} {data.PortInventory[MACPort.Key],-40} {MACPort.Value,-40} {data.PortSettings[MACPort.Key].First,-40} {data.PortSettings[MACPort.Key].Second,-40} {VLANList,-40}");
+            }
 
-                    //Direct Neighbours
-                    Console.WriteLine("\nComputed direct neighbours:\n");
-                    Console.WriteLine("Port ID \t MAC Address \t IP Address");
+            #endregion
 
-                    foreach (KeyValuePair<string, IDictionary<string, string>> computedneigh in DataObj.DeviceDirectNeighbours)
-                    {
-                        foreach (KeyValuePair<string, string> addrrlist in computedneigh.Value)
-                        {
-                            Console.WriteLine($"{computedneigh.Key} \t {addrrlist.Key} \t {addrrlist.Value}");
-                        }
-                    }
-                    Console.WriteLine();
+            #region MACs volumetry
+
+            //Volumetry MACs by port
+            Console.WriteLine("\nVolumetry MACs by port:\n");
+            Console.WriteLine("Port ID \t Quantity");
+
+            foreach (KeyValuePair<string, IDictionary<string, string>> portlearned in data.PortLearnedAddresses)
+            {
+                Console.WriteLine($"{portlearned.Key} \t {portlearned.Value.Count}");
+            }
+
+            #endregion
+
+            #region MAC list by port
+
+            //Learned MACs by port
+            //Console.WriteLine("\nLearned MACs by port:\n");
+            //Console.WriteLine("Port ID \t MAC Address \t IP Address");
+            //
+            //foreach (KeyValuePair<string, IDictionary<string,string>> portlearned in DataObj.PortLearnedAddresses)
+            //{
+            //    foreach (KeyValuePair<string,string> maclist in portlearned.Value)
+            //    {
+            //        Console.WriteLine($"{portlearned.Key} \t {maclist.Key} \t {maclist.Value}");
+            //    }
+            //}
+
+            #endregion
+
+            #region Direct neighbours
+
+            //Direct Neighbours
+            Console.WriteLine("\nComputed direct neighbours:\n");
+            Console.WriteLine("Port ID \t MAC Address \t IP Address");
+
+            foreach (KeyValuePair<string, IDictionary<string, string>> computedneigh in data.DeviceDirectNeighbours)
+            {
+                foreach (KeyValuePair<string, string> addrrlist in computedneigh.Value)
+                {
+                    Console.WriteLine($"{computedneigh.Key} \t {addrrlist.Key} \t {addrrlist.Value}");
                 }
             }
+
+            #endregion
+
+            Console.WriteLine();
+
+            RedirectToFile(false);
         }
 
         #endregion

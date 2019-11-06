@@ -291,6 +291,7 @@ namespace SNMPDiscovery.Model.Services
         {
         }
 
+        //MJE - Pending adding device type and OSI layer detection
         private void GetBasicInfo(ISNMPDeviceDataDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, IDeviceTopologyInfoDTO TopologyInfo)
         {
             IOIDSettingDTO SelectedSetting;
@@ -308,6 +309,14 @@ namespace SNMPDiscovery.Model.Services
             MappingHandlers.Add((x, y, z) => { ((IDeviceTopologyInfoDTO)z).DeviceName = y; });
             MappingHandlers.Add((x, y, z) => { ((IDeviceTopologyInfoDTO)z).Location = y; });
             MappingHandlers.Add(null);
+
+            //Add network known data
+            TopologyInfo.DeviceIPAndMask = $"{Device.TargetIP}/{Device.NetworkMask}";
+
+            if (RegardingObject.ARPTable.Any(x => x.Value == $"{Device.TargetIP}"))
+            {
+                TopologyInfo.DeviceMAC = RegardingObject.ARPTable.Where(x => x.Value == $"{Device.TargetIP}").First().Key;
+            }
 
             //Collect data mapping with handlers
             StrategyHelper.OIDEntryProcessor(Device, TopologyInfo, SelectedSetting, MappingHandlers);
