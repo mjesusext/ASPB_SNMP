@@ -9,17 +9,17 @@ namespace SNMPDiscovery.Model.DTO
     [Flags]
     public enum EnumDeviceType : uint
     {
-        None = 0,
-        Hub = 1 << 0,
-        Bridge = 1 << 2,
-        Switch = 1 << 3,
-        Router = 1 << 4,
-        Firewall = 1 << 5,
+        Unknown = 0,
+        HB = 1 << 0,
+        BD = 1 << 2,
+        SW = 1 << 3,
+        RT = 1 << 4,
+        FW = 1 << 5,
         AP = 1 << 6,
-        Printer = 1 << 7,
-        Server = 1 << 8,
-        DiscRack = 1 << 9,
-        VirtualMachine = 1 << 10,
-        Host = 1 << 11
+        PRT = 1 << 7,
+        SRV = 1 << 8,
+        CAB = 1 << 9,
+        VM = 1 << 10,
+        HST = 1 << 11
     }
 }

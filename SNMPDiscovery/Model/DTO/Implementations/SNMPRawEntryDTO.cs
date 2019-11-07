@@ -17,8 +17,9 @@ namespace SNMPDiscovery.Model.DTO
 
         #region Constructors
 
-        public SNMPRawEntryDTO(string oid, string data, EnumSNMPOIDType datatype)
+        public SNMPRawEntryDTO(ISNMPDeviceDataDTO regardingobj, string oid, string data, EnumSNMPOIDType datatype)
         {
+            RegardingObject = regardingobj;
             OID = oid;
             ValueData = data;
             DataType = datatype;

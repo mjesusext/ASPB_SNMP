@@ -27,6 +27,5 @@ namespace SNMPDiscovery.Model.DTO
         public IDictionary<string, IDictionary<string, string>> PortLearnedAddresses { get; set; }
         public IDictionary<string, CustomPair<string, string>> PortAggregateDestinations { get; set; }
         public IDictionary<string, IDictionary<string, string>> DeviceDirectNeighbours { get; set; }
-
     }
 }

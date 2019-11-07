@@ -9,7 +9,7 @@ namespace SNMPDiscovery.Model.DTO
     [Flags]
     public enum EnumOSILayers : uint
     {
-        None = 0,
+        Unknown = 0,
         Physical = 1 << 0,
         DataLink = 1 << 1,
         Network = 1 << 2,

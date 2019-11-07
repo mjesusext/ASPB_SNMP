@@ -30,7 +30,7 @@ namespace SNMPDiscovery.Model.DTO
                 SNMPRawDataEntries = new Dictionary<string, ISNMPRawEntryDTO>();
             }
 
-            ISNMPRawEntryDTO RawEntry = new SNMPRawEntryDTO(OID, RawValue, DataType);
+            ISNMPRawEntryDTO RawEntry = new SNMPRawEntryDTO(this, OID, RawValue, DataType);
             SNMPRawDataEntries.Add(OID, RawEntry);
 
             //We know data is fully ready

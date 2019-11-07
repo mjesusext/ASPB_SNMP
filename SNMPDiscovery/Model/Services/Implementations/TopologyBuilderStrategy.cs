@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using SNMPDiscovery.Model.DTO;
 using SNMPDiscovery.Model.Helpers;
@@ -292,6 +293,7 @@ namespace SNMPDiscovery.Model.Services
         }
 
         //MJE - Pending adding device type and OSI layer detection
+        //MJE - Correct REGEX for getting device TYPE
         private void GetBasicInfo(ISNMPDeviceDataDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, IDeviceTopologyInfoDTO TopologyInfo)
         {
             IOIDSettingDTO SelectedSetting;
@@ -306,9 +308,15 @@ namespace SNMPDiscovery.Model.Services
             MappingHandlers.Add((x, y, z) => { ((IDeviceTopologyInfoDTO)z).OIDobjectID = y; });
             MappingHandlers.Add(null);
             MappingHandlers.Add(null);
-            MappingHandlers.Add((x, y, z) => { ((IDeviceTopologyInfoDTO)z).DeviceName = y; });
+            MappingHandlers.Add((x, y, z) => 
+                                    {
+                                        EnumDeviceType dvt;
+                                        IDeviceTopologyInfoDTO Data = (IDeviceTopologyInfoDTO)z;
+                                        Data.DeviceName = y;
+                                        Data.DeviceType = Enum.TryParse<EnumDeviceType>(Regex.Match(y.Substring(0, 3), @"^.*? (?=[0-9])").ToString(), out dvt) ? dvt : EnumDeviceType.Unknown;
+                                    });
             MappingHandlers.Add((x, y, z) => { ((IDeviceTopologyInfoDTO)z).Location = y; });
-            MappingHandlers.Add(null);
+            MappingHandlers.Add((x, y, z) => { ((IDeviceTopologyInfoDTO)z).OSIImplementedLayers = (EnumOSILayers)Enum.Parse(typeof(EnumOSILayers), y); });
 
             //Add network known data
             TopologyInfo.DeviceIPAndMask = $"{Device.TargetIP}/{Device.NetworkMask}";

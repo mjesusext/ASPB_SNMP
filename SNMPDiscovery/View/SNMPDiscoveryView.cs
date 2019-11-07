@@ -500,7 +500,7 @@ namespace SNMPDiscovery.View
             _controller.RunDiscovery();
 
             Console.WriteLine();
-            Console.WriteLine("Running processes using collected data");
+            Console.WriteLine("Running processes using collected data\n");
             _controller.RunProcesses();
 
             NextActionHandle();
@@ -572,9 +572,9 @@ namespace SNMPDiscovery.View
         {
             if (data != null)
             {
-                RedirectToFile(true);
-                Console.WriteLine($"SNMP device {data.TargetIP}.\n");
-                RedirectToFile(false);
+                //RedirectToFile(true);
+                //Console.WriteLine($"SNMP device {data.TargetIP}.\n");
+                //RedirectToFile(false);
             }
             
         }
@@ -620,7 +620,9 @@ namespace SNMPDiscovery.View
         {
             if(data != null)
             {
-                //Console.WriteLine($"OID entry. Identifier: {data.OID}. DataType: {data.DataType}. Value: {data.ValueData}.\n");
+                //RedirectToFile(true);
+                //Console.WriteLine($"OID entry of {data.RegardingObject.TargetIP}. Identifier: {data.OID}. DataType: {data.DataType}. Value: {data.ValueData}.\n");
+                //RedirectToFile(false);
             }
         }
 
@@ -628,7 +630,6 @@ namespace SNMPDiscovery.View
         {
             if(data != null)
             {
-                RedirectToFile(true);
                 //PromptBasicInfo
                 ShowData((IDiscoveredBasicInfo)data.Data);
 
@@ -638,7 +639,6 @@ namespace SNMPDiscovery.View
                     ShowData((IDeviceTopologyInfoDTO)data.Data);
                     
                 }
-                RedirectToFile(false);
             }
         }
 
