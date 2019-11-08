@@ -17,8 +17,8 @@ namespace SNMPDiscovery.Model.Services
         #region Private fields
 
         private const int DefaultPort = 161;
-        private const int DefaultTimeout = 1000;
-        private const int DefaultRetries = 1;
+        private const int DefaultTimeout = 2000;
+        private const int DefaultRetries = 2;
         private IList<IObserver<ISNMPModelDTO>> _snmpModelObservers;
 
         #endregion
@@ -305,7 +305,7 @@ namespace SNMPDiscovery.Model.Services
 
         #region SNMP Client Methods
 
-        private void SNMPWalkByIP(ISNMPDeviceSettingDTO SNMPSettingEntry)
+        private void OLD_SNMPWalkByIP(ISNMPDeviceSettingDTO SNMPSettingEntry)
         {
             IList<IPAddress> IPinventory;
             OctetString Community;
@@ -334,7 +334,7 @@ namespace SNMPDiscovery.Model.Services
 
                     try
                     {
-                        SNMPWalkByOIDSetting(UDPtarget, pdu, AgParam, SNMPSettingEntry, device);
+                        OLD_SNMPWalkByOIDSetting(UDPtarget, pdu, AgParam, SNMPSettingEntry, device);
                     }
                     catch (SnmpException e)
                     {
@@ -348,27 +348,72 @@ namespace SNMPDiscovery.Model.Services
             }
         }
 
-        private void SNMPWalkByOIDSetting(UdpTarget UDPtarget, Pdu pdu, AgentParameters param, ISNMPDeviceSettingDTO SNMPSettingEntry, ISNMPDeviceDataDTO SNMPDeviceData)
+        private void SNMPWalkByIP(ISNMPDeviceSettingDTO SNMPSettingEntry)
+        {
+            IList<IPAddress> IPinventory;
+            OctetString Community;
+
+            //Compute full list of devices that have responded to ARP request
+            IPinventory = ModelHelper.GenerateHostList(SNMPSettingEntry.InitialIP, SNMPSettingEntry.FinalIP, SNMPSettingEntry.NetworkMask, ARPTable.Values.ToList());
+
+            Community = new OctetString(SNMPSettingEntry.CommunityString);
+
+            foreach (IPAddress target in IPinventory)
+            {
+                ISNMPDeviceDataDTO device = BuildSNMPDevice(target, SNMPSettingEntry.NetworkMask);
+
+                try
+                {
+                    SNMPWalkByOIDSetting(Community, SNMPSettingEntry, device);
+                }
+                catch (SnmpException e)
+                {
+                    NotifyError(e);
+
+                    //Device entry not containing full info for processing
+                    DeviceData.Remove(target.ToString());
+                    continue;
+                }
+            }
+        }
+
+        private void OLD_SNMPWalkByOIDSetting(UdpTarget UDPtarget, Pdu pdu, AgentParameters param, ISNMPDeviceSettingDTO SNMPSettingEntry, ISNMPDeviceDataDTO SNMPDeviceData)
         {
             //Get all OID requested for all processing algorithms
             IEnumerable<IOIDSettingDTO> OIDSettingCollection = Processes.Values.SelectMany(x => x.OIDSettings.Values);
-            Oid indexOid = new Oid();
-            Oid finalOid = new Oid();
 
             foreach (IOIDSettingDTO OIDSetting in OIDSettingCollection)
             {
                 try
                 {
-                    SNMPRunAgent(UDPtarget, pdu, param, OIDSetting, SNMPDeviceData);
+                    OLD_SNMPRunAgent(UDPtarget, pdu, param, OIDSetting, SNMPDeviceData);
                 }
-                catch(SnmpException e)
+                catch (SnmpException e)
                 {
                     throw;
                 }
             }
         }
 
-        private void SNMPRunAgent(UdpTarget UDPtarget, Pdu pdu, AgentParameters param, IOIDSettingDTO OIDSetting, ISNMPDeviceDataDTO SNMPDeviceData)
+        private void SNMPWalkByOIDSetting(OctetString Community, ISNMPDeviceSettingDTO SNMPSettingEntry, ISNMPDeviceDataDTO SNMPDeviceData)
+        {
+            //Get all OID requested for all processing algorithms
+            IEnumerable<IOIDSettingDTO> OIDSettingCollection = Processes.Values.SelectMany(x => x.OIDSettings.Values);
+
+            foreach (IOIDSettingDTO OIDSetting in OIDSettingCollection)
+            {
+                try
+                {
+                    SNMPRunAgent(Community, OIDSetting, SNMPDeviceData);
+                }
+                catch (SnmpException e)
+                {
+                    throw;
+                }
+            }
+        }
+
+        private void OLD_SNMPRunAgent(UdpTarget UDPtarget, Pdu pdu, AgentParameters param, IOIDSettingDTO OIDSetting, ISNMPDeviceDataDTO SNMPDeviceData)
         {
             bool nextEntry = true;
             SnmpV2Packet Result;
@@ -393,6 +438,48 @@ namespace SNMPDiscovery.Model.Services
                     //Prepare PDU object for iteration. Otherwise, wipe contents of pdu
                     pdu.RequestId++;
                     pdu.VbList.Clear();
+                }
+            }
+        }
+
+        private void SNMPRunAgent(OctetString Community, IOIDSettingDTO OIDSetting, ISNMPDeviceDataDTO SNMPDeviceData)
+        {
+            bool nextEntry = true;
+            AgentParameters AgParam;
+            Pdu pdu;
+            SnmpV2Packet Result;
+            Oid indexOid = new Oid(OIDSetting.InitialOID); //Walk control
+            Oid finalOid = new Oid(OIDSetting.FinalOID);
+
+            AgParam = new AgentParameters(Community);
+            AgParam.Version = SnmpVersion.Ver2; // Set SNMP version to 2 (GET-BULK only works with SNMP ver 2 and 3)
+
+            pdu = new Pdu(PduType.GetBulk);
+            pdu.NonRepeaters = 0; //NonRepeaters tells how many OID asociated values (leafs of this object) get. 0 is all
+            pdu.MaxRepetitions = 5; // MaxRepetitions tells the agent how many Oid/Value pairs to return in the response packet.
+            pdu.RequestId = 1;
+
+            using (UdpTarget UDPtarget = new UdpTarget(SNMPDeviceData.TargetIP, DefaultPort, DefaultTimeout, DefaultRetries))
+            {
+                while (nextEntry)
+                {
+                    pdu.VbList.Add(indexOid); //Add starting OID for request
+
+                    try
+                    {
+                        Result = (SnmpV2Packet)UDPtarget.Request(pdu, AgParam);
+                        nextEntry = SNMPDecodeData(Result, indexOid, finalOid, OIDSetting.InclusiveInterval, SNMPDeviceData);
+                    }
+                    catch (SnmpException e)
+                    {
+                        throw;
+                    }
+                    finally
+                    {
+                        //Prepare PDU object for iteration. Otherwise, wipe contents of pdu
+                        pdu.RequestId++;
+                        pdu.VbList.Clear();
+                    }
                 }
             }
         }

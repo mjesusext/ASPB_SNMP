@@ -38,7 +38,12 @@ namespace SNMPDiscovery.View
 
         public void OnError(Exception error)
         {
-            Console.WriteLine($"Exception: {error.ToString()}\n");
+            //RedirectToFile(true);
+            Console.WriteLine($"Exception {error.GetType().Name}:\n" +
+                              $"\t- Message: {error.Message}\n" +
+                              $"\t- HResult: {error.HResult}\n" +
+                              $"\t- Inner exception: {error.InnerException}\n");
+            //RedirectToFile(false);
         }
 
         public void OnCompleted()
@@ -676,50 +681,54 @@ namespace SNMPDiscovery.View
 
             #endregion
 
-            #region MACs volumetry
-
-            //Volumetry MACs by port
-            Console.WriteLine("\nVolumetry MACs by port:\n");
-            Console.WriteLine("Port ID \t Quantity");
-
-            foreach (KeyValuePair<string, IDictionary<string, string>> portlearned in data.PortLearnedAddresses)
+            if(data.DeviceType == EnumDeviceType.RT || data.DeviceType == EnumDeviceType.SW || data.DeviceType == EnumDeviceType.AP)
             {
-                Console.WriteLine($"{portlearned.Key} \t {portlearned.Value.Count}");
-            }
 
-            #endregion
+                #region MACs volumetry
 
-            #region MAC list by port
+                //Volumetry MACs by port
+                Console.WriteLine("\nVolumetry MACs by port:\n");
+                Console.WriteLine("Port ID \t Quantity");
 
-            //Learned MACs by port
-            //Console.WriteLine("\nLearned MACs by port:\n");
-            //Console.WriteLine("Port ID \t MAC Address \t IP Address");
-            //
-            //foreach (KeyValuePair<string, IDictionary<string,string>> portlearned in DataObj.PortLearnedAddresses)
-            //{
-            //    foreach (KeyValuePair<string,string> maclist in portlearned.Value)
-            //    {
-            //        Console.WriteLine($"{portlearned.Key} \t {maclist.Key} \t {maclist.Value}");
-            //    }
-            //}
-
-            #endregion
-
-            #region Direct neighbours
-
-            //Direct Neighbours
-            Console.WriteLine("\nComputed direct neighbours:\n");
-            Console.WriteLine("Port ID \t MAC Address \t IP Address");
-
-            foreach (KeyValuePair<string, IDictionary<string, string>> computedneigh in data.DeviceDirectNeighbours)
-            {
-                foreach (KeyValuePair<string, string> addrrlist in computedneigh.Value)
+                foreach (KeyValuePair<string, IDictionary<string, string>> portlearned in data.PortLearnedAddresses)
                 {
-                    Console.WriteLine($"{computedneigh.Key} \t {addrrlist.Key} \t {addrrlist.Value}");
+                    Console.WriteLine($"{portlearned.Key} \t {portlearned.Value.Count}");
                 }
-            }
 
-            #endregion
+                #endregion
+
+                #region MAC list by port
+
+                //Learned MACs by port
+                //Console.WriteLine("\nLearned MACs by port:\n");
+                //Console.WriteLine("Port ID \t MAC Address \t IP Address");
+                //
+                //foreach (KeyValuePair<string, IDictionary<string,string>> portlearned in DataObj.PortLearnedAddresses)
+                //{
+                //    foreach (KeyValuePair<string,string> maclist in portlearned.Value)
+                //    {
+                //        Console.WriteLine($"{portlearned.Key} \t {maclist.Key} \t {maclist.Value}");
+                //    }
+                //}
+
+                #endregion
+
+                #region Direct neighbours
+
+                //Direct Neighbours
+                Console.WriteLine("\nComputed direct neighbours:\n");
+                Console.WriteLine("Port ID \t MAC Address \t IP Address");
+
+                foreach (KeyValuePair<string, IDictionary<string, string>> computedneigh in data.DeviceDirectNeighbours)
+                {
+                    foreach (KeyValuePair<string, string> addrrlist in computedneigh.Value)
+                    {
+                        Console.WriteLine($"{computedneigh.Key} \t {addrrlist.Key} \t {addrrlist.Value}");
+                    }
+                }
+
+                #endregion
+            }
 
             Console.WriteLine();
 
@@ -825,7 +834,6 @@ namespace SNMPDiscovery.View
         }
 
         #endregion
-
         
     }
 }

@@ -292,8 +292,6 @@ namespace SNMPDiscovery.Model.Services
         {
         }
 
-        //MJE - Pending adding device type and OSI layer detection
-        //MJE - Correct REGEX for getting device TYPE
         private void GetBasicInfo(ISNMPDeviceDataDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, IDeviceTopologyInfoDTO TopologyInfo)
         {
             IOIDSettingDTO SelectedSetting;
@@ -313,7 +311,7 @@ namespace SNMPDiscovery.Model.Services
                                         EnumDeviceType dvt;
                                         IDeviceTopologyInfoDTO Data = (IDeviceTopologyInfoDTO)z;
                                         Data.DeviceName = y;
-                                        Data.DeviceType = Enum.TryParse<EnumDeviceType>(Regex.Match(y.Substring(0, 3), @"^.*? (?=[0-9])").ToString(), out dvt) ? dvt : EnumDeviceType.Unknown;
+                                        Data.DeviceType = Enum.TryParse<EnumDeviceType>(Regex.Match(y, @"^.*?(?=[0-9])").ToString(), out dvt) ? dvt : EnumDeviceType.Unknown;
                                     });
             MappingHandlers.Add((x, y, z) => { ((IDeviceTopologyInfoDTO)z).Location = y; });
             MappingHandlers.Add((x, y, z) => { ((IDeviceTopologyInfoDTO)z).OSIImplementedLayers = (EnumOSILayers)Enum.Parse(typeof(EnumOSILayers), y); });
