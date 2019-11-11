@@ -193,7 +193,6 @@ namespace SNMPDiscovery.Model.Services
             ComputeDirectNeighbours();
             BuildTopology();
 
-            //MJE Pending of moving to other place
             //We know data is fully ready
             foreach (var procres in RegardingObject.DeviceData.Values.SelectMany(x => x.SNMPProcessedData.Values))
             { 
@@ -290,6 +289,15 @@ namespace SNMPDiscovery.Model.Services
 
         private void BuildTopology()
         {
+            //Get device with MAX MACs learned --> Define as root
+            var DevTopologyColl = RegardingObject.DeviceData.Values.Select(x =>  new { IPstr = x.TargetIP.ToString() });
+            
+            //(IDeviceTopologyInfoDTO)x.SNMPProcessedData[nameof(IDeviceTopologyInfoDTO)].Data)
+            
+            //Loop on root
+            // 1) Get neighbours
+            // 2) Get != IP2 that are known and not processed
+
         }
 
         private void GetBasicInfo(ISNMPDeviceDataDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, IDeviceTopologyInfoDTO TopologyInfo)

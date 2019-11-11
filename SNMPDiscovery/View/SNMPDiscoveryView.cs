@@ -319,12 +319,11 @@ namespace SNMPDiscovery.View
             IList<ISNMPDeviceSettingDTO> settingList = (List<ISNMPDeviceSettingDTO>) (_controller.PullDataList(typeof(ISNMPDeviceSettingDTO)));
             SettingDefinitions = settingList.Select(x => x.ID).ToArray();
 
-            for(int i = 0; i < SettingDefinitions.Length; i++)
+            Console.WriteLine($"0 - All settings");
+            for (int i = 0; i < SettingDefinitions.Length; i++)
             {
-                Console.WriteLine($"{i} - {SettingDefinitions[i]}");
+                Console.WriteLine($"{i++} - {SettingDefinitions[i]}");
             }
-            //All settings option
-            Console.WriteLine($"{SettingDefinitions.Length} - All settings");
 
             do
             {
@@ -337,7 +336,7 @@ namespace SNMPDiscovery.View
             Console.WriteLine();
 
             //Check if all settings options selected
-            if(optionInput == SettingDefinitions.Length)
+            if(optionInput == 0)
             {
                 foreach(string settingID in SettingDefinitions)
                 {
