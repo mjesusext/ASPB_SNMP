@@ -316,14 +316,15 @@ namespace SNMPDiscovery.View
             Console.WriteLine();
             Console.WriteLine("Select settings to apply this processing:");
 
-            IList<ISNMPDeviceSettingDTO> settingList = (List<ISNMPDeviceSettingDTO>) (_controller.PullDataList(typeof(ISNMPDeviceSettingDTO)));
+            IList<ISNMPDeviceSettingDTO> settingList = (List<ISNMPDeviceSettingDTO>)(_controller.PullDataList(typeof(ISNMPDeviceSettingDTO)));
             SettingDefinitions = settingList.Select(x => x.ID).ToArray();
 
-            Console.WriteLine($"0 - All settings");
             for (int i = 0; i < SettingDefinitions.Length; i++)
             {
-                Console.WriteLine($"{i++} - {SettingDefinitions[i]}");
+                Console.WriteLine($"{i} - {SettingDefinitions[i]}");
             }
+            //All settings option
+            Console.WriteLine($"{SettingDefinitions.Length} - All settings");
 
             do
             {
@@ -336,9 +337,9 @@ namespace SNMPDiscovery.View
             Console.WriteLine();
 
             //Check if all settings options selected
-            if(optionInput == 0)
+            if (optionInput == SettingDefinitions.Length)
             {
-                foreach(string settingID in SettingDefinitions)
+                foreach (string settingID in SettingDefinitions)
                 {
                     _controller.DefineProcesses(settingID, selectedOption);
                 }

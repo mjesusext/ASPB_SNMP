@@ -290,7 +290,7 @@ namespace SNMPDiscovery.Model.Services
         private void BuildTopology()
         {
             //Get device with MAX MACs learned --> Define as root
-            var DevTopologyColl = RegardingObject.DeviceData.Values.Select(x =>  new { IPstr = x.TargetIP.ToString() });
+            var DevTopologyColl = RegardingObject.DeviceData.Values.Select(x =>  new { IPstr = x.TargetIP.ToString(), LearnedMACs = ((IDeviceTopologyInfoDTO)x.SNMPProcessedData[nameof(IDeviceTopologyInfoDTO)].Data).PortMACAddress.Sum(y => int.Parse(y.Value)) });
             
             //(IDeviceTopologyInfoDTO)x.SNMPProcessedData[nameof(IDeviceTopologyInfoDTO)].Data)
             
@@ -615,11 +615,6 @@ namespace SNMPDiscovery.Model.Services
             
             HierarchyMapping[IndexValues[0]].Add(IndexValues[1]);
 
-        }
-
-        public IDictionary<string, IOIDSettingDTO> BuildOIDSetting(IDictionary<string, ISNMPDeviceSettingDTO> TargetDevices, IDictionary<string, IOIDSettingDTO> OIDSettings)
-        {
-            throw new NotImplementedException();
         }
 
         #endregion
