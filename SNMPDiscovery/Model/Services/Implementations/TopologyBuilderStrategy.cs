@@ -16,7 +16,7 @@ namespace SNMPDiscovery.Model.Services
 
         public EnumProcessingType ProcessID { get; }
         public ISNMPModelDTO RegardingObject { get; set; }
-        public IList<ISNMPDeviceSettingDTO> TargetDevices { get; set; }
+        public IList<ISNMPDeviceSettingDTO> TargetDeviceSettings { get; set; }
         public IDictionary<string, IOIDSettingDTO> OIDSettings { get; set; }
 
         public event Action<object, Type> OnChange;
@@ -266,7 +266,7 @@ namespace SNMPDiscovery.Model.Services
                             {
                                 aggres.Add(PortMACAddr, RegardingObject.ARPTable[aggports.Value.First]);
                             }
-                            else if (targdevice.PortInventory.TryGetValue(aggports.Value.Second, out PortMACAddr))
+                            else if (targdevice.PortDescriptions.TryGetValue(aggports.Value.Second, out PortMACAddr))
                             {
                                 aggres.Add(PortMACAddr, RegardingObject.ARPTable[aggports.Value.First]);
                             }
@@ -275,7 +275,6 @@ namespace SNMPDiscovery.Model.Services
                         {
                             aggres.Add("Not available", "Not available");
                         }
-
 
                         //MJE - Revisar porque duplica clave a veces...
                         if(!DeviceTopology.DeviceDirectNeighbours.ContainsKey(aggports.Key))
@@ -289,14 +288,49 @@ namespace SNMPDiscovery.Model.Services
 
         private void BuildTopology()
         {
-            //Get device with MAX MACs learned --> Define as root
-            var DevTopologyColl = RegardingObject.DeviceData.Values.Select(x =>  new { IPstr = x.TargetIP.ToString(), LearnedMACs = ((IDeviceTopologyInfoDTO)x.SNMPProcessedData[nameof(IDeviceTopologyInfoDTO)].Data).PortMACAddress.Sum(y => int.Parse(y.Value)) });
-            
-            //(IDeviceTopologyInfoDTO)x.SNMPProcessedData[nameof(IDeviceTopologyInfoDTO)].Data)
-            
-            //Loop on root
-            // 1) Get neighbours
-            // 2) Get != IP2 that are known and not processed
+            List<string> TargetBuffer;
+            Dictionary<string, int> DevMACvolumetry;
+            GlobalTopologyInfo Result;
+                
+            Result = new GlobalTopologyInfo();
+            TargetBuffer = new List<string>();
+
+            //Get volumetry of MACs learned by device
+            DevMACvolumetry = RegardingObject.DeviceData.Values
+                                            .ToDictionary(
+                                            x => x.TargetIP.ToString(),
+                                            y => ((IDeviceTopologyInfoDTO)y.SNMPProcessedData[nameof(IDeviceTopologyInfoDTO)].Data).PortLearnedAddresses.Sum(z => z.Value.Count));
+
+            //Get device of MAX MACs learned --> Define as pivot
+            TargetBuffer.Add(DevMACvolumetry.Aggregate((p, c) => p.Value < c.Value ? c : p).Key);
+
+            //Loop on root node and scans by rows
+            foreach (string nodeID in TargetBuffer)
+            {
+                IDeviceTopologyInfoDTO orignodeOBJ = (IDeviceTopologyInfoDTO)RegardingObject.DeviceData[nodeID].SNMPProcessedData[nameof(IDeviceTopologyInfoDTO)].Data;
+
+                //Add node neighbours to results
+                foreach (var nodeCONN in orignodeOBJ.DeviceDirectNeighbours)
+                {
+                    //Allow multiple node for each connection despite should exist only one
+                    foreach (KeyValuePair<string, string> PortMACIPtuple in nodeCONN.Value)
+                    {
+                        //Check if destination es an scanned device or not
+                        if (RegardingObject.DeviceData.ContainsKey(PortMACIPtuple.Value))
+                        {
+                            IDeviceTopologyInfoDTO destnodeOBJ = (IDeviceTopologyInfoDTO)RegardingObject.DeviceData[PortMACIPtuple.Value].SNMPProcessedData[nameof(IDeviceTopologyInfoDTO)].Data;
+                            string destport = destnodeOBJ.PortMACAddress.Where(x => x.Value == PortMACIPtuple.Key).FirstOrDefault().Key;
+
+                            Result.TopologyMatrix.Add(new Tuple<string, string, string, string, string>($"{orignodeOBJ.DeviceType}", orignodeOBJ.DeviceIPAndMask, orignodeOBJ.PortMACAddress[nodeCONN.Key], nodeCONN.Key, orignodeOBJ.PortDescriptions[nodeCONN.Key]),
+                                               new Tuple<string, string, string, string, string>($"{destnodeOBJ.DeviceType}", destnodeOBJ.DeviceIPAndMask, PortMACIPtuple.Key, destnodeOBJ.PortMACAddress[destport], destnodeOBJ.PortDescriptions[destport]));
+                        }
+                        else
+                        {
+
+                        }
+                    }
+                }
+            }
 
         }
 
@@ -386,9 +420,9 @@ namespace SNMPDiscovery.Model.Services
             SelectedSetting = OIDSettings["PhysPortDescription"];
 
             MappingHandlers = new List<Action<IList<string>, string, object>>();
-            MappingHandlers.Add((x, y, z) => { ((IDeviceTopologyInfoDTO)z).PortInventory.Add(x[0], y); });
+            MappingHandlers.Add((x, y, z) => { ((IDeviceTopologyInfoDTO)z).PortDescriptions.Add(x[0], y); });
 
-            TopologyInfo.PortInventory = new Dictionary<string, string>();
+            TopologyInfo.PortDescriptions = new Dictionary<string, string>();
             StrategyHelper.OIDEntryProcessor(Device, TopologyInfo, SelectedSetting, MappingHandlers);
 
             #endregion
@@ -521,7 +555,7 @@ namespace SNMPDiscovery.Model.Services
 
                     for (int i = 0; i < positions.Length; i++)
                     {
-                        if (TopologyInfo.PortInventory.ContainsKey(positions[i]))
+                        if (TopologyInfo.PortDescriptions.ContainsKey(positions[i]))
                         {
                             if (TopologyInfo.PortVLANMapping.ContainsKey(positions[i]))
                             {
@@ -625,7 +659,7 @@ namespace SNMPDiscovery.Model.Services
         {
             ProcessID = EnumProcessingType.TopologyDiscovery;
             RegardingObject = Model;
-            TargetDevices = new List<ISNMPDeviceSettingDTO>();
+            TargetDeviceSettings = new List<ISNMPDeviceSettingDTO>();
             OnChange += ChangeTrackerHandler;
 
             BuildOIDSetting();

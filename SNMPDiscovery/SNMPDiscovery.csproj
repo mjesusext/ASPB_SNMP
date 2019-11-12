@@ -75,6 +75,7 @@
     <Compile Include="Model\DTO\Enums\EnumSNMPOIDType.cs" />
     <Compile Include="Model\DTO\Implementations\OIDSettingDTO.cs" />
     <Compile Include="Model\DTO\Implementations\SNMPDeviceDataDTO.cs" />
+    <Compile Include="Model\DTO\Implementations\GlobalTopologyInfo.cs" />
     <Compile Include="Model\DTO\Interfaces\IGlobalTopologyInfoDTO.cs" />
     <Compile Include="Model\DTO\Interfaces\ITrackeableObject.cs" />
     <Compile Include="Model\DTO\Interfaces\ITrackedObjectContainer.cs" />

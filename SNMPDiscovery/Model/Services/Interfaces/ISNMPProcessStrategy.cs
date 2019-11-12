@@ -11,7 +11,7 @@ namespace SNMPDiscovery.Model.Services
     {
         EnumProcessingType ProcessID { get; }
         ISNMPModelDTO RegardingObject { get; set; }
-        IList<ISNMPDeviceSettingDTO> TargetDevices { get; set; }
+        IList<ISNMPDeviceSettingDTO> TargetDeviceSettings { get; set; }
         IDictionary<string, IOIDSettingDTO> OIDSettings { get; set; }
 
         void BuildOIDSetting();

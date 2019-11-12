@@ -9,6 +9,6 @@ namespace SNMPDiscovery.Model.DTO
 {
     public interface IGlobalTopologyInfoDTO
     {
-        
+        IDictionary<Tuple<string, string, string, string, string>, Tuple<string, string, string, string, string>> TopologyMatrix { get; set; }
     }
 }

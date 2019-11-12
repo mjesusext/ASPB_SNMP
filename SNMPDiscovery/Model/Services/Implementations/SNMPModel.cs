@@ -132,7 +132,7 @@ namespace SNMPDiscovery.Model.Services
             {
                 foreach (ISNMPProcessStrategy process in Processes.Values)
                 {
-                    process.TargetDevices.Remove(setting);
+                    process.TargetDeviceSettings.Remove(setting);
                 }
             }
 
@@ -185,7 +185,7 @@ namespace SNMPDiscovery.Model.Services
                     //Add device setting if found
                     if(DeviceProfile != null)
                     {
-                        ProcessProfile.TargetDevices.Add(DeviceProfile);
+                        ProcessProfile.TargetDeviceSettings.Add(DeviceProfile);
                     }
 
                     ChangeTrackerHandler(ProcessProfile, typeof(ISNMPProcessStrategy));
@@ -219,7 +219,7 @@ namespace SNMPDiscovery.Model.Services
                     if (!Processes.ContainsKey(NewProcessType))
                     {
                         ProcessProfile = new TopologyBuilderStrategy(this, ChangeTrackerHandler);
-                        ProcessProfile.TargetDevices = Processes[PreviousProcessType].TargetDevices;
+                        ProcessProfile.TargetDeviceSettings = Processes[PreviousProcessType].TargetDeviceSettings;
 
                         Processes.Add(NewProcessType, ProcessProfile);
                     }
@@ -228,8 +228,8 @@ namespace SNMPDiscovery.Model.Services
                         ProcessProfile = Processes[NewProcessType];
 
                         //MJE - Pending of double-checking
-                        ((List<ISNMPDeviceSettingDTO>)ProcessProfile.TargetDevices).AddRange(Processes[PreviousProcessType].TargetDevices);
-                        ProcessProfile.TargetDevices = ProcessProfile.TargetDevices.Distinct().ToList();
+                        ((List<ISNMPDeviceSettingDTO>)ProcessProfile.TargetDeviceSettings).AddRange(Processes[PreviousProcessType].TargetDeviceSettings);
+                        ProcessProfile.TargetDeviceSettings = ProcessProfile.TargetDeviceSettings.Distinct().ToList();
                     }
 
                     Processes.Remove(PreviousProcessType);

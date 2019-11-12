@@ -10,7 +10,7 @@ namespace SNMPDiscovery.Model.DTO
     public interface IDeviceTopologyInfoDTO : IDiscoveredBasicInfo
     {
         //Key: Port ID, Value: Port Description (text id)
-        IDictionary<string, string> PortInventory { get; set; }
+        IDictionary<string, string> PortDescriptions { get; set; }
         //Key: Port ID, Value: Tuple of type and equivalence if needed (for trunks)
         IDictionary<string, CustomPair<EnumPhysPortType, string>> PortSettings { get; set; }
         //Key: Port ID, Value: MAC Address

@@ -19,7 +19,7 @@ namespace SNMPDiscovery.Model.DTO
         public EnumOSILayers OSIImplementedLayers { get; set; }
         public EnumDeviceType DeviceType { get; set; }
 
-        public IDictionary<string, string> PortInventory { get; set; }
+        public IDictionary<string, string> PortDescriptions { get; set; }
         public IDictionary<string, CustomPair<EnumPhysPortType, string>> PortSettings { get; set; }
         public IDictionary<string, string> PortMACAddress { get; set; }
         public IDictionary<string, string> VLANInventory { get; set; }

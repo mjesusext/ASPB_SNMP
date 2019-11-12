@@ -603,7 +603,7 @@ namespace SNMPDiscovery.View
             {
                 RedirectToFile(true);
                 Console.WriteLine($"Process setting \"{data.ProcessID}\" related to following Device Settings:\n" +
-                              $"\t-{string.Join("\n\t-", data.TargetDevices.Select(x => x.ID))}.\n");
+                              $"\t-{string.Join("\n\t-", data.TargetDeviceSettings.Select(x => x.ID))}.\n");
                 RedirectToFile(false);
             }
         }
@@ -676,7 +676,7 @@ namespace SNMPDiscovery.View
                 bool existVLAN = data.PortVLANMapping.TryGetValue(MACPort.Key, out relVLANs);
                 string VLANList = existVLAN ? string.Join(",", relVLANs.Select(x => data.VLANInventory[x])) : string.Empty;
 
-                Console.WriteLine($"{MACPort.Key,-40} {data.PortInventory[MACPort.Key],-40} {MACPort.Value,-40} {data.PortSettings[MACPort.Key].First,-40} {data.PortSettings[MACPort.Key].Second,-40} {VLANList,-40}");
+                Console.WriteLine($"{MACPort.Key,-40} {data.PortDescriptions[MACPort.Key],-40} {MACPort.Value,-40} {data.PortSettings[MACPort.Key].First,-40} {data.PortSettings[MACPort.Key].Second,-40} {VLANList,-40}");
             }
 
             #endregion
