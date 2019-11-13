@@ -194,9 +194,14 @@ namespace SNMPDiscovery.Model.Services
             BuildTopology();
 
             //We know data is fully ready
-            foreach (var procres in RegardingObject.DeviceData.Values.SelectMany(x => x.SNMPProcessedData.Values))
+            foreach (var DevProcRes in RegardingObject.DeviceData.Values.SelectMany(x => x.SNMPProcessedData.Values))
             { 
-                OnChange?.Invoke(procres, typeof(ISNMPProcessedValueDTO));
+                OnChange?.Invoke(DevProcRes, typeof(ISNMPProcessedValueDTO));
+            }
+
+            foreach (var GlobalProcRes in RegardingObject.GlobalProcessedData.Values.Select(x => x.Data))
+            {
+                OnChange?.Invoke(GlobalProcRes, typeof(IGlobalTopologyInfoDTO));
             }
         }
 
@@ -293,6 +298,8 @@ namespace SNMPDiscovery.Model.Services
             GlobalTopologyInfo Result;
                 
             Result = new GlobalTopologyInfo();
+            RegardingObject.AttachSNMPProcessedValue(typeof(GlobalTopologyInfo), Result);
+
             TargetBuffer = new List<string>();
 
             //Get volumetry of MACs learned by device
@@ -305,9 +312,9 @@ namespace SNMPDiscovery.Model.Services
             TargetBuffer.Add(DevMACvolumetry.Aggregate((p, c) => p.Value < c.Value ? c : p).Key);
 
             //Loop on root node and scans by rows
-            foreach (string nodeID in TargetBuffer)
+            while(TargetBuffer.Count > 0)
             {
-                IDeviceTopologyInfoDTO orignodeOBJ = (IDeviceTopologyInfoDTO)RegardingObject.DeviceData[nodeID].SNMPProcessedData[nameof(IDeviceTopologyInfoDTO)].Data;
+                IDeviceTopologyInfoDTO orignodeOBJ = (IDeviceTopologyInfoDTO)RegardingObject.DeviceData[TargetBuffer[0]].SNMPProcessedData[nameof(IDeviceTopologyInfoDTO)].Data;
 
                 //Add node neighbours to results
                 foreach (var nodeCONN in orignodeOBJ.DeviceDirectNeighbours)
@@ -316,22 +323,32 @@ namespace SNMPDiscovery.Model.Services
                     foreach (KeyValuePair<string, string> PortMACIPtuple in nodeCONN.Value)
                     {
                         //Check if destination es an scanned device or not
-                        if (RegardingObject.DeviceData.ContainsKey(PortMACIPtuple.Value))
+                        //Expression eval left to right. Exception avoidance
+                        if (PortMACIPtuple.Value != null && RegardingObject.DeviceData.ContainsKey(PortMACIPtuple.Value))
                         {
+                            //Retrieve data for building tuple
                             IDeviceTopologyInfoDTO destnodeOBJ = (IDeviceTopologyInfoDTO)RegardingObject.DeviceData[PortMACIPtuple.Value].SNMPProcessedData[nameof(IDeviceTopologyInfoDTO)].Data;
                             string destport = destnodeOBJ.PortMACAddress.Where(x => x.Value == PortMACIPtuple.Key).FirstOrDefault().Key;
 
+                            //Update target buffer for drilling down
+                            TargetBuffer.Add(ModelHelper.ExtractIPAddress(destnodeOBJ.DeviceIPAndMask).ToString());
+
+                            //Add to results
                             Result.TopologyMatrix.Add(new Tuple<string, string, string, string, string>($"{orignodeOBJ.DeviceType}", orignodeOBJ.DeviceIPAndMask, orignodeOBJ.PortMACAddress[nodeCONN.Key], nodeCONN.Key, orignodeOBJ.PortDescriptions[nodeCONN.Key]),
                                                new Tuple<string, string, string, string, string>($"{destnodeOBJ.DeviceType}", destnodeOBJ.DeviceIPAndMask, PortMACIPtuple.Key, destnodeOBJ.PortMACAddress[destport], destnodeOBJ.PortDescriptions[destport]));
                         }
                         else
                         {
-
+                            //Add to results
+                            Result.TopologyMatrix.Add(new Tuple<string, string, string, string, string>($"{orignodeOBJ.DeviceType}", orignodeOBJ.DeviceIPAndMask, orignodeOBJ.PortMACAddress[nodeCONN.Key], nodeCONN.Key, orignodeOBJ.PortDescriptions[nodeCONN.Key]),
+                                               new Tuple<string, string, string, string, string>($"{EnumDeviceType.Unknown}", PortMACIPtuple.Value, PortMACIPtuple.Key, "unknown", "unknown"));
                         }
                     }
                 }
-            }
 
+                //Drop current element
+                TargetBuffer.RemoveAt(0);
+            }
         }
 
         private void GetBasicInfo(ISNMPDeviceDataDTO Device, IDictionary<string, IOIDSettingDTO> OIDSettings, IDeviceTopologyInfoDTO TopologyInfo)

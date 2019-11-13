@@ -568,8 +568,9 @@ namespace SNMPDiscovery.View
             {
                 ShowData((ISNMPProcessedValueDTO)data);
             }
-            else
+            else if (datatype.Equals(typeof(IGlobalTopologyInfoDTO)))
             {
+                ShowData((IGlobalTopologyInfoDTO)data);
             }
         }
 
@@ -731,6 +732,30 @@ namespace SNMPDiscovery.View
             }
 
             Console.WriteLine();
+
+            RedirectToFile(false);
+        }
+
+        private void ShowData(IGlobalTopologyInfoDTO data)
+        {
+            RedirectToFile(true);
+
+            Console.WriteLine("\nGlobal Device Mapping Matrix:\n");
+            Console.WriteLine("{0,-40} {1,-40} {2,-40} {3,-40} {4,-40} {5,-40} {6,-40} {7,-40} {8,-40} {9,-40}", "Dev Type Orig", "IP Orig", "MAC Orig", "Port Orig", "Descrip Orig", "Dev Type Dest", "IP Dest", "MAC Dest", "Port Dest", "Descrip Dest");
+
+            foreach (KeyValuePair<Tuple<string, string, string, string, string >, Tuple<string, string, string, string, string>> TopologyEntry in data.TopologyMatrix)
+            {
+                Console.WriteLine($"{TopologyEntry.Key.Item1,-40}" +
+                                 $"{TopologyEntry.Key.Item2,-40}" +
+                                 $"{TopologyEntry.Key.Item3,-40}" +
+                                 $"{TopologyEntry.Key.Item4,-40}" +
+                                 $"{TopologyEntry.Key.Item5,-40}" +
+                                 $"{TopologyEntry.Value.Item1,-40}" +
+                                 $"{TopologyEntry.Value.Item2,-40}" +
+                                 $"{TopologyEntry.Value.Item3,-40}" +
+                                 $"{TopologyEntry.Value.Item4,-40}" +
+                                 $"{TopologyEntry.Value.Item5,-40}");
+            }
 
             RedirectToFile(false);
         }
