@@ -271,14 +271,20 @@ namespace SNMPDiscovery.Model.Services
                             {
                                 aggres.Add(PortMACAddr, RegardingObject.ARPTable[aggports.Value.First]);
                             }
-                            else if (targdevice.PortDescriptions.TryGetValue(aggports.Value.Second, out PortMACAddr))
+                            else
                             {
-                                aggres.Add(PortMACAddr, RegardingObject.ARPTable[aggports.Value.First]);
+                                //Get Port ID associated to port description
+                                KeyValuePair<string,string> PortMapTupple = targdevice.PortMACAddress.Where(x => x.Value == aggports.Value.First).FirstOrDefault();
+
+                                if (targdevice.PortMACAddress.TryGetValue(PortMapTupple.Key, out PortMACAddr))
+                                {
+                                    aggres.Add(PortMACAddr, RegardingObject.ARPTable[aggports.Value.First]);
+                                }
                             }
                         }
                         else
                         {
-                            aggres.Add("Not available", "Not available");
+                            aggres.Add("Aggregate NA", "Aggregate NA");
                         }
 
                         //MJE - Revisar porque duplica clave a veces...
@@ -291,9 +297,11 @@ namespace SNMPDiscovery.Model.Services
             }
         }
 
+        //MJE - ERROR DE CLAVE DUPLICADA PARA ENTRADAS MULTIPLES
         private void BuildTopology()
         {
             List<string> TargetBuffer;
+
             Dictionary<string, int> DevMACvolumetry;
             GlobalTopologyInfo Result;
                 
@@ -312,13 +320,25 @@ namespace SNMPDiscovery.Model.Services
             TargetBuffer.Add(DevMACvolumetry.Aggregate((p, c) => p.Value < c.Value ? c : p).Key);
 
             //Loop on root node and scans by rows
-            while(TargetBuffer.Count > 0)
+            for (int i = 0; i < TargetBuffer.Count; i++)
             {
-                IDeviceTopologyInfoDTO orignodeOBJ = (IDeviceTopologyInfoDTO)RegardingObject.DeviceData[TargetBuffer[0]].SNMPProcessedData[nameof(IDeviceTopologyInfoDTO)].Data;
+                IDeviceTopologyInfoDTO orignodeOBJ = (IDeviceTopologyInfoDTO)RegardingObject.DeviceData[TargetBuffer[i]].SNMPProcessedData[nameof(IDeviceTopologyInfoDTO)].Data;
 
                 //Add node neighbours to results
                 foreach (var nodeCONN in orignodeOBJ.DeviceDirectNeighbours)
                 {
+                    Tuple<string, string, string, string, string> origTopoMatrix = new Tuple<string, string, string, string, string>($"{orignodeOBJ.DeviceType}", orignodeOBJ.DeviceIPAndMask, orignodeOBJ.PortMACAddress[nodeCONN.Key], nodeCONN.Key, orignodeOBJ.PortDescriptions[nodeCONN.Key]);
+                    List<Tuple<string, string, string, string, string>> destTopoMatrix = new List<Tuple<string, string, string, string, string>>();
+
+                    if (Result.TopologyMatrix.ContainsKey(origTopoMatrix))
+                    {
+                        Result.TopologyMatrix[origTopoMatrix] = destTopoMatrix;
+                    }
+                    else
+                    {
+                        Result.TopologyMatrix.Add(origTopoMatrix, destTopoMatrix);
+                    }
+
                     //Allow multiple node for each connection despite should exist only one
                     foreach (KeyValuePair<string, string> PortMACIPtuple in nodeCONN.Value)
                     {
@@ -331,23 +351,21 @@ namespace SNMPDiscovery.Model.Services
                             string destport = destnodeOBJ.PortMACAddress.Where(x => x.Value == PortMACIPtuple.Key).FirstOrDefault().Key;
 
                             //Update target buffer for drilling down
-                            TargetBuffer.Add(ModelHelper.ExtractIPAddress(destnodeOBJ.DeviceIPAndMask).ToString());
+                            if (!TargetBuffer.Contains(ModelHelper.ExtractIPAddress(destnodeOBJ.DeviceIPAndMask).ToString()))
+                            {
+                                TargetBuffer.Add(ModelHelper.ExtractIPAddress(destnodeOBJ.DeviceIPAndMask).ToString());
+                            }
 
                             //Add to results
-                            Result.TopologyMatrix.Add(new Tuple<string, string, string, string, string>($"{orignodeOBJ.DeviceType}", orignodeOBJ.DeviceIPAndMask, orignodeOBJ.PortMACAddress[nodeCONN.Key], nodeCONN.Key, orignodeOBJ.PortDescriptions[nodeCONN.Key]),
-                                               new Tuple<string, string, string, string, string>($"{destnodeOBJ.DeviceType}", destnodeOBJ.DeviceIPAndMask, PortMACIPtuple.Key, destnodeOBJ.PortMACAddress[destport], destnodeOBJ.PortDescriptions[destport]));
+                            destTopoMatrix.Add(new Tuple<string, string, string, string, string>($"{destnodeOBJ.DeviceType}", destnodeOBJ.DeviceIPAndMask, PortMACIPtuple.Key, destnodeOBJ.PortMACAddress[destport], destnodeOBJ.PortDescriptions[destport]));
                         }
                         else
                         {
                             //Add to results
-                            Result.TopologyMatrix.Add(new Tuple<string, string, string, string, string>($"{orignodeOBJ.DeviceType}", orignodeOBJ.DeviceIPAndMask, orignodeOBJ.PortMACAddress[nodeCONN.Key], nodeCONN.Key, orignodeOBJ.PortDescriptions[nodeCONN.Key]),
-                                               new Tuple<string, string, string, string, string>($"{EnumDeviceType.Unknown}", PortMACIPtuple.Value, PortMACIPtuple.Key, "unknown", "unknown"));
+                            destTopoMatrix.Add(new Tuple<string, string, string, string, string>($"{EnumDeviceType.Unknown}", PortMACIPtuple.Value, PortMACIPtuple.Key, "unknown", "unknown"));
                         }
                     }
                 }
-
-                //Drop current element
-                TargetBuffer.RemoveAt(0);
             }
         }
 

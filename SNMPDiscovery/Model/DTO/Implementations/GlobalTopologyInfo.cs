@@ -10,11 +10,11 @@ namespace SNMPDiscovery.Model.DTO
 {
     public class GlobalTopologyInfo : IGlobalTopologyInfoDTO
     {
-        public IDictionary<Tuple<string, string, string, string, string>, Tuple<string, string, string, string, string>> TopologyMatrix { get; set; }
+        public IDictionary<Tuple<string, string, string, string, string>, IList<Tuple<string, string, string, string, string>>> TopologyMatrix { get; set; }
 
         public GlobalTopologyInfo()
         {
-            TopologyMatrix = new Dictionary<Tuple<string, string, string, string, string>, Tuple<string, string, string, string, string>>();
+            TopologyMatrix = new Dictionary<Tuple<string, string, string, string, string>, IList<Tuple<string, string, string, string, string>>>();
         }
     }
 }

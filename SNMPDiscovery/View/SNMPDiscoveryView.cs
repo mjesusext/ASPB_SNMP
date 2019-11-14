@@ -743,18 +743,21 @@ namespace SNMPDiscovery.View
             Console.WriteLine("\nGlobal Device Mapping Matrix:\n");
             Console.WriteLine("{0,-40} {1,-40} {2,-40} {3,-40} {4,-40} {5,-40} {6,-40} {7,-40} {8,-40} {9,-40}", "Dev Type Orig", "IP Orig", "MAC Orig", "Port Orig", "Descrip Orig", "Dev Type Dest", "IP Dest", "MAC Dest", "Port Dest", "Descrip Dest");
 
-            foreach (KeyValuePair<Tuple<string, string, string, string, string >, Tuple<string, string, string, string, string>> TopologyEntry in data.TopologyMatrix)
+            foreach (KeyValuePair<Tuple<string, string, string, string, string>, IList<Tuple<string, string, string, string, string>>> TopoOrigEntry in data.TopologyMatrix)
             {
-                Console.WriteLine($"{TopologyEntry.Key.Item1,-40}" +
-                                 $"{TopologyEntry.Key.Item2,-40}" +
-                                 $"{TopologyEntry.Key.Item3,-40}" +
-                                 $"{TopologyEntry.Key.Item4,-40}" +
-                                 $"{TopologyEntry.Key.Item5,-40}" +
-                                 $"{TopologyEntry.Value.Item1,-40}" +
-                                 $"{TopologyEntry.Value.Item2,-40}" +
-                                 $"{TopologyEntry.Value.Item3,-40}" +
-                                 $"{TopologyEntry.Value.Item4,-40}" +
-                                 $"{TopologyEntry.Value.Item5,-40}");
+                foreach (Tuple<string, string, string, string, string> TopoDestEntry in TopoOrigEntry.Value)
+                {
+                    Console.WriteLine($"{TopoOrigEntry.Key.Item1,-40}" +
+                                 $"{TopoOrigEntry.Key.Item2,-40}" +
+                                 $"{TopoOrigEntry.Key.Item3,-40}" +
+                                 $"{TopoOrigEntry.Key.Item4,-40}" +
+                                 $"{TopoOrigEntry.Key.Item5,-40}" +
+                                 $"{TopoDestEntry.Item1,-40}" +
+                                 $"{TopoDestEntry.Item2,-40}" +
+                                 $"{TopoDestEntry.Item3,-40}" +
+                                 $"{TopoDestEntry.Item4,-40}" +
+                                 $"{TopoDestEntry.Item5,-40}");
+                }
             }
 
             RedirectToFile(false);
