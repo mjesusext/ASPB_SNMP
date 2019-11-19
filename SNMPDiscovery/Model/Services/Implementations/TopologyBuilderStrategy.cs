@@ -297,7 +297,6 @@ namespace SNMPDiscovery.Model.Services
             }
         }
 
-        //MJE - ERROR DE CLAVE DUPLICADA PARA ENTRADAS MULTIPLES
         private void BuildTopology()
         {
             List<string> TargetBuffer;
