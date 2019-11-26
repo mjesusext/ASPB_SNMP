@@ -388,7 +388,7 @@ namespace SNMPDiscovery.Model.Services
                 {
                     OLD_SNMPRunAgent(UDPtarget, pdu, param, OIDSetting, SNMPDeviceData);
                 }
-                catch (SnmpException e)
+                catch //(SnmpException e)
                 {
                     throw;
                 }
@@ -406,7 +406,7 @@ namespace SNMPDiscovery.Model.Services
                 {
                     SNMPRunAgent(Community, OIDSetting, SNMPDeviceData);
                 }
-                catch (SnmpException e)
+                catch //(SnmpException e)
                 {
                     throw;
                 }
@@ -429,7 +429,7 @@ namespace SNMPDiscovery.Model.Services
                     Result = (SnmpV2Packet)UDPtarget.Request(pdu, param);
                     nextEntry = SNMPDecodeData(Result, indexOid, finalOid, OIDSetting.InclusiveInterval, SNMPDeviceData);
                 }
-                catch (SnmpException e)
+                catch //(SnmpException e)
                 {
                     throw;
                 }
@@ -470,7 +470,7 @@ namespace SNMPDiscovery.Model.Services
                         Result = (SnmpV2Packet)UDPtarget.Request(pdu, AgParam);
                         nextEntry = SNMPDecodeData(Result, indexOid, finalOid, OIDSetting.InclusiveInterval, SNMPDeviceData);
                     }
-                    catch (SnmpException e)
+                    catch //(SnmpException e)
                     {
                         throw;
                     }

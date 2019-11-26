@@ -855,12 +855,6 @@ namespace SNMPDiscovery.View
             StateHandlers[_controller.GetCurrentState()].Invoke();
         }
 
-        //Mock for disposing redirection to file
-        ~SNMPDiscoveryView()
-        {
-            //RedirectToFile(false);
-        }
-
         #endregion
         
     }

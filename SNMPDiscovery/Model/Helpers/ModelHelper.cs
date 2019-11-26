@@ -235,7 +235,7 @@ namespace SNMPDiscovery.Model.Helpers
         #region ARP - RARP
 
         [DllImport("iphlpapi.dll", ExactSpelling = true, EntryPoint = "SendARP")]
-        public static extern int SendARP(int DestIP, int SrcIP, [Out] byte[] pMacAddr, ref int PhyAddrLen);
+        private static extern int SendARP(int DestIP, int SrcIP, [Out] byte[] pMacAddr, ref int PhyAddrLen);
 
         public static string GetMACAddress(string IPaddress)
         {

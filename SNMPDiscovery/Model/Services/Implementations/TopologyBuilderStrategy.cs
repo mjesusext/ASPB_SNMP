@@ -211,6 +211,7 @@ namespace SNMPDiscovery.Model.Services
 
         private void TransformRawData()
         {
+            //MJE - Si no se han recogido valores y es nulo peta
             foreach (ISNMPDeviceDataDTO Device in RegardingObject.DeviceData.Values)
             {
                 //Create DTO and attach to device

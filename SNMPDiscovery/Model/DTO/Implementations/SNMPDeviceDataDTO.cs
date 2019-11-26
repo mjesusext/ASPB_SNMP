@@ -31,7 +31,16 @@ namespace SNMPDiscovery.Model.DTO
             }
 
             ISNMPRawEntryDTO RawEntry = new SNMPRawEntryDTO(this, OID, RawValue, DataType);
-            SNMPRawDataEntries.Add(OID, RawEntry);
+
+            //In case of existing previous vale, override 
+            if (SNMPRawDataEntries.ContainsKey(OID))
+            {
+                SNMPRawDataEntries[OID] = RawEntry;
+            }
+            else
+            {
+                SNMPRawDataEntries.Add(OID, RawEntry);
+            }
 
             //We know data is fully ready
             OnChange?.Invoke(RawEntry, typeof(ISNMPRawEntryDTO));
