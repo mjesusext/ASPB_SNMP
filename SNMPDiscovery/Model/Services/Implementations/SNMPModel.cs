@@ -50,6 +50,11 @@ namespace SNMPDiscovery.Model.Services
 
         public void NotifyError(Exception error)
         {
+            if(_snmpModelObservers == null)
+            {
+                return;
+            }
+
             foreach (IObserver<ISNMPModelDTO> observer in _snmpModelObservers)
             {
                 observer.OnError(error);
@@ -58,6 +63,11 @@ namespace SNMPDiscovery.Model.Services
 
         public void NotifyChanges()
         {
+            if(_snmpModelObservers == null)
+            {
+                return;
+            }
+
             foreach (IObserver<ISNMPModelDTO> observer in _snmpModelObservers)
             {
                 observer.OnNext(this);
@@ -128,7 +138,7 @@ namespace SNMPDiscovery.Model.Services
             setting = DeviceSettings[ID];
 
             //Drop references on process if exists
-            if(Processes != null)
+            if(Processes?.Values != null)
             {
                 foreach (ISNMPProcessStrategy process in Processes.Values)
                 {
@@ -276,6 +286,12 @@ namespace SNMPDiscovery.Model.Services
 
         public void StartDiscovery()
         {
+            //Validate values
+            if (DeviceSettings?.Values == null)
+            {
+                return;
+            }
+            
             //Feed ARP table previous to discovery and processing
             GetMACAddressMappings();
 
@@ -288,6 +304,12 @@ namespace SNMPDiscovery.Model.Services
 
         public void RunProcesses()
         {
+            //Validate values
+            if (Processes?.Values == null)
+            {
+                return;
+            }
+
             foreach (ISNMPProcessStrategy alg in Processes.Values)
             {
                 alg.Run();
@@ -304,49 +326,6 @@ namespace SNMPDiscovery.Model.Services
         #endregion
 
         #region SNMP Client Methods
-
-        private void OLD_SNMPWalkByIP(ISNMPDeviceSettingDTO SNMPSettingEntry)
-        {
-            IList<IPAddress> IPinventory;
-            OctetString Community;
-            AgentParameters AgParam;
-            Pdu pdu;
-
-            //Compute full list of devices that have responded to ARP request
-            IPinventory = ModelHelper.GenerateHostList(SNMPSettingEntry.InitialIP, SNMPSettingEntry.FinalIP, SNMPSettingEntry.NetworkMask, ARPTable.Values.ToList());
-
-            Community = new OctetString(SNMPSettingEntry.CommunityString);
-
-            AgParam = new AgentParameters(Community);
-            AgParam.Version = SnmpVersion.Ver2; // Set SNMP version to 2 (GET-BULK only works with SNMP ver 2 and 3)
-
-            pdu = new Pdu(PduType.GetBulk);
-            pdu.NonRepeaters = 0; //NonRepeaters tells how many OID asociated values (leafs of this object) get. 0 is all
-            pdu.MaxRepetitions = 5; // MaxRepetitions tells the agent how many Oid/Value pairs to return in the response packet.
-            pdu.RequestId = 1;
-
-            using (UdpTarget UDPtarget = new UdpTarget(new IPAddress(0), DefaultPort, DefaultTimeout, DefaultRetries))
-            {
-                foreach (IPAddress target in IPinventory)
-                {
-                    ISNMPDeviceDataDTO device = BuildSNMPDevice(target, SNMPSettingEntry.NetworkMask);
-                    UDPtarget.Address = device.TargetIP;
-
-                    try
-                    {
-                        OLD_SNMPWalkByOIDSetting(UDPtarget, pdu, AgParam, SNMPSettingEntry, device);
-                    }
-                    catch (SnmpException e)
-                    {
-                        NotifyError(e);
-
-                        //Device entry not containing full info for processing
-                        DeviceData.Remove(target.ToString());
-                        continue;
-                    }
-                }
-            }
-        }
 
         private void SNMPWalkByIP(ISNMPDeviceSettingDTO SNMPSettingEntry)
         {
@@ -377,24 +356,6 @@ namespace SNMPDiscovery.Model.Services
             }
         }
 
-        private void OLD_SNMPWalkByOIDSetting(UdpTarget UDPtarget, Pdu pdu, AgentParameters param, ISNMPDeviceSettingDTO SNMPSettingEntry, ISNMPDeviceDataDTO SNMPDeviceData)
-        {
-            //Get all OID requested for all processing algorithms
-            IEnumerable<IOIDSettingDTO> OIDSettingCollection = Processes.Values.SelectMany(x => x.OIDSettings.Values);
-
-            foreach (IOIDSettingDTO OIDSetting in OIDSettingCollection)
-            {
-                try
-                {
-                    OLD_SNMPRunAgent(UDPtarget, pdu, param, OIDSetting, SNMPDeviceData);
-                }
-                catch //(SnmpException e)
-                {
-                    throw;
-                }
-            }
-        }
-
         private void SNMPWalkByOIDSetting(OctetString Community, ISNMPDeviceSettingDTO SNMPSettingEntry, ISNMPDeviceDataDTO SNMPDeviceData)
         {
             //Get all OID requested for all processing algorithms
@@ -409,35 +370,6 @@ namespace SNMPDiscovery.Model.Services
                 catch //(SnmpException e)
                 {
                     throw;
-                }
-            }
-        }
-
-        private void OLD_SNMPRunAgent(UdpTarget UDPtarget, Pdu pdu, AgentParameters param, IOIDSettingDTO OIDSetting, ISNMPDeviceDataDTO SNMPDeviceData)
-        {
-            bool nextEntry = true;
-            SnmpV2Packet Result;
-            Oid indexOid = new Oid(OIDSetting.InitialOID); //Walk control
-            Oid finalOid = new Oid(OIDSetting.FinalOID);
-
-            while (nextEntry)
-            {
-                pdu.VbList.Add(indexOid); //Add starting OID for request
-
-                try
-                {
-                    Result = (SnmpV2Packet)UDPtarget.Request(pdu, param);
-                    nextEntry = SNMPDecodeData(Result, indexOid, finalOid, OIDSetting.InclusiveInterval, SNMPDeviceData);
-                }
-                catch //(SnmpException e)
-                {
-                    throw;
-                }
-                finally
-                {
-                    //Prepare PDU object for iteration. Otherwise, wipe contents of pdu
-                    pdu.RequestId++;
-                    pdu.VbList.Clear();
                 }
             }
         }
@@ -572,6 +504,5 @@ namespace SNMPDiscovery.Model.Services
         }
 
         #endregion
-
     }
 }

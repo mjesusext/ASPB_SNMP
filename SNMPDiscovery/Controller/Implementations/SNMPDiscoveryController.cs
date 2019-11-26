@@ -106,6 +106,11 @@ namespace SNMPDiscovery.Controller
 
         public void EditDevice(string oldSettingID, string settingID, string initialIPAndMask, string finalIPAndMask, string SNMPUser)
         {
+            if (string.IsNullOrWhiteSpace(oldSettingID))
+            {
+                _ErrMsgs.Add("Null or empty old setting ID");
+            }
+
             if (string.IsNullOrWhiteSpace(settingID))
             {
                 _ErrMsgs.Add("Null or empty setting ID");
@@ -124,6 +129,11 @@ namespace SNMPDiscovery.Controller
             if(!ModelHelper.ValidateIPandMaskRange(initialIPAndMask, finalIPAndMask))
             {
                 _ErrMsgs.Add("Invalid IP range");
+            }
+
+            if (string.IsNullOrWhiteSpace(SNMPUser))
+            {
+                _ErrMsgs.Add("Null or empty SNMP community string");
             }
 
             if (_ErrMsgs.Count == 0)
@@ -168,6 +178,13 @@ namespace SNMPDiscovery.Controller
 
         public void RunProcesses()
         {
+            if (Model.Processes?.Values == null)
+            {
+                _ErrMsgs.Add("No processes are defined for analysis");
+                NotifyControllerError();
+                return;
+            }
+
             foreach (ISNMPProcessStrategy proccess in Model.Processes.Values)
             {
                 proccess.Run();
