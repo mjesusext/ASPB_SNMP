@@ -21,11 +21,7 @@ namespace SNMPDiscovery.View
 
         private Dictionary<EnumControllerStates, Action> StateHandlers { get; set; }
         private Dictionary<EnumControllerStates, string> StateLabels { get; set; }
-
-        //Mock for redirecting console to file
-        private FileStream ostrm { get; set; }
-        private StreamWriter writer { get; set; }
-        private TextWriter oldOut { get; set; }
+        private string[] ShowDataMode, ShowDataOptions;
 
         #endregion
 
@@ -38,12 +34,12 @@ namespace SNMPDiscovery.View
 
         public void OnError(Exception error)
         {
-            //RedirectToFile(true);
+            //ViewHelper.RedirectConsoleToFile(true);
             Console.WriteLine($"Exception {error.GetType().Name}:\n" +
                               $"\t- Message: {error.Message}\n" +
                               $"\t- HResult: {error.HResult}\n" +
                               $"\t- Inner exception: {error.InnerException}\n");
-            //RedirectToFile(false);
+            //ViewHelper.RedirectConsoleToFile(false);
         }
 
         public void OnCompleted()
@@ -511,9 +507,48 @@ namespace SNMPDiscovery.View
             NextActionHandle();
         }
 
-        private void PromptDataMenu()
+        private void ShowDataMenu()
         {
-            //Posible acitons
+            int optionInput;
+            bool wrongInput = false;
+
+            do
+            {
+                Console.Write("Select option: ");
+
+                wrongInput = !int.TryParse(Console.ReadLine(), out optionInput);
+
+                if (wrongInput)
+                {
+                    Console.WriteLine("ERROR: Input values are not a number.");
+                }
+                else if (optionInput >= ShowDataMode.Length)
+                {
+                    Console.WriteLine("ERROR: Selected option not available");
+                    wrongInput = true;
+                }
+            } while (wrongInput);
+
+            Console.WriteLine();
+
+            if (optionInput == 0)
+            {
+                //  0) Show global data
+            }
+            else
+            {
+                //Get IP & search
+                //IF exist results
+
+                //Set specific query
+                //  1.1) Device basic data
+                //  1.2) Port inventory
+                //  1.3) Port volumetry
+                //  1.4) Port volumetry
+                //  1.5) Connected devices 
+
+                //Run specific showdatamethod o specific DTO method
+            }
 
             NextActionHandle();
         }
@@ -578,9 +613,9 @@ namespace SNMPDiscovery.View
         {
             if (data != null)
             {
-                //RedirectToFile(true);
+                //ViewHelper.RedirectConsoleToFile(true);
                 //Console.WriteLine($"SNMP device {data.TargetIP}.\n");
-                //RedirectToFile(false);
+                //ViewHelper.RedirectConsoleToFile(false);
             }
             
         }
@@ -589,12 +624,12 @@ namespace SNMPDiscovery.View
         {
             if (data != null)
             {
-                RedirectToFile(true);
+                ViewHelper.RedirectConsoleToFile(true);
                 Console.WriteLine($"SNMP setting \"{data.ID}\" with this definition:\n" +
                                   $"\t-Initial IP: {data.InitialIP}/{data.NetworkMask}\n" +
                                   $"\t-Final IP: {data.FinalIP}/{data.NetworkMask}\n" +
                                   $"\t-Community string: {data.CommunityString}\n");
-                RedirectToFile(false);
+                ViewHelper.RedirectConsoleToFile(false);
             }
         }
 
@@ -602,10 +637,10 @@ namespace SNMPDiscovery.View
         {
             if (data != null)
             {
-                RedirectToFile(true);
+                ViewHelper.RedirectConsoleToFile(true);
                 Console.WriteLine($"Process setting \"{data.ProcessID}\" related to following Device Settings:\n" +
                               $"\t-{string.Join("\n\t-", data.TargetDeviceSettings.Select(x => x.ID))}.\n");
-                RedirectToFile(false);
+                ViewHelper.RedirectConsoleToFile(false);
             }
         }
 
@@ -613,12 +648,12 @@ namespace SNMPDiscovery.View
         {
             if(data != null)
             {
-                RedirectToFile(true);
+                ViewHelper.RedirectConsoleToFile(true);
                 Console.WriteLine($"OID setting {data.ID} with this definition:\n" +
                               $"\t-Initial OID: {data.InitialOID}\n" +
                               $"\t-Final OID: {data.FinalOID}\n" +
                               $"\t-Inclusive: {data.InclusiveInterval}\n");
-                RedirectToFile(false);
+                ViewHelper.RedirectConsoleToFile(false);
             }
         }
 
@@ -626,9 +661,9 @@ namespace SNMPDiscovery.View
         {
             if(data != null)
             {
-                //RedirectToFile(true);
+                //ViewHelper.RedirectConsoleToFile(true);
                 //Console.WriteLine($"OID entry of {data.RegardingObject.TargetIP}. Identifier: {data.OID}. DataType: {data.DataType}. Value: {data.ValueData}.\n");
-                //RedirectToFile(false);
+                //ViewHelper.RedirectConsoleToFile(false);
             }
         }
 
@@ -643,14 +678,13 @@ namespace SNMPDiscovery.View
                 if (data.DataType.Equals(typeof(IDeviceTopologyInfoDTO)))
                 {
                     ShowData((IDeviceTopologyInfoDTO)data.Data);
-                    
                 }
             }
         }
 
         private void ShowData(IDiscoveredBasicInfo data)
         {
-            RedirectToFile(true);
+            ViewHelper.RedirectConsoleToFile(true);
             Console.WriteLine($"Processed device basic data:\n" +
                                 $"\t-Device IP/mask: {data.DeviceIPAndMask}\n" +
                                 $"\t-Device MAC: {data.DeviceMAC}\n" +
@@ -659,15 +693,72 @@ namespace SNMPDiscovery.View
                                 $"\t-Location: {data.Location}\n" +
                                 $"\t-Description: {data.Description}\n" +
                                 $"\t-OSI Implemented Layers: {data.OSIImplementedLayers}\n");
-            RedirectToFile(false);
+            ViewHelper.RedirectConsoleToFile(false);
         }
 
         private void ShowData(IDeviceTopologyInfoDTO data)
         {
-            RedirectToFile(true);
+            ViewHelper.RedirectConsoleToFile(true);
 
-            #region Port Inventory
+            ShowPortInventory(data);
+            ShowMACVolumetry(data);
+            ShowMACsByPort(data);
+            ShowDirectNeighbours(data);
 
+            Console.WriteLine();
+
+            ViewHelper.RedirectConsoleToFile(false);
+        }
+
+        private void ShowDirectNeighbours(IDeviceTopologyInfoDTO data)
+        {
+            Console.WriteLine("\nComputed direct neighbours:\n");
+            Console.WriteLine("Port ID \t MAC Address \t IP Address");
+
+            foreach (KeyValuePair<string, IDictionary<string, string>> computedneigh in data.DeviceDirectNeighbours)
+            {
+                foreach (KeyValuePair<string, string> addrrlist in computedneigh.Value)
+                {
+                    Console.WriteLine($"{computedneigh.Key} \t {addrrlist.Key} \t {addrrlist.Value}");
+                }
+            }
+        }
+
+        private void ShowMACsByPort(IDeviceTopologyInfoDTO data)
+        {
+            if (data.DeviceType == EnumDeviceType.RT || data.DeviceType == EnumDeviceType.SW || data.DeviceType == EnumDeviceType.AP)
+            {
+                //Learned MACs by port
+                Console.WriteLine("\nLearned MACs by port:\n");
+                Console.WriteLine("Port ID \t MAC Address \t IP Address");
+
+                foreach (KeyValuePair<string, IDictionary<string, string>> portlearned in data.PortLearnedAddresses)
+                {
+                    foreach (KeyValuePair<string, string> maclist in portlearned.Value)
+                    {
+                        Console.WriteLine($"{portlearned.Key} \t {maclist.Key} \t {maclist.Value}");
+                    }
+                }
+            }
+        }
+
+        private void ShowMACVolumetry(IDeviceTopologyInfoDTO data)
+        {
+            if (data.DeviceType == EnumDeviceType.RT || data.DeviceType == EnumDeviceType.SW || data.DeviceType == EnumDeviceType.AP)
+            {
+                //Volumetry MACs by port
+                Console.WriteLine("\nVolumetry MACs by port:\n");
+                Console.WriteLine("Port ID \t Quantity");
+
+                foreach (KeyValuePair<string, IDictionary<string, string>> portlearned in data.PortLearnedAddresses)
+                {
+                    Console.WriteLine($"{portlearned.Key} \t {portlearned.Value.Count}");
+                }
+            }
+        }
+
+        private void ShowPortInventory(IDeviceTopologyInfoDTO data)
+        {
             Console.WriteLine("\nPort inventory by internal ID:\n");
             Console.WriteLine("{0,-40} {1,-40} {2,-40} {3,-40} {4,-40} {5,-40}", "Port ID", "Port Name", "MAC Address", "Port Type", "Port Referer", "VLAN");
 
@@ -679,66 +770,11 @@ namespace SNMPDiscovery.View
 
                 Console.WriteLine($"{MACPort.Key,-40} {data.PortDescriptions[MACPort.Key],-40} {MACPort.Value,-40} {data.PortSettings[MACPort.Key].First,-40} {data.PortSettings[MACPort.Key].Second,-40} {VLANList,-40}");
             }
-
-            #endregion
-
-            if(data.DeviceType == EnumDeviceType.RT || data.DeviceType == EnumDeviceType.SW || data.DeviceType == EnumDeviceType.AP)
-            {
-
-                #region MACs volumetry
-
-                //Volumetry MACs by port
-                Console.WriteLine("\nVolumetry MACs by port:\n");
-                Console.WriteLine("Port ID \t Quantity");
-
-                foreach (KeyValuePair<string, IDictionary<string, string>> portlearned in data.PortLearnedAddresses)
-                {
-                    Console.WriteLine($"{portlearned.Key} \t {portlearned.Value.Count}");
-                }
-
-                #endregion
-
-                #region MAC list by port
-
-                //Learned MACs by port
-                //Console.WriteLine("\nLearned MACs by port:\n");
-                //Console.WriteLine("Port ID \t MAC Address \t IP Address");
-                //
-                //foreach (KeyValuePair<string, IDictionary<string,string>> portlearned in DataObj.PortLearnedAddresses)
-                //{
-                //    foreach (KeyValuePair<string,string> maclist in portlearned.Value)
-                //    {
-                //        Console.WriteLine($"{portlearned.Key} \t {maclist.Key} \t {maclist.Value}");
-                //    }
-                //}
-
-                #endregion
-
-                #region Direct neighbours
-
-                //Direct Neighbours
-                Console.WriteLine("\nComputed direct neighbours:\n");
-                Console.WriteLine("Port ID \t MAC Address \t IP Address");
-
-                foreach (KeyValuePair<string, IDictionary<string, string>> computedneigh in data.DeviceDirectNeighbours)
-                {
-                    foreach (KeyValuePair<string, string> addrrlist in computedneigh.Value)
-                    {
-                        Console.WriteLine($"{computedneigh.Key} \t {addrrlist.Key} \t {addrrlist.Value}");
-                    }
-                }
-
-                #endregion
-            }
-
-            Console.WriteLine();
-
-            RedirectToFile(false);
         }
 
         private void ShowData(IGlobalTopologyInfoDTO data)
         {
-            RedirectToFile(true);
+            ViewHelper.RedirectConsoleToFile(true);
 
             Console.WriteLine("\nGlobal Device Mapping Matrix:\n");
             Console.WriteLine("{0,-40} {1,-40} {2,-40} {3,-40} {4,-40} {5,-40} {6,-40} {7,-40} {8,-40} {9,-40}", "Dev Type Orig", "IP Orig", "MAC Orig", "Port Orig", "Descrip Orig", "Dev Type Dest", "IP Dest", "MAC Dest", "Port Dest", "Descrip Dest");
@@ -760,41 +796,8 @@ namespace SNMPDiscovery.View
                 }
             }
 
-            RedirectToFile(false);
+            ViewHelper.RedirectConsoleToFile(false);
         }
-
-        #endregion
-
-        #region Auxiliar Methods
-
-        //Mock for redirecting console to file
-        private void RedirectToFile(bool activate)
-        {
-            if (activate)
-            {
-                oldOut = Console.Out;
-                try
-                {
-                    ostrm = new FileStream("./Redirect.txt", FileMode.Append, FileAccess.Write);
-                    writer = new StreamWriter(ostrm);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Cannot open Redirect.txt for writing");
-                    Console.WriteLine(e.Message);
-                    return;
-                }
-                Console.SetOut(writer);
-            }
-            else
-            {
-                Console.SetOut(oldOut);
-                writer.Close();
-                ostrm.Close();
-            }
-        }
-
-        //Same processing steps for getting inputs or handling steps
 
         #endregion
 
@@ -824,7 +827,7 @@ namespace SNMPDiscovery.View
                 { EnumControllerStates.EditProcessDefinition, EditProcess },
                 { EnumControllerStates.DeleteProcessDefinition, DeleteProcess },
                 { EnumControllerStates.RunProcess, RunProcessMenu },
-                { EnumControllerStates.DataSearch, PromptDataMenu },
+                { EnumControllerStates.DataSearch, ShowDataMenu },
                 { EnumControllerStates.SaveDiscoveryData, SaveDiscoveryDataMenu},
                 { EnumControllerStates.SaveProcessedData, SaveProcessedDataMenu},
                 { EnumControllerStates.BackAction, null},
@@ -850,6 +853,9 @@ namespace SNMPDiscovery.View
                 { EnumControllerStates.BackAction, "Back to previous action"},
                 { EnumControllerStates.Exit, "Exit application" }
             };
+
+            ShowDataMode = new string[] { "Show global data", "Show specific device data" };
+            ShowDataOptions = new string[] { "Device basic data", "Port inventory", "MACs Learned By Port", "Port volumetry", "Connected devices" };
 
             Console.WriteLine("Welcome to ASPB network documentation tool.\n");
             StateHandlers[_controller.GetCurrentState()].Invoke();

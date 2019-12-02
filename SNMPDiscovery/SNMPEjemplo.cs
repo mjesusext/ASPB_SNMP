@@ -50,8 +50,9 @@ namespace SNMPDiscovery
             // Define Oid that is the root of the MIB
             //  tree you wish to retrieve
             //Oid rootOid = new Oid("1.3.6.1.2.1.2.2.1.2"); // ifDescr
-            Oid rootOid = new Oid("1.3.6.1.2.1.17.4.3.1"); // conexiones bridge
-
+            //Oid rootOid = new Oid("1.3.6.1.2.1.17.4.3.1"); // conexiones bridge
+            Oid rootOid = new Oid("1.3.6.1.2.1"); // TEST
+            
             // This Oid represents last Oid returned by
             //  the SNMP agent
             Oid lastOid = (Oid)rootOid.Clone();

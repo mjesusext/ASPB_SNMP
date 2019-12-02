@@ -105,6 +105,7 @@
     <Compile Include="SNMPEjemplo.cs" />
     <Compile Include="Controller\Implementations\EnumControllerStates.cs" />
     <Compile Include="View\SNMPDiscoveryView.cs" />
+    <Compile Include="View\ViewHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Model\DAO\Implementations\" />
