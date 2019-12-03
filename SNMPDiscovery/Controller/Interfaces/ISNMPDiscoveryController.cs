@@ -40,8 +40,15 @@ namespace SNMPDiscovery.Controller
         void RunDiscovery();
         //Start processes
         void RunProcesses();
-        //Pull specific data
-        object PullDataList(Type dataType, string key = null);
+
+        //Pulling data entities
+        IList<ISNMPDeviceDataDTO> GetSNMPDeviceData(string key = null);
+        IList<ISNMPDeviceSettingDTO> GetSNMPDeviceSetting(string key = null);
+        IList<ISNMPProcessStrategy> GetSNMPProcessStrategy(string key = null);
+        IList<IOIDSettingDTO> GetOIDSetting(string key = null);
+        IList<ISNMPRawEntryDTO> GetSNMPRawEntry(string key = null);
+        IList<ISNMPProcessedValueDTO> GetSNMPProcessedValue(string key = null);
+
         //Save Discovered data
         void SaveDiscoveryData();
         //Save Processed data

@@ -150,7 +150,7 @@ namespace SNMPDiscovery.View
             Console.WriteLine();
 
             //Pull data and prompt
-            sresult = (List<ISNMPDeviceSettingDTO>)_controller.PullDataList(typeof(ISNMPDeviceSettingDTO), string.IsNullOrWhiteSpace(skey) ? null : skey);
+            sresult = _controller.GetSNMPDeviceSetting(skey);
             Console.WriteLine($"****** {sresult.Count} results found. ******\n");
 
             foreach (ISNMPDeviceSettingDTO DeviceSetItem in sresult)
@@ -185,7 +185,7 @@ namespace SNMPDiscovery.View
             Console.WriteLine();
 
             //Pull existing data and editing
-            sresult = ((List<ISNMPDeviceSettingDTO>)_controller.PullDataList(typeof(ISNMPDeviceSettingDTO), skey)).FirstOrDefault();
+            sresult = _controller.GetSNMPDeviceSetting(skey).FirstOrDefault();
 
             ShowData(sresult);
 
@@ -247,7 +247,7 @@ namespace SNMPDiscovery.View
             Console.WriteLine();
 
             //Pull existing data and editing
-            sresult = ((List<ISNMPDeviceSettingDTO>)_controller.PullDataList(typeof(ISNMPDeviceSettingDTO), skey)).FirstOrDefault();
+            sresult = _controller.GetSNMPDeviceSetting(skey).FirstOrDefault();
             ShowData(sresult);
 
             if(sresult != null)
@@ -312,7 +312,7 @@ namespace SNMPDiscovery.View
             Console.WriteLine();
             Console.WriteLine("Select settings to apply this processing:");
 
-            IList<ISNMPDeviceSettingDTO> settingList = (List<ISNMPDeviceSettingDTO>)(_controller.PullDataList(typeof(ISNMPDeviceSettingDTO)));
+            IList<ISNMPDeviceSettingDTO> settingList = _controller.GetSNMPDeviceSetting();
             SettingDefinitions = settingList.Select(x => x.ID).ToArray();
 
             for (int i = 0; i < SettingDefinitions.Length; i++)
@@ -359,7 +359,7 @@ namespace SNMPDiscovery.View
             Console.WriteLine();
 
             //Pull data and prompt
-            sresult = (List<ISNMPProcessStrategy>)_controller.PullDataList(typeof(ISNMPProcessStrategy), string.IsNullOrWhiteSpace(skey) ? null : skey);
+            sresult = _controller.GetSNMPProcessStrategy(skey);
             Console.WriteLine($"****** {sresult.Count} results found. ******\n");
 
             foreach (ISNMPProcessStrategy DeviceSetItem in sresult)
@@ -396,7 +396,7 @@ namespace SNMPDiscovery.View
             Console.WriteLine();
 
             //Pull exiting data and editing
-            sresult = ((List<ISNMPProcessStrategy>)_controller.PullDataList(typeof(ISNMPProcessStrategy), skey)).FirstOrDefault();
+            sresult = _controller.GetSNMPProcessStrategy(skey).FirstOrDefault();
             ShowData(sresult);
 
             if(sresult != null)
@@ -456,7 +456,7 @@ namespace SNMPDiscovery.View
             Console.WriteLine();
 
             //Pull exiting data and editing
-            sresult = ((List<ISNMPProcessStrategy>)_controller.PullDataList(typeof(ISNMPProcessStrategy), skey)).FirstOrDefault();
+            sresult = _controller.GetSNMPProcessStrategy(skey).FirstOrDefault();
             ShowData(sresult);
 
             if (sresult != null)
