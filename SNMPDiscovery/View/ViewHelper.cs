@@ -42,7 +42,7 @@ namespace SNMPDiscovery.View
 
         public static void GetConsoleInput(string requesttext, out string result, Predicate<string> validation)
         {
-            result = "";
+            throw new NotImplementedException();
         }
     }
 }
