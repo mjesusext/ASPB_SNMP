@@ -469,7 +469,6 @@ namespace SNMPDiscovery.Model.Services
 
         private void GetMACAddressMappings()
         {
-            ARPTable = new Dictionary<string, string>();
             List<IPAddress> IPinventory = new List<IPAddress>();
 
             foreach (ISNMPDeviceSettingDTO DeviceDef in DeviceSettings.Values)
@@ -501,6 +500,7 @@ namespace SNMPDiscovery.Model.Services
         {
             _snmpModelObservers = new List<IObserver<ISNMPModelDTO>>();
             ChangedObject = new CustomPair<Type, object>();
+            ARPTable = new Dictionary<string, string>();
         }
 
         #endregion

@@ -244,7 +244,7 @@ namespace SNMPDiscovery.Model.Helpers
             //Host order is assumed
             int formattedtip = BitConverter.ToInt32(IPAddress.Parse(IPaddress).GetAddressBytes(), 0);
 
-            if(SendARP(formattedtip, 0, MACAddress, ref MAClenght) == 0)
+            if (SendARP(formattedtip, 0, MACAddress, ref MAClenght) == 0)
             {
                 return string.Join(" ", MACAddress.Select(x => string.Format("{0:x2}", x).ToUpper()));
             }
