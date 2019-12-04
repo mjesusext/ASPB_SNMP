@@ -192,7 +192,6 @@ namespace SNMPDiscovery.View
             if(sresult != null)
             {
                 //Redefine values
-                //MJE - Pending rencapsule methods of each getting step of processes
                 Console.WriteLine("Insert values to be editted. Insert null-values for keeping previous ones.");
 
                 Console.Write("Device definition name: ");
@@ -402,7 +401,6 @@ namespace SNMPDiscovery.View
             if(sresult != null)
             {
                 //Redefine values
-                //MJE - Pending rencapsule methods of each getting step of processes
                 Console.WriteLine("Select processing option:");
 
                 ProcessingOptions = Enum.GetNames(typeof(EnumProcessingType));
@@ -533,11 +531,21 @@ namespace SNMPDiscovery.View
 
             if (optionInput == 0)
             {
-                //  0) Show global data
+                IList<ISNMPProcessedValueDTO> globaldata = _controller.GetSNMPGlobalProcessedValue();
+                
+                foreach (ISNMPProcessedValueDTO globalitem in globaldata)
+                {
+                    if (globalitem.DataType.Equals(typeof(IGlobalTopologyInfoDTO)))
+                    {
+                        ShowData((IGlobalTopologyInfoDTO)globalitem.Data);
+                    }                    
+                }
             }
             else
             {
-                //Get IP & search
+                Console.Write("Write related Device IP: ");
+                string searchIP = Console.ReadLine();
+
                 //IF exist results
 
                 //Set specific query

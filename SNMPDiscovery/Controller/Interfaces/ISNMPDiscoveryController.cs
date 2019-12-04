@@ -10,8 +10,6 @@ namespace SNMPDiscovery.Controller
 {
     public interface ISNMPDiscoveryController
     {
-        IObserver<ISNMPModelDTO> View { get; set; }
-        ISNMPModelDTO Model { get; set; }
         event Action<List<string>> OnInvalidInputs;
 
         //Get current state of state machine
@@ -41,13 +39,14 @@ namespace SNMPDiscovery.Controller
         //Start processes
         void RunProcesses();
 
-        //Pulling data entities
+        //Getting data entities
         IList<ISNMPDeviceDataDTO> GetSNMPDeviceData(string key = null);
         IList<ISNMPDeviceSettingDTO> GetSNMPDeviceSetting(string key = null);
         IList<ISNMPProcessStrategy> GetSNMPProcessStrategy(string key = null);
         IList<IOIDSettingDTO> GetOIDSetting(string key = null);
         IList<ISNMPRawEntryDTO> GetSNMPRawEntry(string key = null);
-        IList<ISNMPProcessedValueDTO> GetSNMPProcessedValue(string key = null);
+        IList<ISNMPProcessedValueDTO> GetSNMPDeviceProcessedValue(string key = null);
+        IList<ISNMPProcessedValueDTO> GetSNMPGlobalProcessedValue(string key = null);
 
         //Save Discovered data
         void SaveDiscoveryData();

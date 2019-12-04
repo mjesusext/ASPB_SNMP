@@ -13,15 +13,16 @@ namespace SNMPDiscovery.Controller
 {
     public class SNMPDiscoveryController : ISNMPDiscoveryController
     {
-        #region Public properties
+        #region Public fields
 
-        public IObserver<ISNMPModelDTO> View { get; set; }
-        public ISNMPModelDTO Model { get; set; }
         public event Action<List<string>> OnInvalidInputs;
-
+        
         #endregion
 
         #region Private properties
+
+        private IObserver<ISNMPModelDTO> View { get; set; }
+        private ISNMPModelDTO Model { get; set; }
 
         private List<string> _ErrMsgs { get; set; }
         private Dictionary<EnumControllerStates, EnumControllerStates[]> _StateMachine { get; set; }
@@ -269,7 +270,7 @@ namespace SNMPDiscovery.Controller
             }
         }
 
-        public IList<ISNMPProcessedValueDTO> GetSNMPProcessedValue(string key = null)
+        public IList<ISNMPProcessedValueDTO> GetSNMPDeviceProcessedValue(string key = null)
         {
             if (string.IsNullOrWhiteSpace(key))
             {
@@ -280,6 +281,20 @@ namespace SNMPDiscovery.Controller
                 IEnumerable<ISNMPProcessedValueDTO> res = Model.DeviceData.Values.Select(x => x.SNMPProcessedData.ContainsKey(key) ? x.SNMPProcessedData[key] : null);
 
                 return res.Count() == 0 ? new List<ISNMPProcessedValueDTO>() : new List<ISNMPProcessedValueDTO>(res);
+            }
+        }
+
+        public IList<ISNMPProcessedValueDTO> GetSNMPGlobalProcessedValue(string key = null)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                return Model.GlobalProcessedData.Values.ToList();
+            }
+            else
+            {
+                ISNMPProcessedValueDTO res = null;
+
+                return Model.GlobalProcessedData.TryGetValue(key, out res) ? new List<ISNMPProcessedValueDTO>() : new List<ISNMPProcessedValueDTO>(new[] { res });
             }
         }
 
