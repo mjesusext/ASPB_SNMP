@@ -465,7 +465,7 @@ namespace SNMPDiscovery.Model.Services
 
         #endregion
 
-        #region ARP Table Management
+        #region ARP - DHCP Management
 
         private void GetMACAddressMappings()
         {
@@ -476,10 +476,10 @@ namespace SNMPDiscovery.Model.Services
                 IPinventory.AddRange(ModelHelper.GenerateHostList(DeviceDef.InitialIP, DeviceDef.FinalIP, DeviceDef.NetworkMask));
             }
 
-            Parallel.ForEach(IPinventory.Select(x => x.ToString()), MACGetterHandler);
+            Parallel.ForEach(IPinventory.Select(x => x.ToString()), ARPMACsearch);
         }
 
-        private void MACGetterHandler(string iptarget)
+        private void ARPMACsearch(string iptarget)
         {
             string MACaddr = ModelHelper.GetMACAddress(iptarget);
 
@@ -491,6 +491,8 @@ namespace SNMPDiscovery.Model.Services
                 }
             }
         }
+
+        private void GetDHCPIPpool() { }
 
         #endregion
 

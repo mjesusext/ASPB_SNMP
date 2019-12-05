@@ -21,13 +21,13 @@ namespace SNMPDiscovery
             ISNMPModelDTO model = new SNMPModel();
             ISNMPDiscoveryController controller = new SNMPDiscoveryController(model);
 
-            //TestConcepto();
+            //SNMPTestConcepto();
 
             Console.WriteLine("Fin de ejecución. Pulse una tecla");
             Console.ReadKey();
         }
 
-        public static void TestConcepto()
+        public static void SNMPTestConcepto()
         {
             int _NumEntries = 0;
             
@@ -136,5 +136,6 @@ namespace SNMPDiscovery
             target.Close();
             Console.WriteLine("Número entradas: {0}", _NumEntries);
         }
+
     }
 }
