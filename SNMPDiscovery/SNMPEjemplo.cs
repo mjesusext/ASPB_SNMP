@@ -11,6 +11,8 @@ using SNMPDiscovery.View;
 using SNMPDiscovery.Model.DTO;
 //TEST
 using SNMPDiscovery.Model.Helpers;
+using System.Runtime.InteropServices;
+using System.Collections;
 
 namespace SNMPDiscovery
 {
@@ -18,8 +20,8 @@ namespace SNMPDiscovery
     {
         public static void Main()
         {
-            ISNMPModelDTO model = new SNMPModel();
-            ISNMPDiscoveryController controller = new SNMPDiscoveryController(model);
+            //ISNMPModelDTO model = new SNMPModel();
+            //ISNMPDiscoveryController controller = new SNMPDiscoveryController(model);
 
             //SNMPTestConcepto();
 
@@ -136,6 +138,7 @@ namespace SNMPDiscovery
             target.Close();
             Console.WriteLine("Número entradas: {0}", _NumEntries);
         }
+
 
     }
 }
