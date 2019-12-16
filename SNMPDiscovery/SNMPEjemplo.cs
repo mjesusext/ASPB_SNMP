@@ -20,11 +20,10 @@ namespace SNMPDiscovery
     {
         public static void Main()
         {
-            //ISNMPModelDTO model = new SNMPModel();
-            //ISNMPDiscoveryController controller = new SNMPDiscoveryController(model);
+            ISNMPModelDTO model = new SNMPModel();
+            ISNMPDiscoveryController controller = new SNMPDiscoveryController(model);
 
             //SNMPTestConcepto();
-            DHCPv1.RunDHCPTEST();
 
             Console.WriteLine("Fin de ejecución. Pulse una tecla");
             Console.ReadKey();

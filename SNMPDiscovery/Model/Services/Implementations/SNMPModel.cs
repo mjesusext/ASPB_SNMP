@@ -291,9 +291,10 @@ namespace SNMPDiscovery.Model.Services
             {
                 return;
             }
-            
+
             //Feed ARP table previous to discovery and processing
-            GetMACAddressMappings();
+            //GetIPMACMappingsOnARP();
+            GetIPMACMappingsOnDHCP();
 
             //Iterate on all settings
             foreach (ISNMPDeviceSettingDTO SNMPSettingEntry in DeviceSettings.Values)
@@ -467,7 +468,7 @@ namespace SNMPDiscovery.Model.Services
 
         #region ARP - DHCP Management
 
-        private void GetMACAddressMappings()
+        private void GetIPMACMappingsOnARP()
         {
             List<IPAddress> IPinventory = new List<IPAddress>();
 
@@ -481,7 +482,7 @@ namespace SNMPDiscovery.Model.Services
 
         private void ARPMACsearch(string iptarget)
         {
-            string MACaddr = ModelHelper.GetMACAddress(iptarget);
+            string MACaddr = ModelHelper.SendARPRequest(iptarget);
 
             lock (ARPTable)
             {
@@ -492,7 +493,10 @@ namespace SNMPDiscovery.Model.Services
             }
         }
 
-        private void GetDHCPIPpool() { }
+        private void GetIPMACMappingsOnDHCP()
+        {
+            ModelHelper.GetDHCPleases(new List<string>() { "192.168.1.67", "192.1.1.74" }, ARPTable);
+        }
 
         #endregion
 

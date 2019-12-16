@@ -238,7 +238,43 @@ namespace SNMPDiscovery.Model.Helpers
         [DllImport("iphlpapi.dll", ExactSpelling = true, EntryPoint = "SendARP")]
         private static extern int SendARP(int DestIP, int SrcIP, [Out] byte[] pMacAddr, ref int PhyAddrLen);
 
-        public static string GetMACAddress(string IPaddress)
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern uint DhcpEnumSubnetClients(string ServerIpAddress, uint SubnetAddress, ref uint ResumeHandle, uint PreferredMaximum, out IntPtr ClientInfo, ref uint ElementsRead, ref uint ElementsTotal        );
+
+        #region Structs DCHP API code
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct DHCP_CLIENT_INFO_ARRAY
+        {
+            public uint NumElements;
+            public IntPtr Clients;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct DHCP_CLIENT_UID
+        {
+            public uint DataLength;
+            public IntPtr Data;
+        }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        public struct DHCP_CLIENT_INFO
+        {
+            public uint ip;
+            public uint subnet;
+
+            public DHCP_CLIENT_UID mac;
+
+            [MarshalAs(UnmanagedType.LPWStr)]
+            public string ClientName;
+
+            [MarshalAs(UnmanagedType.LPWStr)]
+            public string ClientComment;
+        }
+
+        #endregion
+
+        public static string SendARPRequest(string IPaddress)
         {
             int MAClenght = 6;
             byte[] MACAddress = new byte[MAClenght];
@@ -252,6 +288,60 @@ namespace SNMPDiscovery.Model.Helpers
             else
             {
                 return null;
+            }
+        }
+
+        public static void GetDHCPleases(List<string> DHCPServerIPs, IDictionary<string, string> MACIPmapping)
+        {
+            uint parsedMask = 0; //Gets all scopes
+            uint resumeHandle = 0;
+            uint numClientsRead = 0;
+            uint totalClients = 0;
+            IntPtr info_array_ptr = IntPtr.Zero;
+
+            foreach (string DHCPServer in DHCPServerIPs)
+            {
+                uint response = DhcpEnumSubnetClients(DHCPServer, parsedMask, ref resumeHandle, 65536, out info_array_ptr, ref numClientsRead, ref totalClients);
+
+                //If no results, next DHCP server
+                if((int)info_array_ptr == 0)
+                {
+                    continue;
+                }
+
+                //Set up client array casted to a DHCP_CLIENT_INFO_ARRAY using the pointer from the response object above
+                DHCP_CLIENT_INFO_ARRAY rawClients = (DHCP_CLIENT_INFO_ARRAY)Marshal.PtrToStructure(info_array_ptr, typeof(DHCP_CLIENT_INFO_ARRAY));
+
+                // Loop through the clients structure inside rawClients adding to the dchpClient collection
+                IntPtr current = rawClients.Clients;
+
+                for (int i = 0; i < (int)rawClients.NumElements; i++)
+                {
+                    string machineIP, machineMAC;
+                    
+                    //Create machine object using the struct
+                    DHCP_CLIENT_INFO rawMachine = (DHCP_CLIENT_INFO)Marshal.PtrToStructure(Marshal.ReadIntPtr(current), typeof(DHCP_CLIENT_INFO));
+
+                    var a = BitConverter.GetBytes(rawMachine.ip).Reverse().ToArray();
+                    var b = BitConverter.ToUInt32(a, 0);
+
+                    //Transform machine information
+                    machineIP = new IPAddress(b).ToString();
+
+                    machineMAC = string.Format("{0:x2} {1:x2} {2:x2} {3:x2} {4:x2} {5:x2}",
+                        Marshal.ReadByte(rawMachine.mac.Data),
+                        Marshal.ReadByte(rawMachine.mac.Data, 1),
+                        Marshal.ReadByte(rawMachine.mac.Data, 2),
+                        Marshal.ReadByte(rawMachine.mac.Data, 3),
+                        Marshal.ReadByte(rawMachine.mac.Data, 4),
+                        Marshal.ReadByte(rawMachine.mac.Data, 5)).ToUpper();
+
+                    //Add to mapping object
+                    MACIPmapping.Add(machineMAC, machineIP);
+
+                    //Move pointer to next machine
+                    current = (IntPtr)((int)current + (int)Marshal.SizeOf(typeof(IntPtr)));
+                }
             }
         }
 
