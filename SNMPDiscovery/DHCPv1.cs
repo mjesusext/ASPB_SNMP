@@ -11,7 +11,7 @@ namespace SNMPDiscovery
 {
     public static class DHCPv1
     {
-        static void RunDHCPTEST()
+        public static void RunDHCPTEST()
         {
             try
             {
