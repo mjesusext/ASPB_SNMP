@@ -68,6 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DHCPv1.cs" />
+    <Compile Include="DHCPv2.cs" />
     <Compile Include="Model\DAO\Interfaces\ISNMPDataDAO.cs" />
     <Compile Include="Model\DTO\Enums\EnumDeviceType.cs" />
     <Compile Include="Model\DTO\Enums\EnumOSILayers.cs" />

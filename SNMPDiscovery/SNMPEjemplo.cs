@@ -24,6 +24,7 @@ namespace SNMPDiscovery
             //ISNMPDiscoveryController controller = new SNMPDiscoveryController(model);
 
             //SNMPTestConcepto();
+            DHCPv2.RunDHCPTESTv2();
 
             Console.WriteLine("Fin de ejecución. Pulse una tecla");
             Console.ReadKey();
