@@ -90,12 +90,6 @@ namespace SNMPDiscovery.Model.Services
 
         public ISNMPDeviceSettingDTO BuildSNMPSetting(string ID, string initialIPAndMask, string finalIPAndMask, string SNMPUser)
         {
-            //Lazy initialization
-            if (DeviceSettings == null)
-            {
-                DeviceSettings = new Dictionary<string, ISNMPDeviceSettingDTO>();
-            }
-
             ISNMPDeviceSettingDTO setting = new SNMPDeviceSettingDTO(ID, initialIPAndMask, finalIPAndMask, SNMPUser, ChangeTrackerHandler);
             DeviceSettings.Add(ID, setting);
 
@@ -152,12 +146,6 @@ namespace SNMPDiscovery.Model.Services
 
         public ISNMPDeviceDataDTO BuildSNMPDevice(IPAddress targetIP, int targetMask)
         {
-            //Lazy initialization
-            if (DeviceData == null)
-            {
-                DeviceData = new Dictionary<string, ISNMPDeviceDataDTO>();
-            }
-
             ISNMPDeviceDataDTO device = new SNMPDeviceDataDTO(targetIP, targetMask, ChangeTrackerHandler);
             DeviceData.Add(targetIP.ToString(), device);
 
@@ -168,12 +156,6 @@ namespace SNMPDiscovery.Model.Services
         {
             ISNMPProcessStrategy ProcessProfile = null;
             ISNMPDeviceSettingDTO DeviceProfile = DeviceSettings?[SettingID];
-
-            //Lazy initialization
-            if (Processes == null)
-            {
-                Processes = new Dictionary<EnumProcessingType, ISNMPProcessStrategy>();
-            }
 
             switch (ProcessType)
             {
@@ -267,12 +249,6 @@ namespace SNMPDiscovery.Model.Services
 
         public ISNMPProcessedValueDTO AttachSNMPProcessedValue(Type DataType, object Data)
         {
-            //Lazy initialization
-            if (GlobalProcessedData == null)
-            {
-                GlobalProcessedData = new Dictionary<string, ISNMPProcessedValueDTO>();
-            }
-
             ISNMPProcessedValueDTO ProcessedValue = new SNMPProcessedValueDTO(DataType, Data);
             GlobalProcessedData.Add(DataType.Name, ProcessedValue);
             //We don't trigger OnChange because we only set the poiner, information is still not filled.
@@ -292,7 +268,7 @@ namespace SNMPDiscovery.Model.Services
                 return;
             }
 
-            //Feed ARP table previous to discovery and processing
+            //Feed MAC-IP mappings previously
             //GetIPMACMappingsOnARP();
             GetIPMACMappingsOnDHCP();
 
@@ -506,7 +482,13 @@ namespace SNMPDiscovery.Model.Services
         {
             _snmpModelObservers = new List<IObserver<ISNMPModelDTO>>();
             ChangedObject = new CustomPair<Type, object>();
+
+            DeviceSettings = new Dictionary<string, ISNMPDeviceSettingDTO>();
+            Processes = new Dictionary<EnumProcessingType, ISNMPProcessStrategy>();
+            DeviceData = new Dictionary<string, ISNMPDeviceDataDTO>();
+            GlobalProcessedData = new Dictionary<string, ISNMPProcessedValueDTO>();
             ARPTable = new Dictionary<string, string>();
+
         }
 
         #endregion

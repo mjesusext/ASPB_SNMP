@@ -316,6 +316,12 @@ namespace SNMPDiscovery.Model.Services
                                             x => x.TargetIP.ToString(),
                                             y => ((IDeviceTopologyInfoDTO)y.SNMPProcessedData[nameof(IDeviceTopologyInfoDTO)].Data).PortLearnedAddresses.Sum(z => z.Value.Count));
 
+            //If no elements are found, avoid continue with processing
+            if(DevMACvolumetry.Count == 0)
+            {
+                return;
+            }
+
             //Get device of MAX MACs learned --> Define as pivot
             TargetBuffer.Add(DevMACvolumetry.Aggregate((p, c) => p.Value < c.Value ? c : p).Key);
 

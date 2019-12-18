@@ -112,7 +112,7 @@ namespace SNMPDiscovery.Model.Helpers
             return int.Parse(targetIPAndMask.Substring(maskpos + 1));
         }
 
-        public static IList<IPAddress> GenerateHostList(IPAddress initialIP, IPAddress finalIP, int NetworkMask, List<string> ARPIPList = null)
+        public static IList<IPAddress> GenerateHostList(IPAddress initialIP, IPAddress finalIP, int NetworkMask, List<string> LeasedIPs = null)
         {
             IList<IPAddress> res = new List<IPAddress>();
             IPAddress netMask;
@@ -130,12 +130,11 @@ namespace SNMPDiscovery.Model.Helpers
 
                 if (!currentIP.Equals(broadcastIP) && !currentIP.Equals(networkIP))
                 {
-                    if(ARPIPList != null && !ARPIPList.Contains(currentIP.ToString()))
+                    //Compare with list of IP currently being used or generate full range
+                    if (LeasedIPs == null || LeasedIPs.Contains(currentIP.ToString()))
                     {
-                        continue;
+                        res.Add(currentIP);
                     }
-
-                    res.Add(currentIP);
                 }
             }
 
