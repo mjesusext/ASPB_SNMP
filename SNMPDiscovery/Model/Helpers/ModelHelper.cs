@@ -130,11 +130,13 @@ namespace SNMPDiscovery.Model.Helpers
 
                 if (!currentIP.Equals(broadcastIP) && !currentIP.Equals(networkIP))
                 {
+                    //MJE 130321 - Añade elementos solo si son IPs concedidas por el DHCP. Anulamos validación de momento.
+
                     //Compare with list of IP currently being used or generate full range
-                    if (LeasedIPs == null || LeasedIPs.Contains(currentIP.ToString()))
-                    {
+                    //if (LeasedIPs == null || LeasedIPs.Contains(currentIP.ToString()))
+                    //{
                         res.Add(currentIP);
-                    }
+                    //}
                 }
             }
 

@@ -621,9 +621,9 @@ namespace SNMPDiscovery.View
         {
             if (data != null)
             {
-                //ViewHelper.RedirectConsoleToFile(true);
-                //Console.WriteLine($"SNMP device {data.TargetIP}.\n");
-                //ViewHelper.RedirectConsoleToFile(false);
+                ViewHelper.RedirectConsoleToFile(true);
+                Console.WriteLine($"SNMP device {data.TargetIP}.\n");
+                ViewHelper.RedirectConsoleToFile(false);
             }
             
         }
@@ -669,9 +669,9 @@ namespace SNMPDiscovery.View
         {
             if(data != null)
             {
-                //ViewHelper.RedirectConsoleToFile(true);
-                //Console.WriteLine($"OID entry of {data.RegardingObject.TargetIP}. Identifier: {data.OID}. DataType: {data.DataType}. Value: {data.ValueData}.\n");
-                //ViewHelper.RedirectConsoleToFile(false);
+                ViewHelper.RedirectConsoleToFile(true);
+                Console.WriteLine($"OID entry of {data.RegardingObject.TargetIP}. Identifier: {data.OID}. DataType: {data.DataType}. Value: {data.ValueData}.\n");
+                ViewHelper.RedirectConsoleToFile(false);
             }
         }
 
